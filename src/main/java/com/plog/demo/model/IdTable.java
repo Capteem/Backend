@@ -6,4 +6,8 @@ public class IdTable {
     private String phoneNum;
     private String email;
     private String nickname;
+
+    String getId() {
+        return id;
+    }
 }
