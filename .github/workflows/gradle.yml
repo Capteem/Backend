@@ -9,9 +9,10 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "feature" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "develop"]
+
 
 jobs:
   build:
@@ -34,6 +35,9 @@ jobs:
       uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
       with:
         gradle-version: '8.7'
+
+    - name: Set up environment variables
+      run : echo "${{ secrets.APPLICATION_KEY }}" >> $GITHUB_ENV
 
     - name: gradlew permission
       run: chmod +x gradlew
