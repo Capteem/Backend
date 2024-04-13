@@ -37,7 +37,9 @@ jobs:
         gradle-version: '8.7'
 
     - name: Set up environment variables
-      run : echo "${{ secrets.APPLICATION_KEY }}" >> $GITHUB_ENV
+      run : touch .src/main/resources/application_secret.properties
+            echo ${{secret.APPLICATION_KEY}} > .src/main/resources/application_secret.properties
+            cat .src/main/resources/application_secret.properties
 
     - name: gradlew permission
       run: chmod +x gradlew
