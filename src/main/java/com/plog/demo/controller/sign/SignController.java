@@ -40,6 +40,7 @@ public class SignController {
             responseData.put("message", "서버에서 오류가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseData);
         }
+
     }
 
     @PostMapping("/signin")
@@ -51,6 +52,13 @@ public class SignController {
             return ResponseEntity.status(HttpStatus.OK).body(loginResponseDto);
         }catch (CustomException e){
             responseData.put("message", e.getMessage());
+
+            //유저 없음
+            if(e.getResultCode() == HttpStatus.UNAUTHORIZED.value()){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseData);
+            }
+
+
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
         }catch (RuntimeException e) {
             // 데이터베이스 접근 예외 처리

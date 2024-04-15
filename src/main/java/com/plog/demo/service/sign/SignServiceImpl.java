@@ -9,6 +9,7 @@ import com.plog.demo.repository.IdTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,12 +71,12 @@ public class SignServiceImpl implements SignService{
         //유저 존재
         if(user.isEmpty()){
             log.info("[login] 유저 존재 암함");
-            throw new CustomException("존재 하지 않는 유저입니다.");
+            throw new CustomException("존재 하지 않는 유저입니다.", HttpStatus.UNAUTHORIZED.value());
         }
 
         if(!passwordEncoder.matches(password, user.get().getPassword())){
             log.info("[login] 패스워드 불일치");
-            throw new CustomException("패스워드 불일치");
+            throw new CustomException("패스워드 불일치", HttpStatus.BAD_REQUEST.value());
         }
 
         log.info("[login] 패스워드 일치");
