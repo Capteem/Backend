@@ -38,7 +38,7 @@ jobs:
 
     - name: Set up environment variables
       run : ls
-            touch ./src/main/resources/application.properties
+            
 
 
     - name: Set up application properties
