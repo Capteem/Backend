@@ -75,3 +75,22 @@ jobs:
     # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: plog
+          path: build/libs
+
+      - name: Deploy to EC2
+        run: |
+          echo "${{secrets.AWS_PRIVATE_KEY}}" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem -o StrictHostKeyChecking=no build/libs/plog-0.0.1-SNAPSHOT.jar ${{secrets.AWS_USER_NAME}}@${{secrets.AWS_END_POINT}}:/home/${{secrets.AWS_USER_NAME}}/plog.jar
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{secrets.AWS_USER_NAME}}@${{secrets.AWS_END_POINT}} "pgrep java | xargs kill -9; nohup java -jar /home/${{secrets.AWS_USER_NAME}}/plog.jar > /dev/null 2> /dev/null < /dev/null &"
+          rm -f private_key.pem
