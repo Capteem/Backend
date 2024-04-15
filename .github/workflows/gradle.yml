@@ -43,6 +43,7 @@ jobs:
     - run: ls -al
     - run: chmod -R 777 ./src
     - run: ls -al
+    - run: cd src
     - run: touch ./src/main/resources/application.properties
     - run: echo "${{secrets.APPLICATION_PROPERTIES}}" >> ./src/main/resources/application.properties
     - run: cat ./src/main/resources/application.properties
