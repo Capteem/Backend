@@ -37,7 +37,7 @@ jobs:
         gradle-version: '8.7'
 
     - name: Set up environment variables
-      run : touch .src/main/resources/application.properties
+      run : touch ./src/main/resources/application.properties
             echo ${{secrets.APPLICATION_PROPERTIES}} > .src/main/resources/application.properties
             cat .src/main/resources/application.properties
 
