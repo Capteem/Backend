@@ -37,7 +37,8 @@ jobs:
         gradle-version: '8.7'
 
     - name: Set up environment variables
-      run : touch ./src/main/resources/application.properties
+      run : ls
+            touch ./src/main/resources/application.properties
 
 
     - name: Set up application properties
