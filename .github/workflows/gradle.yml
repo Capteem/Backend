@@ -41,7 +41,6 @@ jobs:
 
 
 
-    - name: Create application.properties
     - run: touch ./src/main/resources/application.properties
     - run: echo "${{secret.APPLICATION_PROPERTIES}}" >> ./src/main/resources/application.properties
     - run: cat ./src/main/resources/application.properties
