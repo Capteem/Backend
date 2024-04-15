@@ -42,7 +42,7 @@ jobs:
 
 
     - run: touch ./src/main/resources/application.properties
-    - run: echo "${{secret.APPLICATION_PROPERTIES}}" >> ./src/main/resources/application.properties
+    - run: echo "${{secrets.APPLICATION_PROPERTIES}}" >> ./src/main/resources/application.properties
     - run: cat ./src/main/resources/application.properties
 
     - name: gradlew permission
