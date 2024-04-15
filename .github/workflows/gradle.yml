@@ -36,10 +36,9 @@ jobs:
       with:
         gradle-version: '8.7'
 
-    - name: Set up environment variables
-      run : touch .src/main/resources/application.properties
-            echo ${{secrets.APPLICATION_PROPERTIES}} > .src/main/resources/application.properties
-            cat .src/main/resources/application.properties
+    # make application.properties file with github secrets
+    - name: Make application.properties
+      run: echo "${{secrets.APPLICATION_PROPERTIES}}" > src/main/resources/application.properties
 
     - name: gradlew permission
       run: chmod +x gradlew
