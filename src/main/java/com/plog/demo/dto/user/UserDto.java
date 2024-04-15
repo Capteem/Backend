@@ -1,4 +1,4 @@
-package com.plog.demo.dto;
+package com.plog.demo.dto.user;
 
 import lombok.*;
 
@@ -10,6 +10,8 @@ import lombok.*;
 public class UserDto {
 
     private String id;
+
+    private String password;
 
     private String name;
 

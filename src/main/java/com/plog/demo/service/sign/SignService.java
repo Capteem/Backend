@@ -1,12 +1,13 @@
 package com.plog.demo.service.sign;
 
-import com.plog.demo.dto.UserDto;
+import com.plog.demo.dto.sign.LoginResponseDto;
+import com.plog.demo.dto.user.UserDto;
 import com.plog.demo.exception.CustomException;
 
 public interface SignService {
 
-    UserDto addUser(UserDto userDto) throws CustomException;
+    UserDto register(UserDto userDto) throws CustomException;
 
-    UserDto login(UserDto userDto);
+    LoginResponseDto login(String userId, String password) throws CustomException;
 
 }

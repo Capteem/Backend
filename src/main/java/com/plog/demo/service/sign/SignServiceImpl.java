@@ -1,14 +1,15 @@
 package com.plog.demo.service.sign;
 
-import com.plog.demo.dto.UserDto;
+import com.plog.demo.config.JwtTokenProvider;
+import com.plog.demo.dto.sign.LoginResponseDto;
+import com.plog.demo.dto.user.UserDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.IdTable;
 import com.plog.demo.repository.IdTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +22,11 @@ import java.util.Optional;
 public class SignServiceImpl implements SignService{
 
     private final IdTableRepository idTableRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
-    public UserDto addUser(UserDto userDto) throws CustomException {
+    public UserDto register(UserDto userDto) throws CustomException {
 
         log.info("[addUser] 유저 저장 로직 시작");
 
@@ -40,8 +43,10 @@ public class SignServiceImpl implements SignService{
                 .id(userDto.getId())
                 .email(userDto.getEmail())
                 .name(userDto.getName())
-                .phoneNum(userDto.getPhoneNum())
+                .phonenum(userDto.getPhoneNum())
                 .nickname(userDto.getNickname())
+                .password(passwordEncoder.encode(userDto.getPassword()))
+                .role("USER")
                 .build();
 
         try {
@@ -57,7 +62,32 @@ public class SignServiceImpl implements SignService{
     }
 
     @Override
-    public UserDto login(UserDto userDto) {
-        return null;
+    public LoginResponseDto login(String userId, String password) throws CustomException {
+        log.info("[login] 시작");
+
+        Optional<IdTable> user = idTableRepository.findById(userId);
+
+        //유저 존재
+        if(user.isEmpty()){
+            log.info("[login] 유저 존재 암함");
+            throw new CustomException("존재 하지 않는 유저입니다.");
+        }
+
+        if(!passwordEncoder.matches(password, user.get().getPassword())){
+            log.info("[login] 패스워드 불일치");
+            throw new CustomException("패스워드 불일치");
+        }
+
+        log.info("[login] 패스워드 일치");
+
+        String accessToken = jwtTokenProvider.createAccessToken(userId);
+        String refreshToken = jwtTokenProvider.createRefreshToken();
+
+        LoginResponseDto loginResponseDto = LoginResponseDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
+        return loginResponseDto;
     }
 }
