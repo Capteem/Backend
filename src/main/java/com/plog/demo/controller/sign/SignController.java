@@ -23,7 +23,7 @@ public class SignController {
     private final SignService signService;
 
 
-    @PostMapping("/sign-up")
+    @PostMapping("/signup")
     public ResponseEntity<Map<String, String>> signUp(@RequestBody UserDto userDto){
 
         Map<String, String> responseData = new HashMap<>();
@@ -42,7 +42,7 @@ public class SignController {
         }
     }
 
-    @PostMapping("/sign-in")
+    @PostMapping("/signin")
     public ResponseEntity<Object> signIn(@RequestBody LoginRequestDto loginRequestDto){
         Map<String, String> responseData = new HashMap<>();
 
