@@ -41,7 +41,7 @@ jobs:
 
 
     - run: ls -al
-    - run: cd src
+    - run: cd ./src
     - run: pwd
     - run: touch ./src/main/resources/application.properties
     - run: echo "${{secrets.APPLICATION_PROPERTIES}}" >> ./src/main/resources/application.properties
