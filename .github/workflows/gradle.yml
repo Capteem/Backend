@@ -38,7 +38,7 @@ jobs:
 
     - name: Set up environment variables
       run : pwd
-            ls -la
+            ls
             touch ./src/main/resources/application.properties
             echo ${{secrets.APPLICATION_PROPERTIES}} > ./src/main/resources/application.properties
 
