@@ -6,6 +6,7 @@ import com.plog.demo.model.ReservationTable;
 import com.plog.demo.repository.ReservationTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +21,21 @@ public class ReservationServiceImpl implements ReservationService{
     private final ReservationTableRepository reservationTableRepository;
 
     @Override
-    public void deleteReservation(String reservationId, String userId) {
-        // TODO Auto-generated method stub
+    public void deleteReservation(int reservationId) {
 
+        log.info("[deleteReservation] 예약 삭제를 시작합니다.");
+        ReservationTable reservationTable = reservationTableRepository.findById(reservationId).get();
+        if(reservationTable == null){
+            log.info("[deleteReservation] 예약이 존재하지 않습니다.");
+            return;
+        }
+        try{
+            reservationTable.setStatus("CANCEL");
+            reservationTableRepository.save(reservationTable);
+            log.info("[deleteReservation] 예약이 취소되었습니다.");
+        } catch (DataAccessException e){
+            log.info("[deleteReservation] 데이터 베이스 접근 오류");
+        }
     }
 
     @Override

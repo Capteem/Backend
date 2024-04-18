@@ -18,6 +18,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/sign-api")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class SignController {
 
     private final SignService signService;

@@ -4,7 +4,7 @@ import com.plog.demo.dto.reservation.ReservationDto;
 
 public interface ReservationService {
 
-    void deleteReservation(String reservationId, String userId);
+    void deleteReservation(int reservationId);
 
     ReservationDto addReservation(ReservationDto reservationDto);
 
