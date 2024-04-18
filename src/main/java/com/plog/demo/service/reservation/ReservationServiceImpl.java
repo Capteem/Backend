@@ -1,4 +1,4 @@
-package com.plog.demo.service.Reservation;
+package com.plog.demo.service.reservation;
 
 public class ReservationServiceImpl implements ReservationService{
 

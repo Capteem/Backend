@@ -1,4 +1,4 @@
-package com.plog.demo.dto.Reservation;
+package com.plog.demo.dto.reservation;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
