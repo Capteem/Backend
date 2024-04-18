@@ -12,6 +12,11 @@ import java.util.Date;
 @Entity
 @NoArgsConstructor
 @Builder
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"reservation_camera", "reservation_date"}),
+        @UniqueConstraint(columnNames = {"reservation_studio", "reservation_date"}),
+        @UniqueConstraint(columnNames = {"reservation_hair", "reservation_date"})
+})
 public class ReservationTable {
 
     @Id
