@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.Builder;
 import org.antlr.v4.runtime.misc.NotNull;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -24,7 +25,7 @@ public class ReservationTable {
     @Column
     private int reservation_hair;
     @Column
-    private Date reservation_date;
+    private LocalDateTime reservation_date;
 
     @Column
     private String status;
@@ -33,7 +34,7 @@ public class ReservationTable {
     @JoinColumn(name="id")
     private IdTable userId;
 
-    public ReservationTable(int reservationId, int reservation_camera, int reservation_studio, int reservation_hair, Date reservation_date,String status, IdTable userId) {
+    public ReservationTable(int reservationId, int reservation_camera, int reservation_studio, int reservation_hair, LocalDateTime reservation_date,String status, IdTable userId) {
         this.reservationId = reservationId;
         this.reservation_camera = reservation_camera;
         this.reservation_studio = reservation_studio;
