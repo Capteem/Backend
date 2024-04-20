@@ -84,29 +84,21 @@ jobs:
 
 
 
-
   deploy:
-    if: github.event.pull_request.merged == true
-    env:
-      ENV_PATH: .env
-    environment: production
+    needs: build
     runs-on: ubuntu-latest
+
     steps:
-      - name: ✅ Checkout branch
-        uses: actions/checkout@v3
-
-      - name: 🗂️ Make config folder
-        run: mkdir -p config
-
-      - name: AWS 설정
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Download artifact
+        uses: actions/download-artifact@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2
+          name: plog
+          path: build/libs
 
-      - name: S3 업로드
-        run: aws deploy push --application-name EC2-S3-Deploy --description "This is a revision for the application airbnb_App" --s3-location s3://plog-github-actions-s3-bucket/server/build.zip --source .
-
-      - name: Code Deploy
-        run: aws deploy create-deployment --application-name EC2-S3-Deploy --deployment-config-name CodeDeployDefault.OneAtATime --deployment-group-name dev --s3-location bucket=plog-github-actions-s3-bucket,bundleType=zip,key=server/build.zip
+      - name: Deploy to EC2
+        run: |
+          echo "${{secrets.AWS_PRIVATE_KEY}}" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem -o StrictHostKeyChecking=no build/libs/plog-0.0.1-SNAPSHOT.jar ${{secrets.AWS_USER_NAME}}@${{secrets.AWS_END_POINT}}:/home/${{secrets.AWS_USER_NAME}}/plog.jar
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{secrets.AWS_USER_NAME}}@${{secrets.AWS_END_POINT}} "pgrep java | xargs kill -9; nohup java -jar /home/${{secrets.AWS_USER_NAME}}/plog.jar > /dev/null 2> /dev/null < /dev/null &"
+          rm -f private_key.pem
