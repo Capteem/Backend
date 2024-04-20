@@ -12,8 +12,6 @@ env:
   CODE_DEPLOY_APPLICATION_NAME: plog-spring-boot
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: plog-codedeploy-deployment-group
 
-permissions: read
-
 on:
   push:
     branches: [ "feature" ]
