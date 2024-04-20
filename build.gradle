@@ -46,13 +46,6 @@ dependencies {
 
 }
 
-jar{
-	enabled = true
-}
-
-tasks.getByName<Jar>("jar") {
-	enabled = false
-}
 tasks.named('test') {
 	useJUnitPlatform()
 }
