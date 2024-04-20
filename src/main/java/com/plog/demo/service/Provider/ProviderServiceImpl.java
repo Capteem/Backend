@@ -27,7 +27,7 @@ public class ProviderServiceImpl implements ProviderService{
     @Override
     public ProviderDto addProvider(ProviderDto providerDto) throws CustomException{
 
-        Optional<ProviderTable> findProvider = providerTableRepository.findAllByUserIdAndProviderName(providerDto.getUserId(), providerDto.getProviderName());
+        Optional<ProviderTable> findProvider = providerTableRepository.findByProviderName(providerDto.getProviderName());
         IdTable idTable = idTableRepository.findById(providerDto.getUserId()).orElseThrow(() -> new CustomException("존재하지 않는 사용자입니다."));
 
         if(findProvider.isPresent()){

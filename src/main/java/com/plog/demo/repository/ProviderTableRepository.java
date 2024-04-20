@@ -9,5 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface ProviderTableRepository extends JpaRepository<ProviderTable, Integer> {
-    Optional<ProviderTable> findAllByUserIdAndProviderName(String userId, String providerName);
+
+    Optional<ProviderTable> findByProviderName(String providerName);
 }

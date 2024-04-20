@@ -15,7 +15,7 @@ public class ProviderTable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String providerId;
+    private int providerId;
     @Column
     private String providerName;
     @Column
