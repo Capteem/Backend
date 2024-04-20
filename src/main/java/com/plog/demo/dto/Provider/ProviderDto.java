@@ -10,7 +10,12 @@ import lombok.*;
 public class ProviderDto {
 
     private String providerName;
-    private String providerAddress;
-    private int providerService;
+    private String providerArea;
+    private String providerSubArea;
+    private String providerDetailArea;
+    private String providerPrice;
+    private int providerType;
+    private int providerStatus;
+    private String userId;
 
 }
