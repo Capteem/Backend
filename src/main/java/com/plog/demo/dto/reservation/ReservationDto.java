@@ -19,6 +19,9 @@ public class ReservationDto {
 
     private int reservationHairId;
 
-    private LocalDateTime reservationDate;
+    private LocalDateTime reservationStartDate;
+
+    private LocalDateTime reservationEndDate;
+
 
 }
