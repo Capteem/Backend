@@ -1,80 +1,61 @@
-package com.plog.demo.controller.sign;
+package com.plog.demo.controller.provider;
 
-import com.plog.demo.dto.sign.LoginRequestDto;
-import com.plog.demo.dto.sign.LoginResponseDto;
-import com.plog.demo.dto.user.UserDto;
+import com.plog.demo.dto.Provider.PhotoDto;
+import com.plog.demo.dto.Provider.ProviderDto;
 import com.plog.demo.exception.CustomException;
-import com.plog.demo.service.sign.SignService;
+import com.plog.demo.service.Provider.ProviderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Controller
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/sign-api")
+@RequestMapping("/service")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-public class SignController {
+public class ProviderController {
 
-    private final SignService signService;
+    private final ProviderService providerService;
 
-
-    @PostMapping("/signup")
-    public ResponseEntity<Map<String, String>> signUp(@RequestBody UserDto userDto){
+    @PostMapping("/service")
+    public ResponseEntity<Map<String, String>> signUpProvider(@RequestBody ProviderDto providerDto){
 
         Map<String, String> responseData = new HashMap<>();
 
         try {
-            signService.register(userDto);
-            responseData.put("message", "회원가입 성공");
+            providerService.addProvider(providerDto);
+            responseData.put("message", "서비스 등록 성공");
             return ResponseEntity.status(HttpStatus.OK).body(responseData);
         }catch (CustomException e){
             responseData.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
         }catch (RuntimeException e) {
-            // 데이터베이스 접근 예외 처리
             responseData.put("message", "서버에서 오류가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseData);
         }
-
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<Object> signIn(@RequestBody LoginRequestDto loginRequestDto){
+    @PostMapping("/photo")
+    public ResponseEntity<Map<String ,String>> addPhoto(@RequestBody PhotoDto pictureDto){
         Map<String, String> responseData = new HashMap<>();
 
         try {
-            LoginResponseDto loginResponseDto = signService.login(loginRequestDto.getId(), loginRequestDto.getPassword());
-            return ResponseEntity.status(HttpStatus.OK).body(loginResponseDto);
+            providerService.addPhoto(pictureDto);
+            responseData.put("message", "사진 등록 성공");
+            return ResponseEntity.status(HttpStatus.OK).body(responseData);
         }catch (CustomException e){
             responseData.put("message", e.getMessage());
-
-            //유저 없음
-            if(e.getResultCode() == HttpStatus.UNAUTHORIZED.value()){
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseData);
-            }
-
-
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
         }catch (RuntimeException e) {
-            // 데이터베이스 접근 예외 처리
             responseData.put("message", "서버에서 오류가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseData);
         }
-
     }
-
-    /**
-     * logout TODO
-     */
-
-
-    /**
-     * exceptionHanlder TODO
-     */
 }

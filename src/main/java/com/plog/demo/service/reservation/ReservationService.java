@@ -5,7 +5,7 @@ import com.plog.demo.exception.CustomException;
 
 public interface ReservationService {
 
-    void deleteReservation(String reservationId, String userId);
+    void deleteReservation(int reservationId);
 
     ReservationDto addReservation(ReservationDto reservationDto) throws CustomException;
 

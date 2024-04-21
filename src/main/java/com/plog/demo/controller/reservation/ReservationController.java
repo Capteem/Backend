@@ -1,5 +1,6 @@
 package com.plog.demo.controller.reservation;
 
+
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.reservation.ReservationDto;
 import com.plog.demo.exception.CustomException;
@@ -17,7 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/reservation")
 @Slf4j
-public class ReservationCotroller {
+public class ReservationController {
 
     private final ReservationService reservationService;
 
@@ -27,6 +28,21 @@ public class ReservationCotroller {
         ReservationDto result = reservationService.addReservation(reservationDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @PostMapping("/cancel")
+    public ResponseEntity<Map<String, Integer>> cancelReservation(@RequestBody int reservationId){
+
+            Map<String, Integer> responseData = new HashMap<>();
+
+            try {
+                reservationService.deleteReservation(reservationId);
+                responseData.put("예약 취소 성공", reservationId);
+                return ResponseEntity.status(200).body(responseData);
+            }catch (Exception e){
+                responseData.put("예약 취소 실패", reservationId);
+                return ResponseEntity.status(400).body(responseData);
+            }
     }
 
     /**

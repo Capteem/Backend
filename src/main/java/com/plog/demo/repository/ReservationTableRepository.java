@@ -10,11 +10,9 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ReservationTableRepository extends JpaRepository<ReservationTable, Integer> {
-
 
     /**
      * 예약 날짜 겹치는 경우
@@ -31,5 +29,6 @@ public interface ReservationTableRepository extends JpaRepository<ReservationTab
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
             );
+
 }
 
