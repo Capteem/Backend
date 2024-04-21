@@ -6,16 +6,15 @@ import lombok.Builder;
 
 import java.time.LocalDateTime;
 
+
+/**
+ * TODO index 설정해야함
+ */
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-//@Table(uniqueConstraints = {
-//        @UniqueConstraint(columnNames = {"reservation_camera", "reservation_date"}),
-//        @UniqueConstraint(columnNames = {"reservation_studio", "reservation_date"}),
-//        @UniqueConstraint(columnNames = {"reservation_hair", "reservation_date"})
-//})
 public class ReservationTable {
 
     @Id

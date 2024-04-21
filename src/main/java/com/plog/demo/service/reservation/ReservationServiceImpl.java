@@ -60,7 +60,11 @@ public class ReservationServiceImpl implements ReservationService{
                 .reservationId(reservationDto.getUserId())
                 .build();
 
-        reservationTableRepository.save(reservation);
+        try {
+            reservationTableRepository.save(reservation);
+        }catch (Exception e){
+            throw new RuntimeException("데이터 베이스 오류", e);
+        }
 
         log.info("[addReservation] 예약 완료");
 
