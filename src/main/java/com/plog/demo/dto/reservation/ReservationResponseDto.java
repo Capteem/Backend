@@ -14,11 +14,11 @@ public class ReservationResponseDto {
 
     private int reservationTableId;
 
-    private int reservationCameraId;
+    private String reservationCameraName;
 
-    private int reservationStudioId;
+    private String reservationStudioName;
 
-    private int reservationHairId;
+    private String reservationHairName;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reservationStartDate;

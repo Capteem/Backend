@@ -1,11 +1,9 @@
 package com.plog.demo.controller.reservation;
-import com.plog.demo.config.JwtTokenProvider;
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.reservation.ReservationRequestDto;
 import com.plog.demo.dto.reservation.ReservationResponseDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.reservation.ReservationService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,19 +21,21 @@ import java.util.Map;
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/booking")
-    public ResponseEntity<ReservationResponseDto> makeReservation(@RequestBody ReservationRequestDto reservationRequestDto) throws CustomException {
+    public ResponseEntity<Map<String, String>> makeReservation(@RequestBody ReservationRequestDto reservationRequestDto) throws CustomException {
 
         /**
          * TODO 인터셉터로 토큰 검증 미리 해야함
          */
 
+        reservationService.addReservation(reservationRequestDto);
 
-        ReservationResponseDto result = reservationService.addReservation(reservationRequestDto);
+        Map<String, String> responseData = new HashMap<>();
 
-        return ResponseEntity.status(HttpStatus.OK).body(result);
+        responseData.put("msg", "예약 성공");
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseData);
     }
 
     @PostMapping("/list")
