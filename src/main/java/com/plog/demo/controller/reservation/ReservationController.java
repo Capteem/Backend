@@ -44,7 +44,7 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    @GetMapping()
+    @GetMapping("/list")
     public ResponseEntity<List<ReservationResponseDto>> getReservations(HttpServletRequest request) throws CustomException {
         /**
          * TODO 인터셉터로 토큰 검증 미리 해야함
