@@ -1,11 +1,14 @@
 package com.plog.demo.service.reservation;
 
 
+import com.plog.demo.common.ReservationStatus;
 import com.plog.demo.dto.reservation.ReservationRequestDto;
 import com.plog.demo.dto.reservation.ReservationResponseDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.IdTable;
+import com.plog.demo.model.ProviderTable;
 import com.plog.demo.model.ReservationTable;
+import com.plog.demo.repository.ProviderTableRepository;
 import com.plog.demo.repository.ReservationTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +17,9 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -24,6 +29,7 @@ import java.util.List;
 public class ReservationServiceImpl implements ReservationService{
 
     private final ReservationTableRepository reservationTableRepository;
+    private final ProviderTableRepository providerTableRepository;
 
     @Override
     public void deleteReservation(int reservationId) {
@@ -35,7 +41,7 @@ public class ReservationServiceImpl implements ReservationService{
             return;
         }
         try{
-            reservationTable.setStatus("CANCEL");
+            reservationTable.setStatus(ReservationStatus.CANCELLED.getCode());
             reservationTableRepository.save(reservationTable);
             log.info("[deleteReservation] 예약이 취소되었습니다.");
         } catch (DataAccessException e){
@@ -44,7 +50,7 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
-    public ReservationResponseDto addReservation(ReservationRequestDto reservationRequestDto) throws CustomException {
+    public void addReservation(ReservationRequestDto reservationRequestDto) throws CustomException {
 
 
         log.info("[addReservation] 예약 서비스 로직 시작");
@@ -63,6 +69,7 @@ public class ReservationServiceImpl implements ReservationService{
                 .reservation_hair(reservationRequestDto.getReservationHairId())
                 .reservation_start_date(reservationRequestDto.getReservationStartDate())
                 .reservation_end_date(reservationRequestDto.getReservationEndDate())
+                .status(ReservationStatus.WAITING.getCode())
                 .build();
 
         reservation.setUserId(user);
@@ -75,16 +82,6 @@ public class ReservationServiceImpl implements ReservationService{
 
         log.info("[addReservation] 예약 완료");
 
-        ReservationResponseDto reservationResponseDto = ReservationResponseDto.builder()
-                .reservationTableId(reservation.getReservationId())
-                .reservationCameraId(reservation.getReservation_camera())
-                .reservationStudioId(reservation.getReservation_studio())
-                .reservationHairId(reservation.getReservation_hair())
-                .reservationStartDate(reservation.getReservation_start_date())
-                .reservationEndDate(reservation.getReservation_end_date())
-                .build();
-
-        return reservationResponseDto;
     }
 
     @Override
@@ -92,6 +89,7 @@ public class ReservationServiceImpl implements ReservationService{
 
         log.info("[getReservationAll] 모든 예약 조회");
 
+        // 유저 엔티티 생성
         IdTable user = IdTable.builder()
                 .id(userId)
                 .build();
@@ -103,20 +101,43 @@ public class ReservationServiceImpl implements ReservationService{
             throw new CustomException("예약이 없습니다.", HttpStatus.NOT_FOUND.value());
         }
 
-        List<ReservationResponseDto> reservationResponseDtoList = reservations.stream().map(
-                reservation -> ReservationResponseDto.builder()
-                        .reservationTableId(reservation.getReservationId())
-                        .reservationCameraId(reservation.getReservation_camera())
-                        .reservationStudioId(reservation.getReservation_studio())
-                        .reservationHairId(reservation.getReservation_hair())
-                        .reservationStartDate(reservation.getReservation_start_date())
-                        .reservationEndDate(reservation.getReservation_end_date())
-                        .build()
-                ).toList();
+        List<ReservationResponseDto> reservationResponseDtoList = getReservationResponseDtoList(reservations);
 
+
+        log.info("[getReservationAll] 모든 예약 조회 성공");
 
         return reservationResponseDtoList;
     }
+
+    private List<ReservationResponseDto> getReservationResponseDtoList(List<ReservationTable> reservations) throws CustomException {
+
+        List<ReservationResponseDto> reservationResponseDtoList = new ArrayList<>();
+
+        for (ReservationTable reservation : reservations) {
+
+            ReservationResponseDto reservationResponseDto = ReservationResponseDto.builder()
+                    .reservationTableId(reservation.getReservationId())
+                    .reservationCameraName(getProviderName(reservation.getReservation_camera()))
+                    .reservationStudioName(getProviderName(reservation.getReservation_studio()))
+                    .reservationHairName(getProviderName(reservation.getReservation_hair()))
+                    .reservationStartDate(reservation.getReservation_start_date())
+                    .reservationEndDate(reservation.getReservation_end_date())
+                    .build();
+
+            reservationResponseDtoList.add(reservationResponseDto);
+        }
+
+        return reservationResponseDtoList;
+    }
+
+    private String getProviderName(int providerId) throws CustomException {
+
+        ProviderTable providerTable = providerTableRepository.findById(providerId)
+                .orElseThrow(() -> new CustomException("서비스 제공자가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value()));
+
+        return providerTable.getProviderName();
+    }
+
 
     private boolean isOverlappingReservation(ReservationRequestDto reservationRequestDto) {
         List<ReservationTable> overlappingReservations = reservationTableRepository.findReservationTableWithLock(

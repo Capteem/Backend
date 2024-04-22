@@ -21,8 +21,8 @@ import java.util.Optional;
 @Slf4j
 public class ProviderServiceImpl implements ProviderService{
 
-    private ProviderTableRepository providerTableRepository;
-    private IdTableRepository idTableRepository;
+    private final ProviderTableRepository providerTableRepository;
+    private final IdTableRepository idTableRepository;
 
     @Override
     public ProviderDto addProvider(ProviderDto providerDto) throws CustomException{

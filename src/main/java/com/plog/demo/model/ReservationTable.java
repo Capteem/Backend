@@ -39,7 +39,7 @@ public class ReservationTable {
     private LocalDateTime reservation_end_date;
 
     @Column
-    private String status;
+    private int status;
 
     @ManyToOne
     @JoinColumn(name="id")
