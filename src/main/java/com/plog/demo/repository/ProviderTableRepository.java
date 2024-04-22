@@ -9,6 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface ProviderTableRepository extends JpaRepository<ProviderTable, Integer> {
-
     Optional<ProviderTable> findByProviderName(String providerName);
 }

@@ -12,10 +12,10 @@ public class ProviderDto {
     private String providerName;
     private String providerArea;
     private String providerSubArea;
-    private String providerDetailArea;
-    private String providerPrice;
+    private String providerDetail;
+    private int providerTypeAuth;
     private int providerType;
     private int providerStatus;
     private String userId;
-
+    private String providerPhoneNum;
 }
