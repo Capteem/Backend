@@ -7,9 +7,6 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 
-/**
- * TODO index 설정해야함
- */
 @Data
 @Entity
 @NoArgsConstructor
