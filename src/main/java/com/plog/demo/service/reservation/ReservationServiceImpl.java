@@ -1,8 +1,10 @@
 package com.plog.demo.service.reservation;
 
 
-import com.plog.demo.dto.reservation.ReservationDto;
+import com.plog.demo.dto.reservation.ReservationRequestDto;
+import com.plog.demo.dto.reservation.ReservationResponseDto;
 import com.plog.demo.exception.CustomException;
+import com.plog.demo.model.IdTable;
 import com.plog.demo.model.ReservationTable;
 import com.plog.demo.repository.ReservationTableRepository;
 import lombok.RequiredArgsConstructor;
@@ -42,23 +44,28 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
-    public ReservationDto addReservation(ReservationDto reservationDto) throws CustomException {
+    public ReservationResponseDto addReservation(ReservationRequestDto reservationRequestDto, String userId) throws CustomException {
 
 
         log.info("[addReservation] 예약 서비스 로직 시작");
 
-        if (isOverlappingReservation(reservationDto)) {
+        if (isOverlappingReservation(reservationRequestDto)) {
             throw new CustomException("예약 날짜 중복", HttpStatus.CONFLICT.value());
         }
 
-        ReservationTable reservation = ReservationTable.builder()
-                .reservation_camera(reservationDto.getReservationCameraId())
-                .reservation_studio(reservationDto.getReservationStudioId())
-                .reservation_hair(reservationDto.getReservationHairId())
-                .reservation_start_date(reservationDto.getReservationStartDate())
-                .reservation_end_date(reservationDto.getReservationEndDate())
-                .reservationId(reservationDto.getUserId())
+        IdTable user = IdTable.builder()
+                .id(userId)
                 .build();
+
+        ReservationTable reservation = ReservationTable.builder()
+                .reservation_camera(reservationRequestDto.getReservationCameraId())
+                .reservation_studio(reservationRequestDto.getReservationStudioId())
+                .reservation_hair(reservationRequestDto.getReservationHairId())
+                .reservation_start_date(reservationRequestDto.getReservationStartDate())
+                .reservation_end_date(reservationRequestDto.getReservationEndDate())
+                .build();
+
+        reservation.setUserId(user);
 
         try {
             reservationTableRepository.save(reservation);
@@ -68,16 +75,56 @@ public class ReservationServiceImpl implements ReservationService{
 
         log.info("[addReservation] 예약 완료");
 
-        return reservationDto;
+        ReservationResponseDto reservationResponseDto = ReservationResponseDto.builder()
+                .reservationTableId(reservation.getReservationId())
+                .reservationCameraId(reservation.getReservation_camera())
+                .reservationStudioId(reservation.getReservation_studio())
+                .reservationHairId(reservation.getReservation_hair())
+                .reservationStartDate(reservation.getReservation_start_date())
+                .reservationEndDate(reservation.getReservation_end_date())
+                .build();
+
+        return reservationResponseDto;
     }
 
-    private boolean isOverlappingReservation(ReservationDto reservationDto) {
+    @Override
+    public List<ReservationResponseDto> getReservationAll(String userId) throws CustomException {
+
+        log.info("[getReservationAll] 모든 예약 조회");
+
+        IdTable user = IdTable.builder()
+                .id(userId)
+                .build();
+
+        List<ReservationTable> reservations = reservationTableRepository.findByUserId(user);
+
+        //예약 없을 때
+        if(reservations.isEmpty()){
+            throw new CustomException("예약이 없습니다.", HttpStatus.NOT_FOUND.value());
+        }
+
+        List<ReservationResponseDto> reservationResponseDtoList = reservations.stream().map(
+                reservation -> ReservationResponseDto.builder()
+                        .reservationTableId(reservation.getReservationId())
+                        .reservationCameraId(reservation.getReservation_camera())
+                        .reservationStudioId(reservation.getReservation_studio())
+                        .reservationHairId(reservation.getReservation_hair())
+                        .reservationStartDate(reservation.getReservation_start_date())
+                        .reservationEndDate(reservation.getReservation_end_date())
+                        .build()
+                ).toList();
+
+
+        return reservationResponseDtoList;
+    }
+
+    private boolean isOverlappingReservation(ReservationRequestDto reservationRequestDto) {
         List<ReservationTable> overlappingReservations = reservationTableRepository.findReservationTableWithLock(
-                 reservationDto.getReservationCameraId(),
-                 reservationDto.getReservationHairId(),
-                 reservationDto.getReservationStudioId(),
-                 reservationDto.getReservationStartDate(),
-                 reservationDto.getReservationEndDate());
+                 reservationRequestDto.getReservationCameraId(),
+                 reservationRequestDto.getReservationHairId(),
+                 reservationRequestDto.getReservationStudioId(),
+                 reservationRequestDto.getReservationStartDate(),
+                 reservationRequestDto.getReservationEndDate());
 
         if(!overlappingReservations.isEmpty()){
             log.info("[addReservation] 예약 날짜 중복");

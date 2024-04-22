@@ -15,6 +15,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(indexes = {
+        @Index(columnList = "reservation_camera"),
+        @Index(columnList = "reservation_studio"),
+        @Index(columnList = "reservation_hair")
+})
 public class ReservationTable {
 
     @Id

@@ -1,16 +1,18 @@
 package com.plog.demo.dto.reservation;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.time.LocalDateTime;
-
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReservationDto {
+@Setter
+public class ReservationResponseDto {
 
-    private int userId;
+    private int reservationTableId;
 
     private int reservationCameraId;
 
@@ -18,9 +20,9 @@ public class ReservationDto {
 
     private int reservationHairId;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reservationStartDate;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reservationEndDate;
-
-
 }

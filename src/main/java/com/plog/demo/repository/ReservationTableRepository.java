@@ -1,5 +1,6 @@
 package com.plog.demo.repository;
 
+import com.plog.demo.model.IdTable;
 import com.plog.demo.model.ReservationTable;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +14,10 @@ import java.util.List;
 
 @Repository
 public interface ReservationTableRepository extends JpaRepository<ReservationTable, Integer> {
+
+
+    List<ReservationTable> findByUserId(IdTable userId);
+
 
     /**
      * 예약 날짜 겹치는 경우

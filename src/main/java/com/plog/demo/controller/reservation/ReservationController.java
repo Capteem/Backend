@@ -1,10 +1,15 @@
 package com.plog.demo.controller.reservation;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.plog.demo.config.JwtTokenProvider;
 import com.plog.demo.dto.ErrorDto;
-import com.plog.demo.dto.reservation.ReservationDto;
+import com.plog.demo.dto.reservation.ReservationRequestDto;
+import com.plog.demo.dto.reservation.ReservationResponseDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.reservation.ReservationService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -21,13 +27,34 @@ import java.util.Map;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping()
-    public ResponseEntity<ReservationDto> makeReservation(@RequestBody ReservationDto reservationDto) throws CustomException {
+    public ResponseEntity<ReservationResponseDto> makeReservation(@RequestBody ReservationRequestDto reservationRequestDto,
+                                                                  HttpServletRequest request) throws CustomException {
 
-        ReservationDto result = reservationService.addReservation(reservationDto);
+        /**
+         * TODO 인터셉터로 토큰 검증 미리 해야함
+         */
+        String accessToken = jwtTokenProvider.resolveToken(request);
+        String userId = jwtTokenProvider.getUserId(accessToken);
+
+        ReservationResponseDto result = reservationService.addReservation(reservationRequestDto, userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<ReservationResponseDto>> getReservations(HttpServletRequest request) throws CustomException {
+        /**
+         * TODO 인터셉터로 토큰 검증 미리 해야함
+         */
+        String accessToken = jwtTokenProvider.resolveToken(request);
+        String userId = jwtTokenProvider.getUserId(accessToken);
+
+        List<ReservationResponseDto> reservations = reservationService.getReservationAll(userId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(reservations);
     }
 
     @PostMapping("/cancel")
@@ -72,6 +99,6 @@ public class ReservationController {
                 .msg(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
                 .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDto);
     }
 }

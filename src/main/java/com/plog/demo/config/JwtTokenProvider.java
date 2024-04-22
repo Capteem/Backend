@@ -21,11 +21,11 @@ public class JwtTokenProvider {
 
     private String refreshTokenSecretKey = "SecretKey222";
 
-    //하루
-    private final long jwtAccessExpiration = 1000L * 60;
+    //한시간
+    private final long jwtAccessExpiration = 1000L * 60 * 60;
 
     //일주일
-    private final long jwtRefreshExpiration = 1000L * 60 * 60;
+    private final long jwtRefreshExpiration = 1000L * 60 * 60 * 24 * 7;
 
     /**
      * secret key 초기화
@@ -80,7 +80,7 @@ public class JwtTokenProvider {
      * 토큰 기반 회원 정보 추출
      */
     public String getUserId(String accessToken){
-        log.info("[getUserId] 토큰 기반 회원 정보 추출");
+        log.info("[getUserId] 토큰 기반 회원 정보 추출 {}");
         Claims info = Jwts.parser().setSigningKey(accessTokenSecretKey).parseClaimsJws(accessToken).getBody();
         log.info("[getUserId] info = {}, userId = {}", info, info.getSubject());
         return info.getSubject();
@@ -93,7 +93,7 @@ public class JwtTokenProvider {
      */
     public String resolveToken(HttpServletRequest request){
         log.info("[resolveToken] HTTP 헤더에서 Token 값 추출");
-        return request.getHeader("X-AUTH_TOKEN");
+        return request.getHeader("Auth-Token");
     }
 
     /**
