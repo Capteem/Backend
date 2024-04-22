@@ -29,7 +29,7 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @PostMapping()
+    @PostMapping("/booking")
     public ResponseEntity<ReservationResponseDto> makeReservation(@RequestBody ReservationRequestDto reservationRequestDto,
                                                                   HttpServletRequest request) throws CustomException {
 
