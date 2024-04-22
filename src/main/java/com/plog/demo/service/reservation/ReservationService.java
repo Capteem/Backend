@@ -10,7 +10,7 @@ public interface ReservationService {
 
     void deleteReservation(int reservationId);
 
-    ReservationResponseDto addReservation(ReservationRequestDto reservationRequestDto, String userId) throws CustomException;
+    ReservationResponseDto addReservation(ReservationRequestDto reservationRequestDto) throws CustomException;
 
     List<ReservationResponseDto> getReservationAll(String userId) throws CustomException;
 

@@ -1,8 +1,4 @@
 package com.plog.demo.controller.reservation;
-
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.plog.demo.config.JwtTokenProvider;
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.reservation.ReservationRequestDto;
@@ -30,29 +26,25 @@ public class ReservationController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/booking")
-    public ResponseEntity<ReservationResponseDto> makeReservation(@RequestBody ReservationRequestDto reservationRequestDto,
-                                                                  HttpServletRequest request) throws CustomException {
+    public ResponseEntity<ReservationResponseDto> makeReservation(@RequestBody ReservationRequestDto reservationRequestDto) throws CustomException {
 
         /**
          * TODO 인터셉터로 토큰 검증 미리 해야함
          */
-        String accessToken = jwtTokenProvider.resolveToken(request);
-        String userId = jwtTokenProvider.getUserId(accessToken);
 
-        ReservationResponseDto result = reservationService.addReservation(reservationRequestDto, userId);
+
+        ReservationResponseDto result = reservationService.addReservation(reservationRequestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    @GetMapping("/list")
-    public ResponseEntity<List<ReservationResponseDto>> getReservations(HttpServletRequest request) throws CustomException {
+    @PostMapping("/list")
+    public ResponseEntity<List<ReservationResponseDto>> getReservations(@RequestBody Map<String, String> requestBody) throws CustomException {
         /**
          * TODO 인터셉터로 토큰 검증 미리 해야함
          */
-        String accessToken = jwtTokenProvider.resolveToken(request);
-        String userId = jwtTokenProvider.getUserId(accessToken);
 
-        List<ReservationResponseDto> reservations = reservationService.getReservationAll(userId);
+        List<ReservationResponseDto> reservations = reservationService.getReservationAll(requestBody.get("userId"));
 
         return ResponseEntity.status(HttpStatus.OK).body(reservations);
     }

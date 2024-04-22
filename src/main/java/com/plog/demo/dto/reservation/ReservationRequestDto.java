@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 @Setter
 public class ReservationRequestDto {
 
+    private String userId;
+
     private int reservationCameraId;
 
     private int reservationStudioId;

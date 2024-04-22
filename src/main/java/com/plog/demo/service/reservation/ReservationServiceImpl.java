@@ -44,7 +44,7 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
-    public ReservationResponseDto addReservation(ReservationRequestDto reservationRequestDto, String userId) throws CustomException {
+    public ReservationResponseDto addReservation(ReservationRequestDto reservationRequestDto) throws CustomException {
 
 
         log.info("[addReservation] 예약 서비스 로직 시작");
@@ -54,7 +54,7 @@ public class ReservationServiceImpl implements ReservationService{
         }
 
         IdTable user = IdTable.builder()
-                .id(userId)
+                .id(reservationRequestDto.getUserId())
                 .build();
 
         ReservationTable reservation = ReservationTable.builder()
