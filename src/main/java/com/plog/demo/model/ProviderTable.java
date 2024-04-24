@@ -1,6 +1,5 @@
 package com.plog.demo.model;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +31,11 @@ public class ProviderTable {
     private int providerType;
     @Column
     private int providerStatus;
+    @Column
+    private String providerRepPhoto;
+    @Column
+    private String providerRepPhotoPath;
+
 
 
     @OneToOne
