@@ -40,14 +40,16 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerType(providerDto.getProviderType())
                 .providerArea(providerDto.getProviderArea())
                 .providerSubArea(providerDto.getProviderSubArea())
-                .providerDetailArea(providerDto.getProviderDetailArea())
+                .providerDetailArea(providerDto.getProviderDetail())
+                .providerPhoneNum(providerDto.getProviderPhoneNum())
+                .providerStatus(0)
                 .build();
 
         try{
-            log.info("[addProvider] 제공자 저장 로직 시작");
+            log.info("[addProvider] save제공자 저장 로직 시작");
             providerTableRepository.save(providerTable);
         }catch (Exception e){
-            log.info("[addProvider] 데이터 베이스 접근 오류");
+            log.info("[addProvider] db데이터 베이스 접근 오류");
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
         }
 

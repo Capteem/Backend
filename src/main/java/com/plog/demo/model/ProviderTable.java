@@ -1,14 +1,11 @@
 package com.plog.demo.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Entity
-@NoArgsConstructor
+@RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ProviderTable {
@@ -29,9 +26,16 @@ public class ProviderTable {
     @Column
     private String providerPhoneNum;
     @Column
+    private int providerTypeInfo;
+    @Column
     private int providerType;
     @Column
     private int providerStatus;
+    @Column
+    private String providerRepPhoto;
+    @Column
+    private String providerRepPhotoPath;
+
 
 
     @OneToOne

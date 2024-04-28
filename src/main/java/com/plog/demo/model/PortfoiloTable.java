@@ -20,6 +20,7 @@ public class PortfoiloTable {
     @Column
     private String portfoiloTitle;
 
+
     @ManyToOne
     @JoinColumn(name="providerId")
     private ProviderTable providerId;
