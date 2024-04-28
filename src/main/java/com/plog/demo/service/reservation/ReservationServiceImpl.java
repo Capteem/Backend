@@ -122,6 +122,7 @@ public class ReservationServiceImpl implements ReservationService{
                     .reservationHairName(getProviderName(reservation.getReservation_hair()))
                     .reservationStartDate(reservation.getReservation_start_date())
                     .reservationEndDate(reservation.getReservation_end_date())
+                    .status(reservation.getStatus())
                     .build();
 
             reservationResponseDtoList.add(reservationResponseDto);
