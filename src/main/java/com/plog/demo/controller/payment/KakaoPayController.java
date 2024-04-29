@@ -29,14 +29,24 @@ public class KakaoPayController {
         }
     }
 
-    @GetMapping("/success/{id}")
-    public ResponseEntity<Object> getApprove(@PathVariable("id") String id, @RequestParam("pg_token") String pgToken){
+    @GetMapping("/success")
+    public ResponseEntity<Object> getApprove(@RequestParam("userId") String id, @RequestParam("pg_token") String pgToken){
         try{
-            PayApproveResDto payApproveResDto = paymentService.getApprove(pgToken, id);
+            PayApproveResDto payApproveResDto = paymentService.getApprove(id, pgToken);
             return ResponseEntity.status(HttpStatus.OK).body(payApproveResDto);
         } catch (Exception e){
-            log.info("[getApprove] 결제 승인 중 오류 발생");
+            log.info("[getApprove] error");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 승인 중 오류가 발생했습니다.");
+        }
+    }
+
+    @PostMapping("/refund")
+    public ResponseEntity<Object> getRefund(@RequestBody String userId, String tid){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(paymentService.getCancelApprove(tid, userId));
+        } catch (Exception e){
+            log.info("[getRefund] error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("환불 중 오류가 발생했습니다.");
         }
     }
 
