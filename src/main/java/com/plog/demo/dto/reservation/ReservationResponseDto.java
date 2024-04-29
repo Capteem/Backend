@@ -20,6 +20,8 @@ public class ReservationResponseDto {
 
     private String reservationHairName;
 
+    private int status;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reservationStartDate;
 

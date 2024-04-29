@@ -11,15 +11,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PortfoiloTable {
+public class PortfolioTable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int portfoiloId;
+    private int portfolioId;
 
     @Column
-    private String portfoiloTitle;
-
+    private String portfolioTitle;
 
     @ManyToOne
     @JoinColumn(name="providerId")

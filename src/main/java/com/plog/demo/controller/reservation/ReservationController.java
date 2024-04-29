@@ -20,14 +20,15 @@ import java.util.Map;
 @Slf4j
 public class ReservationController {
 
+    /**
+     * TODO 인터셉터로 토큰 검증 미리 해야함
+     */
+
     private final ReservationService reservationService;
 
     @PostMapping("/booking")
     public ResponseEntity<Map<String, String>> makeReservation(@RequestBody ReservationRequestDto reservationRequestDto) throws CustomException {
 
-        /**
-         * TODO 인터셉터로 토큰 검증 미리 해야함
-         */
 
         reservationService.addReservation(reservationRequestDto);
 
@@ -40,9 +41,7 @@ public class ReservationController {
 
     @PostMapping("/list")
     public ResponseEntity<List<ReservationResponseDto>> getReservations(@RequestBody Map<String, String> requestBody) throws CustomException {
-        /**
-         * TODO 인터셉터로 토큰 검증 미리 해야함
-         */
+
 
         List<ReservationResponseDto> reservations = reservationService.getReservationAll(requestBody.get("userId"));
 
