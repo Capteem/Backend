@@ -12,5 +12,6 @@ import lombok.Setter;
 public class ConfirmResponseDto {
     private String status_code;
     private int request_cnt;
+    private int match_cnt;
     private ConfirmResponseDataDto confirmResponseDataDto;
 }
