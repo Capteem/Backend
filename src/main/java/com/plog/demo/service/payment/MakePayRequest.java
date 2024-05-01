@@ -37,7 +37,7 @@ public class MakePayRequest {
         jsonMap.put("total_amount", payInfoDto.getPurchaseAmount());
         jsonMap.put("tax_free_amount", 0);
 
-        jsonMap.put("approval_url", "http://222.251.241.116:8084/payment/success?userId=" + payInfoDto.getUserId());
+        jsonMap.put("approval_url", "http://222.251.241.116:8084/payment/success?userId=" + payInfoDto.getReservationRequestDto().getUserId());
         jsonMap.put("cancel_url", "http://222.251.241.116:8084/payment/cancel");
         jsonMap.put("fail_url", "http://222.251.241.116:8084/payment/fail");
         try{

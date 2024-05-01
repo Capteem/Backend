@@ -5,6 +5,7 @@ import com.plog.demo.model.IdTable;
 import com.plog.demo.model.PaymentTable;
 import com.plog.demo.repository.IdTableRepository;
 import com.plog.demo.repository.PaymentTableRepository;
+import com.plog.demo.service.reservation.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,14 +26,16 @@ public class PaymentServiceImpl implements PaymentService{
 
     private final IdTableRepository idTableRepository;
     private final PaymentTableRepository paymentTableRepository;
+    private final ReservationService reservationService;
 
-    @Value("${pay.admin-key}")
+    @Value("${pay.admin_key}")
     private String adminKey;
 
     @Override
     public PayReadyResDto payReady(PayInfoDto payInfoDto) {
 
-        IdTable idTable = idTableRepository.findById(payInfoDto.getUserId()).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
+        IdTable idTable = idTableRepository.findById(payInfoDto.getReservationRequestDto().getUserId()).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
+        log.info("[payReady] idTable : " + idTable.toString());
         String payId = idTable.getId();
         String paymentId;
         PayReadyResDto payReadyResDto;
@@ -45,6 +48,7 @@ public class PaymentServiceImpl implements PaymentService{
         PayRequestDto payRequestDto = new MakePayRequest().getReadyRequest(payInfoDto);
 
         HttpEntity<Map<String, Object>> urlRequest = new HttpEntity<>(payRequestDto.getMap(), headers);
+        log.info("[payReady] urlRequest : " + urlRequest.toString());
         RestTemplate restTemplate = new RestTemplate();
         try{
             payReadyResDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayReadyResDto.class);
@@ -59,6 +63,13 @@ public class PaymentServiceImpl implements PaymentService{
         } catch (Exception e){
             log.info("[payReady] 결제 준비 중 오류 발생");
             throw new RuntimeException("결제 준비 중 오류가 발생했습니다.", e);
+        }
+
+        try{
+            reservationService.addReservation(payInfoDto.getReservationRequestDto());
+        } catch (Exception e){
+            log.info("[payReady] 예약 정보 저장 중 오류 발생");
+            throw new RuntimeException("예약 정보 저장 중 오류가 발생했습니다.", e);
         }
 
         try {

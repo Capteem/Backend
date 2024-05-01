@@ -13,9 +13,9 @@ public class ProviderDto {
     private String providerArea;
     private String providerSubArea;
     private String providerDetail;
-    private int providerTypeAuth;
     private int providerType;
     private int providerStatus;
     private String userId;
     private String providerPhoneNum;
+
 }
