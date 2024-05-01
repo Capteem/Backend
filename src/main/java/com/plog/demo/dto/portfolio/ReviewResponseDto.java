@@ -14,7 +14,7 @@ public class ReviewResponseDto {
 
     private int reviewId;
 
-    private String reviewContext;
+    private String reviewContent;
 
     private int reviewScore;
 

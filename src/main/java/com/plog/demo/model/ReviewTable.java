@@ -18,7 +18,7 @@ public class ReviewTable {
     private int reviewId;
 
     @Column
-    private String reviewContext;
+    private String reviewContent;
 
     @Column
     private int reviewScore;
