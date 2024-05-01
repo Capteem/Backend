@@ -8,6 +8,7 @@ import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.IdTable;
 import com.plog.demo.model.ProviderTable;
 import com.plog.demo.model.ReservationTable;
+import com.plog.demo.repository.IdTableRepository;
 import com.plog.demo.repository.ProviderTableRepository;
 import com.plog.demo.repository.ReservationTableRepository;
 import lombok.RequiredArgsConstructor;

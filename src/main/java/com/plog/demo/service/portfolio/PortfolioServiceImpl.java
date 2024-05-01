@@ -49,7 +49,7 @@ public class PortfolioServiceImpl implements PortfolioService{
         List<ReviewResponseDto> reviewResponseDtos = reviewTables.stream()
                 .map(reviewTable -> ReviewResponseDto.builder()
                         .reviewId(reviewTable.getReviewId())
-                        .reviewContext(reviewTable.getReviewContext())
+                        .reviewContent(reviewTable.getReviewContent())
                         .reviewScore(reviewTable.getReviewScore())
                         .reviewDate(reviewTable.getReviewDate())
                         .build()

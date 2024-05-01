@@ -20,6 +20,13 @@ public class PortfolioTable {
     @Column
     private String portfolioTitle;
 
+    @Column
+    private String storedFileName;
+
+    //서버에 저장할 날짜 디렉토리
+    @Column
+    private String dateBasedImagePath;
+
     @ManyToOne
     @JoinColumn(name="providerId")
     private ProviderTable providerId;
