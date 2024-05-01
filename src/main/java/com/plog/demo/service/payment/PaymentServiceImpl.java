@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Map;
+
 
 @Service
 @Slf4j
@@ -40,10 +42,9 @@ public class PaymentServiceImpl implements PaymentService{
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "SECRET_KEY " + adminKey);
 
-        PayRequestDto payRequestDto = new MakePayRequest().getReadyRequest(payId, payInfoDto);
+        PayRequestDto payRequestDto = new MakePayRequest().getReadyRequest(payInfoDto);
 
-        HttpEntity<MultiValueMap<String, Object>> urlRequest = new HttpEntity<>(payRequestDto.getMap(), headers);
-
+        HttpEntity<Map<String, Object>> urlRequest = new HttpEntity<>(payRequestDto.getMap(), headers);
         RestTemplate restTemplate = new RestTemplate();
         try{
             payReadyResDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayReadyResDto.class);
@@ -77,10 +78,16 @@ public class PaymentServiceImpl implements PaymentService{
     }
 
     @Override
-    public PayApproveResDto getApprove(String pgToken, String id) throws Exception {
+    public PayApproveResDto getApprove(String id, String pgToken) throws Exception {
 
-        IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
-        String tid = paymentTableRepository.findByUserId(idTable).getPaymentId();
+        PaymentTable paymentTable;
+        IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("[getApprove] no such id exists."));
+        try{
+            paymentTable = paymentTableRepository.findByUserId(idTable);
+        } catch (Exception e){
+            log.info("[getApprove] paymentTable is null");
+            throw new RuntimeException("결제 정보가 존재하지 않습니다.", e);
+        }
 
         HttpHeaders headers = new HttpHeaders();
         String auth = "SECRET_KEY " + adminKey;
@@ -88,15 +95,25 @@ public class PaymentServiceImpl implements PaymentService{
         headers.add("Authorization", auth);
         headers.add("Content-Type", "application/json");
 
-        PayRequestDto payRequestDto = new MakePayRequest().getApproveRequest(tid, id, pgToken);
+        PayRequestDto payRequestDto = new MakePayRequest().getApproveRequest(paymentTable.getPaymentId(), idTable.getId(), pgToken);
+        log.info("[getApprove] payRequestDto : " + payRequestDto.toString());
 
-        HttpEntity<MultiValueMap<String, Object>> urlRequest = new HttpEntity<>(payRequestDto.getMap(), headers);
+        PayApproveResDto payApproveResDto;
+        HttpEntity<Map<String, Object>> urlRequest = new HttpEntity<>(payRequestDto.getMap(), headers);
 
         RestTemplate restTemplate = new RestTemplate();
 
-        return restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayApproveResDto.class);
+        try{
+            payApproveResDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayApproveResDto.class);
+        }catch (Exception e){
+            log.info("[getApprove] failure to get approve");
+            throw new RuntimeException("failure to get approve", e);
+        }
+
+        return payApproveResDto;
     }
 
+    @Override
     public PayCancelDto getCancelApprove(String tid, String id) throws Exception{
         IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
         PaymentTable paymentTable = paymentTableRepository.findByPaymentId(tid);
@@ -110,7 +127,7 @@ public class PaymentServiceImpl implements PaymentService{
 
         PayRequestDto payRequestDto = new MakePayRequest().getCancelRequest(tid, paymentTable.getPaymentAmount());
 
-        HttpEntity<MultiValueMap<String, Object>> urlRequest = new HttpEntity<>(payRequestDto.getMap(), headers);
+        HttpEntity<Map<String, Object>> urlRequest = new HttpEntity<>(payRequestDto.getMap(), headers);
 
         RestTemplate restTemplate = new RestTemplate();
         try{

@@ -27,6 +27,6 @@ public class PaymentTable {
     private int paymentTaxFreeAmount;
 
     @ManyToOne
-    @JoinTable(name = "id")
+    @JoinColumn(name = "id")
     private IdTable userId;
 }
