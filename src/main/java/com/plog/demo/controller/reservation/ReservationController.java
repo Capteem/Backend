@@ -75,7 +75,7 @@ public class ReservationController {
                 .msg(e.getMessage())
                 .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+        return ResponseEntity.status(e.getResultCode()).body(errorDto);
     }
 
     /**

@@ -24,6 +24,10 @@ public class FileStore {
     private String fileDir;
 
 
+    public String getFullPath(String currentDateDir, String filename){
+        return fileDir + currentDateDir + filename;
+    }
+
     public List<UploadFileDto> storeFiles(List<MultipartFile> multipartFiles) {
 
         log.info("[storeFiles] 파일 저장 로직 시작");

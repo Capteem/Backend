@@ -5,5 +5,5 @@ import com.plog.demo.exception.CustomException;
 
 public interface PortfolioService {
 
-    PortfolioResponseDto getPortfolio(int portfolioId) throws CustomException;
+    PortfolioResponseDto getPortfolio(int providerId) throws CustomException;
 }
