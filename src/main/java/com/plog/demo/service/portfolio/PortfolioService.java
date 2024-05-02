@@ -8,6 +8,4 @@ public interface PortfolioService {
 
     PortfolioResponseDto getPortfolio(int portfolioId) throws CustomException;
 
-    void addPortfolio(PortfolioAddDto portfolioAddDto) throws CustomException;
-
 }

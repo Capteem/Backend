@@ -32,13 +32,6 @@ public class PortfolioServiceImpl implements PortfolioService{
     private final ReviewTableRepository reviewTableRepository;
     private final CommentTableRepository commentTableRepository;
 
-//    @Override
-//    public PortfolioResponseDto getPortfolio(int providerId) throws CustomException {
-//        log.info("[getPortfolio] 포토폴리오 조회 시작");
-//
-//    }
-
-
     @Override
     public PortfolioResponseDto getPortfolio(int providerId) throws CustomException {
 
@@ -88,15 +81,6 @@ public class PortfolioServiceImpl implements PortfolioService{
         return portfolioResponseDto;
     }
 
-    @Override
-    public void addPortfolio(PortfolioAddDto portfolioAddDto) throws CustomException {
-
-        log.info("[addPortfolio] 포토폴리오 추가 시작");
-
-
-        log.info("[addPortfolio] 포토폴리오 추가 완료");
-
-    }
 
     /**
      *  리뷰 응답 dto 생성

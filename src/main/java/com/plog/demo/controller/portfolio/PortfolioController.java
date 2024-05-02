@@ -41,13 +41,8 @@ public class PortfolioController {
      * TODO 이거 그냥 테스용
      */
     @PostMapping("/upload")
-<<<<<<< HEAD
-    public ResponseEntity<List<UploadFileDto>> addImages(@RequestParam PortfolioAddDto portfolioAddDto) throws IOException {
-        return ResponseEntity.status(HttpStatus.OK).body(fileStore.storeFiles(portfolioAddDto.getPortfolioPhotoPath()));
-=======
     public ResponseEntity<List<UploadFileDto>> addImages(@RequestParam List<MultipartFile> uploadFiles) {
         return ResponseEntity.status(HttpStatus.OK).body(fileStore.storeFiles(uploadFiles));
->>>>>>> 98ab8b56258be6ce43d11b6260c2ef03f282ccc4
     }
 
     @GetMapping("/images/{filename}")

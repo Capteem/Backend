@@ -38,7 +38,7 @@ public class ProviderTable {
 
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Id")
     private IdTable userId;
 }
