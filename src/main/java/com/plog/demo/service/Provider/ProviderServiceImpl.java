@@ -27,13 +27,8 @@ public class ProviderServiceImpl implements ProviderService{
     @Override
     public ProviderDto addProvider(ProviderDto providerDto) throws CustomException{
 
-        Optional<ProviderTable> findProvider = providerTableRepository.findByProviderName(providerDto.getProviderName());
         IdTable idTable = idTableRepository.findById(providerDto.getUserId()).orElseThrow(() -> new CustomException("존재하지 않는 사용자입니다."));
 
-        if(findProvider.isPresent()){
-            log.info("[addProvider] 이미 등록된 제공자입니다.");
-            throw new CustomException("이미 등록된 제공자입니다.");
-        }
         ProviderTable providerTable = ProviderTable.builder()
                 .userId(idTable)
                 .providerName(providerDto.getProviderName())

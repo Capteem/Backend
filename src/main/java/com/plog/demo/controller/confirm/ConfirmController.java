@@ -33,12 +33,12 @@ public class ConfirmController {
     @GetMapping("/check")
     @Operation(summary = "사업자 번호 확인", description = "사업자 번호를 확인합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "사업자 번호 확인 성공",
+            @ApiResponse(responseCode = "200", description = "사업자 번호 확인 로직 성공",
                     content = @Content(
                             schema = @Schema(implementation = Integer.class),
                             examples = {@ExampleObject(value = "1", description = "사업자 번호 일치")}
                     )),
-            @ApiResponse(responseCode = "201", description = "사업자 번호 확인 성공",
+            @ApiResponse(responseCode = "201", description = "사업자 번호 확인 로직 성공",
                     content = @Content(
                             schema = @Schema(implementation = Integer.class),
                             examples = {@ExampleObject(value = "0", description = "사업자 번호 불일치")}
