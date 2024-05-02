@@ -1,5 +1,6 @@
 package com.plog.demo.dto.payment;
 
+import com.plog.demo.dto.reservation.ReservationRequestDto;
 import lombok.*;
 
 @Getter
@@ -8,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class PayInfoDto {
-    private String userId;
     private int purchaseAmount;
     private String purchaseName;
+    private ReservationRequestDto reservationRequestDto;
 }
