@@ -1,5 +1,6 @@
 package com.plog.demo.service.portfolio;
 
+import com.plog.demo.dto.portfolio.PortfolioAddDto;
 import com.plog.demo.dto.portfolio.PortfolioResponseDto;
 import com.plog.demo.dto.portfolio.ReviewResponseDto;
 import com.plog.demo.exception.CustomException;
@@ -66,4 +67,17 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         return portfolioResponseDto;
     }
+
+    @Override
+    public void addPortfolio(PortfolioAddDto portfolioAddDto) throws CustomException {
+
+        log.info("[addPortfolio] 포토폴리오 추가 시작");
+
+
+        portfolioTableRepository.save(portfolioTable);
+
+        log.info("[addPortfolio] 포토폴리오 추가 완료");
+
+    }
+
 }

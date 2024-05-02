@@ -4,6 +4,8 @@ import com.plog.demo.dto.reservation.ReservationRequestDto;
 import com.plog.demo.dto.reservation.ReservationResponseDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.reservation.ReservationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/reservation")
 @Slf4j
+@Tag(name = "Reservation", description = "예약 관련 API")
 public class ReservationController {
 
     /**
@@ -27,6 +30,7 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping("/booking")
+    @Operation(summary = "예약하기", description = "사용자가 예약을 합니다.(API 콜 X)")
     public ResponseEntity<Map<String, String>> makeReservation(@RequestBody ReservationRequestDto reservationRequestDto) throws CustomException {
 
 
@@ -40,6 +44,7 @@ public class ReservationController {
     }
 
     @PostMapping("/list")
+    @Operation(summary = "예약 리스트 조회", description = "사용자의 예약 리스트를 조회합니다.")
     public ResponseEntity<List<ReservationResponseDto>> getReservations(@RequestBody Map<String, String> requestBody) throws CustomException {
 
 

@@ -3,6 +3,7 @@ package com.plog.demo.controller.portfolio;
 import com.plog.demo.common.file.FileStore;
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.file.UploadFileDto;
+import com.plog.demo.dto.portfolio.PortfolioAddDto;
 import com.plog.demo.dto.portfolio.PortfolioResponseDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.portfolio.PortfolioService;
@@ -36,8 +37,8 @@ public class PortfolioController {
      * TODO 이거 그냥 테스용
      */
     @PostMapping("/upload")
-    public ResponseEntity<List<UploadFileDto>> addImages(@RequestParam List<MultipartFile> uploadFiles) throws IOException {
-        return ResponseEntity.status(HttpStatus.OK).body(fileStore.storeFiles(uploadFiles));
+    public ResponseEntity<List<UploadFileDto>> addImages(@RequestParam PortfolioAddDto portfolioAddDto) throws IOException {
+        return ResponseEntity.status(HttpStatus.OK).body(fileStore.storeFiles(portfolioAddDto.getPortfolioPhotoPath()));
     }
 
     /**

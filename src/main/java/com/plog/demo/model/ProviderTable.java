@@ -38,7 +38,7 @@ public class ProviderTable {
 
 
 
-    @OneToOne
-    @JoinColumn(name = "userId")
+    @ManyToOne
+    @JoinColumn(name = "Id")
     private IdTable userId;
 }
