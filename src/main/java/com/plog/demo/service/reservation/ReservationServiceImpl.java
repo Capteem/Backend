@@ -134,8 +134,11 @@ public class ReservationServiceImpl implements ReservationService{
 
     private String getProviderName(int providerId) throws CustomException {
 
-        ProviderTable providerTable = providerTableRepository.findById(providerId)
-                .orElseThrow(() -> new CustomException("서비스 제공자가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value()));
+        ProviderTable providerTable = providerTableRepository.findById(providerId).orElse(null);
+
+        if(providerTable == null){
+            return null;
+        }
 
         return providerTable.getProviderName();
     }

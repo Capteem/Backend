@@ -1,5 +1,6 @@
 package com.plog.demo.repository;
 
+import com.plog.demo.model.ProviderTable;
 import com.plog.demo.model.ReviewTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,5 +12,5 @@ public interface ReviewTableRepository extends JpaRepository<ReviewTable, Intege
     /**
      * ProviderId로 조회
      */
-    List<ReviewTable> findByProviderTable_ProviderId(int providerId);
+    List<ReviewTable> findByProviderId(ProviderTable providerTable);
 }

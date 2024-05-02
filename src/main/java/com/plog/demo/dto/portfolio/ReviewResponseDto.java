@@ -21,5 +21,5 @@ public class ReviewResponseDto {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reviewDate;
 
-    //TODO Comment 정보 추가 해야함
+    private CommentResponseDto commentResponseDto;
 }

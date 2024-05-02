@@ -28,6 +28,6 @@ public class ReviewTable {
 
     @ManyToOne
     @JoinColumn(name = "providerId")
-    private ProviderTable providerTable;
+    private ProviderTable providerId;
 
 }

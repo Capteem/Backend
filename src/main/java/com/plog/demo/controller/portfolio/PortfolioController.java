@@ -9,12 +9,16 @@ import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.portfolio.PortfolioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
 @RestController
@@ -26,10 +30,10 @@ public class PortfolioController {
     private final PortfolioService portfolioService;
     private final FileStore fileStore;
 
-    @GetMapping("/data/{portfolioId}")
-    public ResponseEntity<PortfolioResponseDto> getPortfolio(@PathVariable int portfolioId) throws CustomException {
+    @GetMapping("/data/{providerId}")
+    public ResponseEntity<PortfolioResponseDto> getPortfolio(@PathVariable int providerId) throws CustomException {
 
-        return ResponseEntity.status(HttpStatus.OK).body(portfolioService.getPortfolio(portfolioId));
+        return ResponseEntity.status(HttpStatus.OK).body(portfolioService.getPortfolio(providerId));
     }
 
 
@@ -37,8 +41,18 @@ public class PortfolioController {
      * TODO 이거 그냥 테스용
      */
     @PostMapping("/upload")
+<<<<<<< HEAD
     public ResponseEntity<List<UploadFileDto>> addImages(@RequestParam PortfolioAddDto portfolioAddDto) throws IOException {
         return ResponseEntity.status(HttpStatus.OK).body(fileStore.storeFiles(portfolioAddDto.getPortfolioPhotoPath()));
+=======
+    public ResponseEntity<List<UploadFileDto>> addImages(@RequestParam List<MultipartFile> uploadFiles) {
+        return ResponseEntity.status(HttpStatus.OK).body(fileStore.storeFiles(uploadFiles));
+>>>>>>> 98ab8b56258be6ce43d11b6260c2ef03f282ccc4
+    }
+
+    @GetMapping("/images/{filename}")
+    public ResponseEntity<Resource> downloadImage(@PathVariable String filename) throws MalformedURLException {
+        return ResponseEntity.status(HttpStatus.OK).body(new UrlResource("file:" + fileStore.getFullPath("20240501/", filename)));
     }
 
     /**
@@ -53,7 +67,7 @@ public class PortfolioController {
                 .msg(e.getMessage())
                 .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+        return ResponseEntity.status(e.getResultCode()).body(errorDto);
     }
 
     /**
