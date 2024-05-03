@@ -50,6 +50,28 @@ jobs:
           name: plog
           path: build/libs
 
+      - name: Make Directory
+        run: mkdir -p deploy
+
+      - name: Copy Jar
+        run: cp ./build/libs/*.jar ./deploy
+
+          # appspec.yml 파일 복사
+      - name: Copy appspec.yml
+        run: cp appspec.yml ./deploy
+
+
+          # script files 복사
+      - name: Copy script
+        run: cp ./scripts/*.sh ./deploy
+
+      - name: Make zip file
+        run: zip -r ./plog.zip ./deploy
+        shell: bash
+
+      - name: S3 업로드
+        run: aws s3 cp --region ${{ env.AWS_REGION }} ./plog.zip s3://${{ env.S3_BUCKET_NAME }}
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
