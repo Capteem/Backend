@@ -81,18 +81,6 @@ jobs:
       contents: read
 
     steps:
-      - name: 아티팩트 다운로드
-        uses: actions/download-artifact@v2
-        with:
-          name: plog
-          path: build
-
-      - name: AWS CLI 설치
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip
-          pip3 install awscli --upgrade --user
-
       - name: AWS 액세스 키 및 시크릿 키 설정
         run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
