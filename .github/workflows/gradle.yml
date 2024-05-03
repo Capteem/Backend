@@ -93,6 +93,9 @@ jobs:
           sudo apt-get install -y python3-pip
           pip3 install awscli --upgrade --user
 
+      - name: AWS 액세스 키 및 시크릿 키 설정
+        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: AWS CodeDeploy에 배포
         run: |
           aws deploy create-deployment \
