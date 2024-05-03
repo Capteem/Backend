@@ -68,6 +68,8 @@ jobs:
       - name: Make zip file
         run: zip -r ./plog.zip ./deploy
         shell: bash
+      - name: AWS 액세스 키 및 시크릿 키 설정
+        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: S3 업로드
         run: aws s3 cp --region ${{ env.AWS_REGION }} ./plog.zip s3://${{ env.S3_BUCKET_NAME }}
@@ -90,9 +92,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-pip
           pip3 install awscli --upgrade --user
-
-      - name: AWS 액세스 키 및 시크릿 키 설정
-        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: AWS CodeDeploy에 배포
         run: |
