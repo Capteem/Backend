@@ -11,6 +11,7 @@ public interface PortfolioService {
 
     PortfolioResponseDto getPortfolio(int portfolioId) throws CustomException;
 
+
     List<UploadFileDto> addPortfolios(PortfolioUploadDto portfolioUploadDto) throws CustomException;
 
 
@@ -19,6 +20,7 @@ public interface PortfolioService {
      */
 
     boolean deletePortfolio(int portfolioId) throws CustomException;
+
 
 
 }

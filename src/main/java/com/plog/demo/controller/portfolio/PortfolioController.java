@@ -83,6 +83,7 @@ public class PortfolioController {
     /**
      * TODO 조금 더 수정 필요?
      */
+<<<<<<< HEAD
     @Operation(summary = "포트 폴리오 삭제", description = "포트 폴리오 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
@@ -102,6 +103,11 @@ public class PortfolioController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body("포트폴리오 정상 삭제");
+=======
+    @PostMapping("/upload")
+    public ResponseEntity<List<UploadFileDto>> addImages(@RequestParam List<MultipartFile> uploadFiles) {
+        return ResponseEntity.status(HttpStatus.OK).body(fileStore.storeFiles(uploadFiles));
+>>>>>>> d55dbb595ac9954776a2df52e8fc4d17814e68a1
     }
 
     /**

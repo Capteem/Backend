@@ -3,8 +3,12 @@ package com.plog.demo.controller.payment;
 import com.plog.demo.dto.payment.CancelRequestDto;
 import com.plog.demo.dto.payment.PayApproveResDto;
 import com.plog.demo.dto.payment.PayInfoDto;
+import com.plog.demo.dto.payment.PayReadyResDto;
 import com.plog.demo.service.payment.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +29,7 @@ public class KakaoPayController {
 
     @PostMapping("/ready")
     @Operation(summary = "결제 준비", description = "결제 준비를 진행합니다.")
+    @ApiResponse(responseCode = "200", description = "결제 준비 성공",content = @Content(schema = @Schema(implementation = PayReadyResDto.class)))
     public ResponseEntity<Object> getRedirectUrl(@RequestBody PayInfoDto payInfoDto){
         try{
             return ResponseEntity.status(HttpStatus.OK).body(paymentService.payReady(payInfoDto));

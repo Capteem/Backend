@@ -37,7 +37,9 @@ public class ProviderTable {
     private String providerRepPhotoPath;
 
 
-    @ManyToOne
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Id")
     private IdTable userId;
 }
