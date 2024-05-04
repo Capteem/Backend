@@ -21,5 +21,5 @@ public class ReviewResponseDto {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reviewDate;
 
-    private CommentResponseDto commentResponseDto;
+    private CommentResponseDto comment;
 }

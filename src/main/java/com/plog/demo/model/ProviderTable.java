@@ -37,7 +37,6 @@ public class ProviderTable {
     private String providerRepPhotoPath;
 
 
-
     @ManyToOne
     @JoinColumn(name = "Id")
     private IdTable userId;

@@ -31,6 +31,7 @@ public class ReservationServiceImpl implements ReservationService{
 
     private final ReservationTableRepository reservationTableRepository;
     private final ProviderTableRepository providerTableRepository;
+    private final IdTableRepository idTableRepository;
 
     @Override
     public void deleteReservation(int reservationId) {
@@ -60,9 +61,9 @@ public class ReservationServiceImpl implements ReservationService{
             throw new CustomException("예약 날짜 중복", HttpStatus.CONFLICT.value());
         }
 
-        IdTable user = IdTable.builder()
-                .id(reservationRequestDto.getUserId())
-                .build();
+        IdTable idTable = idTableRepository.findById(reservationRequestDto.getUserId())
+                .orElseThrow(() -> new CustomException("존재하지 않는 회원입니다.", HttpStatus.NOT_FOUND.value()));
+
 
         ReservationTable reservation = ReservationTable.builder()
                 .reservation_camera(reservationRequestDto.getReservationCameraId())
@@ -73,7 +74,7 @@ public class ReservationServiceImpl implements ReservationService{
                 .status(ReservationStatus.WAITING.getCode())
                 .build();
 
-        reservation.setUserId(user);
+        reservation.setUserId(idTable);
 
         try {
             reservationTableRepository.save(reservation);
@@ -91,11 +92,11 @@ public class ReservationServiceImpl implements ReservationService{
         log.info("[getReservationAll] 모든 예약 조회");
 
         // 유저 엔티티 생성
-        IdTable user = IdTable.builder()
-                .id(userId)
-                .build();
+        IdTable idTable = idTableRepository.findById(userId)
+                .orElseThrow(() -> new CustomException("존재하지 않는 회원입니다.", HttpStatus.NOT_FOUND.value()));
 
-        List<ReservationTable> reservations = reservationTableRepository.findByUserId(user);
+
+        List<ReservationTable> reservations = reservationTableRepository.findByUserId(idTable);
 
         //예약 없을 때
         if(reservations.isEmpty()){

@@ -1,5 +1,6 @@
 package com.plog.demo.common.file;
 
+import com.plog.demo.dto.file.DeleteFileDto;
 import com.plog.demo.dto.file.UploadFileDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,14 +19,14 @@ import java.util.UUID;
 
 @Component
 @Slf4j
-public class FileStore {
+public class PortfolioFileStore {
 
-    @Value("${upload.dir}")
-    private String fileDir;
+    @Value("${portfolio.upload.dir}")
+    private String portfolioFileDir;
 
 
     public String getFullPath(String currentDateDir, String filename){
-        return fileDir + currentDateDir + filename;
+        return portfolioFileDir + currentDateDir + filename;
     }
 
     public List<UploadFileDto> storeFiles(List<MultipartFile> multipartFiles) {
@@ -36,7 +37,7 @@ public class FileStore {
         try {
             // 현재 날짜를 포함한 경로 생성 -> 날짜별로 이미지 모을거
             String currentDate = new SimpleDateFormat("yyyyMMdd").format(new Date());
-            String uploadPath = fileDir + currentDate + "/";
+            String uploadPath = portfolioFileDir + currentDate + "/";
 
             // 디렉토리 생성 (존재하지 않을 경우, 모든 path 디렉토리 자동 생성)
             Files.createDirectories(Paths.get(uploadPath));
@@ -55,6 +56,34 @@ public class FileStore {
 
         return uploadFileDtos;
     }
+
+    public boolean deleteFile(DeleteFileDto deleteFileDto){
+        log.info("[deleteFiles] 파일 삭제 로직 시작");
+
+        try{
+            File storedFile = new File(portfolioFileDir + deleteFileDto.getImgPath() + deleteFileDto.getStoredFileName());
+
+            if(storedFile.exists()){
+                if(storedFile.delete()) {
+                    log.info("삭제 성공: {}", storedFile);
+                }else {
+                    log.error("삭제 실패: {}", storedFile);
+                    return false;
+                }
+            }else {
+                log.warn("삭제할 파일이 존재하지 않습니다. {}", storedFile);
+            }
+
+        }catch (Exception e){
+            log.error("파일 삭제 중 에러 발생: {}", e.getMessage());
+            return false;
+        }
+
+
+        log.info("[deleteFiles] 파일 삭제 완료");
+        return true;
+    }
+
 
     private UploadFileDto storeFile(MultipartFile multipartFile, String uploadPath, String currentDate) throws IOException {
 
