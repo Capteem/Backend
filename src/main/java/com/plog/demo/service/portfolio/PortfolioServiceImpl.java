@@ -55,7 +55,7 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         //이미지 url list
         List<String> imgUrls = portfolios.stream()
-                .map(portfolio -> getImgUrl(portfolio))
+                .map(this::getImgUrl)
                 .toList();
 
 
@@ -114,6 +114,19 @@ public class PortfolioServiceImpl implements PortfolioService{
         log.info("[addPortfolio] 포토폴리오 추가 완료");
 
         return storedFiles;
+    }
+
+    @Override
+    public PortfolioUpdateDto updatePortfolio(PortfolioUpdateDto portfolioUpdateDto) throws CustomException {
+
+        PortfolioTable portfolioTable = portfolioTableRepository.findById(portfolioUpdateDto.getPortfolioId())
+                .orElseThrow(
+                        () -> new CustomException("포트폴리오가 존재하지 않습니다", HttpStatus.NOT_FOUND.value())
+                );
+
+        portfolioTable.setPortfolioTitle(portfolioUpdateDto.getPortfolioTitle());
+
+        return portfolioUpdateDto;
     }
 
     @Override

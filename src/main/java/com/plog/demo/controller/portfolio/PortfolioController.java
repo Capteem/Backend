@@ -1,9 +1,12 @@
 package com.plog.demo.controller.portfolio;
 
+
 import com.plog.demo.common.file.PortfolioFileStore;
 import com.plog.demo.dto.ErrorDto;
+import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.file.UploadFileDto;
 import com.plog.demo.dto.portfolio.PortfolioResponseDto;
+import com.plog.demo.dto.portfolio.PortfolioUpdateDto;
 import com.plog.demo.dto.portfolio.PortfolioUploadDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.portfolio.PortfolioService;
@@ -18,7 +21,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,7 +40,6 @@ public class PortfolioController {
 
     private final PortfolioService portfolioService;
     private final PortfolioFileStore portfolioFileStore;
-
 
     @Operation(summary = "포트 폴리오 조회", description = "포트 폴리오 조회합니다.")
     @ApiResponses({
@@ -68,7 +72,7 @@ public class PortfolioController {
 
         for(MultipartFile portfolioUploadFile : portfolioUploadFiles){
             String originalFilename = portfolioUploadFile.getOriginalFilename();
-            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+            String fileExtension = getFileExtension(originalFilename);
 
             if(isNotSupportedExtension(fileExtension)){
                 throw new CustomException("지원하지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
@@ -80,10 +84,6 @@ public class PortfolioController {
     }
 
 
-    /**
-     * TODO 조금 더 수정 필요?
-     */
-<<<<<<< HEAD
     @Operation(summary = "포트 폴리오 삭제", description = "포트 폴리오 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
@@ -94,36 +94,73 @@ public class PortfolioController {
                     content = @Content(schema = @Schema(implementation = ErrorDto.class)))
     })
     @DeleteMapping("/{portfolioId}")
-    public ResponseEntity<String> deletePortfolios(@PathVariable int portfolioId) throws CustomException {
+    public ResponseEntity<SuccessDto> deletePortfolios(@PathVariable int portfolioId) throws CustomException {
 
         boolean isDeleted = portfolioService.deletePortfolio(portfolioId);
 
         if(!isDeleted){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("포트폴리오 제거 중 에러 발생");
+            throw new RuntimeException("파일 저장중 에러 발생");
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("포트폴리오 정상 삭제");
-=======
-    @PostMapping("/upload")
-    public ResponseEntity<List<UploadFileDto>> addImages(@RequestParam List<MultipartFile> uploadFiles) {
-        return ResponseEntity.status(HttpStatus.OK).body(fileStore.storeFiles(uploadFiles));
->>>>>>> d55dbb595ac9954776a2df52e8fc4d17814e68a1
+
+        return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
+
+    }
+
+    @PutMapping("/update")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "포트폴리오 삭제 완료",
+                    content = @Content(schema = @Schema(implementation = PortfolioUpdateDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "포트폴리오 삭제 실패",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class))
+            )
+    })
+    public ResponseEntity<PortfolioUpdateDto> updatePortfolio(@RequestBody PortfolioUpdateDto portfolioUpdateDto) throws CustomException {
+        return ResponseEntity.status(HttpStatus.OK).body(portfolioService.updatePortfolio(portfolioUpdateDto));
     }
 
     /**
-     * TODO 포트폴리오 수정 제목 등
+     * TODO 수정필요
      */
+    @GetMapping("/image/{middleDir}/{fileName}")
+    public ResponseEntity<Resource> getImage(@PathVariable String middleDir, @PathVariable String fileName) throws CustomException, MalformedURLException {
+        String fileExtension = getFileExtension(fileName);
+
+        if(isNotSupportedExtension(fileExtension)){
+            throw new CustomException("지원되지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
+        }
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+
+
+        if(fileExtension.equalsIgnoreCase("jpg")){
+            httpHeaders.setContentType(MediaType.IMAGE_JPEG);
+        }
+
+        if(fileExtension.equalsIgnoreCase("png")){
+            httpHeaders.setContentType(MediaType.IMAGE_PNG);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .headers(httpHeaders)
+                .body(new UrlResource("file:" + portfolioFileStore.getFullPath(middleDir, fileName)));
+    }
 
     private boolean isNotSupportedExtension(String fileExtension) {
         return !fileExtension.equalsIgnoreCase("jpg") && !fileExtension.equalsIgnoreCase("png");
     }
 
-//    @GetMapping("/images/{filename}")
-//    public ResponseEntity<Resource> downloadImage(@PathVariable String filename) throws MalformedURLException {
-//        return ResponseEntity.status(HttpStatus.OK).body(new UrlResource("file:" + portfolioFileStore.getFullPath("20240501/", filename)));
-//    }
-
-
+    private String getFileExtension(String originalFilename) throws CustomException {
+        if(originalFilename == null){
+            throw new CustomException("파일 이름이 존재하지 않습니다.", HttpStatus.BAD_REQUEST.value());
+        }
+        return originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+    }
 
     /**
      * 커스텀 예외
