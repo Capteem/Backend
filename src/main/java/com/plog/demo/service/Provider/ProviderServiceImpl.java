@@ -40,7 +40,7 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerSubArea(providerDto.getProviderSubArea())
                 .providerDetailArea(providerDto.getProviderDetail())
                 .providerPhoneNum(providerDto.getProviderPhoneNum())
-                .providerStatus(0)
+                .providerStatus(1)
                 .build();
 
         try{
