@@ -1,8 +1,11 @@
 package com.plog.demo.controller.provider;
 
+import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.Provider.ProviderAdminDto;
+import com.plog.demo.dto.Provider.ProviderCheckRequestDto;
 import com.plog.demo.dto.Provider.ProviderDto;
 import com.plog.demo.dto.Provider.ProviderResponseDto;
+import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.ProviderTable;
 import com.plog.demo.service.Provider.ProviderService;
@@ -74,6 +77,45 @@ public class ProviderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
+    }
+
+    @PostMapping("/checkProvider")
+    @Operation(summary = "제공자 등록 체크", description = "제공자를 등록하고 체크합니다.")
+    @ApiResponse(responseCode = "200", description = "제공자 등록 성공", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
+    public ResponseEntity<SuccessDto> checkProvider(@ModelAttribute ProviderCheckRequestDto providerCheckRequestDto) throws CustomException {
+        providerService.checkProvider(providerCheckRequestDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
+    }
+
+    /**
+     * 커스텀 예외
+     */
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorDto> customExceptionHandler(CustomException e){
+        log.warn("customExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
+
+        ErrorDto errorDto = ErrorDto.builder()
+                .resultCode(e.getResultCode())
+                .msg(e.getMessage())
+                .build();
+
+        return ResponseEntity.status(e.getResultCode()).body(errorDto);
+    }
+
+    /**
+     * 서버 내부 에러
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorDto> runtimeExceptionHandler(Exception e){
+        log.error("runtimeExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
+
+        ErrorDto errorDto = ErrorDto.builder()
+                .resultCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .msg(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDto);
     }
 
 }

@@ -1,6 +1,6 @@
 package com.plog.demo.common.file;
 
-import com.plog.demo.dto.file.UploadFileDto;
+import com.plog.demo.dto.file.ProviderCheckFileDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -10,41 +10,37 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 @Component
 @Slf4j
-public class FileStore {
+public class ProviderCheckFileStore {
 
-    @Value("${upload.dir}")
-    private String fileDir;
+    @Value("${provider.check.dir}")
+    private String providerCheckFileDir;
 
 
-    public String getFullPath(String currentDateDir, String filename){
-        return fileDir + currentDateDir + filename;
+    public String getFullPath(String fileName){
+        return providerCheckFileDir + fileName;
     }
 
-    public List<UploadFileDto> storeFiles(List<MultipartFile> multipartFiles) {
+    public List<ProviderCheckFileDto> storeFiles(List<MultipartFile> multipartFiles) {
 
         log.info("[storeFiles] 파일 저장 로직 시작");
-        List<UploadFileDto> uploadFileDtos = new ArrayList<>();
+        List<ProviderCheckFileDto> providerCheckFileDtos = new ArrayList<>();
 
         try {
-            // 현재 날짜를 포함한 경로 생성 -> 날짜별로 이미지 모을거
-            String currentDate = new SimpleDateFormat("yyyyMMdd").format(new Date());
-            String uploadPath = fileDir + currentDate + "/";
 
+            String uploadPath = providerCheckFileDir;
             // 디렉토리 생성 (존재하지 않을 경우, 모든 path 디렉토리 자동 생성)
             Files.createDirectories(Paths.get(uploadPath));
 
             for (MultipartFile multipartFile : multipartFiles) {
                 if (!multipartFile.isEmpty()) {
                     //저장로직
-                    uploadFileDtos.add(storeFile(multipartFile, uploadPath, currentDate));
+                    providerCheckFileDtos.add(storeFile(multipartFile, uploadPath));
                 }
             }
         }catch (IOException e){
@@ -53,20 +49,47 @@ public class FileStore {
 
         log.info("[storeFiles] 파일 저장 성공");
 
-        return uploadFileDtos;
+        return providerCheckFileDtos;
     }
 
-    private UploadFileDto storeFile(MultipartFile multipartFile, String uploadPath, String currentDate) throws IOException {
+    public boolean deleteFile(String storedFileName){
+        log.info("[deleteFiles] 파일 삭제 로직 시작");
+
+        try{
+            File storedFile = new File(providerCheckFileDir + storedFileName);
+
+            if(storedFile.exists()){
+                if(storedFile.delete()) {
+                    log.info("삭제 성공: {}", storedFile);
+                }else {
+                    log.error("삭제 실패: {}", storedFile);
+                    return false;
+                }
+            }else {
+                log.warn("삭제할 파일이 존재하지 않습니다. {}", storedFile);
+            }
+
+        }catch (Exception e){
+            log.error("파일 삭제 중 에러 발생: {}", e.getMessage());
+            return false;
+        }
+
+
+        log.info("[deleteFiles] 파일 삭제 완료");
+        return true;
+    }
+
+
+    private ProviderCheckFileDto storeFile(MultipartFile multipartFile, String uploadPath) throws IOException {
 
 
         String originalFileName = multipartFile.getOriginalFilename();
         String storeFileName = createStoreFileName(originalFileName);
         multipartFile.transferTo(new File(uploadPath + storeFileName));
 
-        return UploadFileDto.builder()
-                .originalFileName(originalFileName)
+        return ProviderCheckFileDto.builder()
+                .originFileName(originalFileName)
                 .storeFileName(storeFileName)
-                .dateBasedImagePath(currentDate+"/") // 날짜 폴더 저장
                 .build();
     }
 

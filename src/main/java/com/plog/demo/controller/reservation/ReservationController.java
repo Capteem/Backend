@@ -73,7 +73,7 @@ public class ReservationController {
      */
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorDto> customExceptionHandler(CustomException e){
-        log.info("customExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
+        log.warn("customExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
 
         ErrorDto errorDto = ErrorDto.builder()
                 .resultCode(e.getResultCode())
@@ -88,7 +88,7 @@ public class ReservationController {
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorDto> runtimeExceptionHandler(Exception e){
-        log.info("runtimeExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
+        log.error("runtimeExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
 
         ErrorDto errorDto = ErrorDto.builder()
                 .resultCode(HttpStatus.INTERNAL_SERVER_ERROR.value())

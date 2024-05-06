@@ -13,6 +13,8 @@ public class PortfolioResponseDto {
 
     private int providerId;
 
+    private List<PortfolioDto> portfolioList;
+
     private List<ReviewResponseDto> reviewList;
 
     private List<String> imgUrlList;
