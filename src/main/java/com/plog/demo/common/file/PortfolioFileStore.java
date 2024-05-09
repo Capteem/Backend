@@ -2,8 +2,10 @@ package com.plog.demo.common.file;
 
 import com.plog.demo.dto.file.DeleteFileDto;
 import com.plog.demo.dto.file.UploadFileDto;
+import com.plog.demo.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -117,9 +119,31 @@ public class PortfolioFileStore {
     /**
      * 파일 확장자 이름 추출
      */
-    private String extractExt(String originalFileName){
+    public String extractExt(String originalFileName){
         int pos = originalFileName.lastIndexOf(".");
         return originalFileName.substring(pos+1);
     }
 
+    /**
+     * 파일 확장자 jpg or png만 허용
+     */
+    public boolean isNotSupportedExtension(String fileExtension) {
+        return !fileExtension.equalsIgnoreCase("jpg") && !fileExtension.equalsIgnoreCase("png");
+    }
+
+    public void validateFiles(List<MultipartFile> files) throws CustomException {
+        for(MultipartFile file : files){
+            String originalFilename = file.getOriginalFilename();
+
+            if(originalFilename == null){
+                throw new CustomException("파일 이름이 존재하지 않습니다.", HttpStatus.BAD_REQUEST.value());
+            }
+
+            String fileExtension = extractExt(originalFilename);
+
+            if(isNotSupportedExtension(fileExtension)){
+                throw new CustomException("지원하지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
+            }
+        }
+    }
 }

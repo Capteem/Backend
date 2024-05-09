@@ -70,18 +70,14 @@ public class PortfolioController {
 
         List<MultipartFile> portfolioUploadFiles = portfolioUploadDto.getPortfolioUploadFiles();
 
-        for(MultipartFile portfolioUploadFile : portfolioUploadFiles){
-            String originalFilename = portfolioUploadFile.getOriginalFilename();
-            String fileExtension = getFileExtension(originalFilename);
 
-            if(isNotSupportedExtension(fileExtension)){
-                throw new CustomException("지원하지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
-            }
-        }
+        portfolioFileStore.validateFiles(portfolioUploadFiles);
 
 
         return ResponseEntity.status(HttpStatus.OK).body(portfolioService.addPortfolios(portfolioUploadDto));
     }
+
+
 
 
     @Operation(summary = "포트 폴리오 삭제", description = "포트 폴리오 삭제합니다.")
@@ -99,9 +95,8 @@ public class PortfolioController {
         boolean isDeleted = portfolioService.deletePortfolio(portfolioId);
 
         if(!isDeleted){
-            throw new RuntimeException("파일 저장중 에러 발생");
+            throw new RuntimeException("파일 삭제중 에러 발생");
         }
-
 
         return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
 
@@ -129,9 +124,9 @@ public class PortfolioController {
      */
     @GetMapping("/image/{middleDir}/{fileName}")
     public ResponseEntity<Resource> getImage(@PathVariable String middleDir, @PathVariable String fileName) throws CustomException, MalformedURLException {
-        String fileExtension = getFileExtension(fileName);
+        String fileExtension = portfolioFileStore.extractExt(fileName);
 
-        if(isNotSupportedExtension(fileExtension)){
+        if(portfolioFileStore.isNotSupportedExtension(fileExtension)){
             throw new CustomException("지원되지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
         }
 
@@ -151,16 +146,6 @@ public class PortfolioController {
                 .body(new UrlResource("file:" + portfolioFileStore.getFullPath(middleDir, fileName)));
     }
 
-    private boolean isNotSupportedExtension(String fileExtension) {
-        return !fileExtension.equalsIgnoreCase("jpg") && !fileExtension.equalsIgnoreCase("png");
-    }
-
-    private String getFileExtension(String originalFilename) throws CustomException {
-        if(originalFilename == null){
-            throw new CustomException("파일 이름이 존재하지 않습니다.", HttpStatus.BAD_REQUEST.value());
-        }
-        return originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
-    }
 
     /**
      * 커스텀 예외
