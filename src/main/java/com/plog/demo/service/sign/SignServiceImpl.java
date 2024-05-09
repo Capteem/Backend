@@ -1,5 +1,6 @@
 package com.plog.demo.service.sign;
 
+import com.plog.demo.common.UserStatus;
 import com.plog.demo.config.JwtTokenProvider;
 import com.plog.demo.dto.sign.LoginResponseDto;
 import com.plog.demo.dto.user.UserDto;
@@ -48,6 +49,7 @@ public class SignServiceImpl implements SignService{
                 .nickname(userDto.getNickname())
                 .password(passwordEncoder.encode(userDto.getPassword()))
                 .role("USER")
+                .status(UserStatus.ACTIVE.getCode())
                 .build();
 
         try {
@@ -79,16 +81,24 @@ public class SignServiceImpl implements SignService{
             throw new CustomException("패스워드 불일치", HttpStatus.BAD_REQUEST.value());
         }
 
+        if(user.get().getStatus() == UserStatus.STOP.getCode()){
+            log.info("[login] 유저 비활성화");
+            throw new CustomException("정지된 유저입니다.", HttpStatus.UNAUTHORIZED.value());
+        }
+
+        if(user.get().getStatus() == UserStatus.BANNED.getCode()){
+            log.info("[login] 유저 탈퇴");
+            throw new CustomException("탈퇴된 유저입니다.", HttpStatus.UNAUTHORIZED.value());
+        }
+
         log.info("[login] 패스워드 일치");
 
         String accessToken = jwtTokenProvider.createAccessToken(userId);
         String refreshToken = jwtTokenProvider.createRefreshToken();
 
-        LoginResponseDto loginResponseDto = LoginResponseDto.builder()
+        return LoginResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
-
-        return loginResponseDto;
     }
 }

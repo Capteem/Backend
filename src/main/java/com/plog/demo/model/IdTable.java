@@ -27,8 +27,10 @@ public class IdTable {
     private String nickname;
     @Column
     private String role;
+    @Column
+    private int status;
 
-    public IdTable(String id, String name, String password, String email, String phonenum, String nickname, String role) {
+    public IdTable(String id, String name, String password, String email, String phonenum, String nickname, String role, int status) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -36,5 +38,6 @@ public class IdTable {
         this.phonenum = phonenum;
         this.nickname = nickname;
         this.role = role;
+        this.status = status;
     }
 }
