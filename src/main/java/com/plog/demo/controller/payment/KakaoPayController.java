@@ -1,10 +1,8 @@
 package com.plog.demo.controller.payment;
 
-import com.plog.demo.dto.payment.CancelRequestDto;
-import com.plog.demo.dto.payment.PayApproveResDto;
-import com.plog.demo.dto.payment.PayInfoDto;
-import com.plog.demo.dto.payment.PayReadyResDto;
+import com.plog.demo.dto.payment.*;
 import com.plog.demo.service.payment.PaymentService;
+import com.plog.demo.service.reservation.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class KakaoPayController {
 
     private final PaymentService paymentService;
+    private final ReservationService reservationService;
 
     @PostMapping("/ready")
     @Operation(summary = "결제 준비", description = "결제 준비를 진행합니다.")
@@ -44,6 +43,7 @@ public class KakaoPayController {
     public ResponseEntity<Object> getApprove(@RequestParam("userId") String id, @RequestParam("pg_token") String pgToken){
         try{
             PayApproveResDto payApproveResDto = paymentService.getApprove(id, pgToken);
+            log.info(id + " 결제 승인 완료");
             return ResponseEntity.status(HttpStatus.OK).body(payApproveResDto);
         } catch (Exception e){
             log.info("[getApprove] error");
@@ -55,7 +55,8 @@ public class KakaoPayController {
     @Operation(summary = "환불", description = "환불을 진행합니다.")
     public ResponseEntity<Object> getRefund(@RequestBody CancelRequestDto cancelRequestDto){
         try{
-            return ResponseEntity.status(HttpStatus.OK).body(paymentService.getCancelApprove(cancelRequestDto.getTid(), cancelRequestDto.getUserId()));
+            PayCancelDto approveCancel = paymentService.getCancelApprove(cancelRequestDto.getTid(), cancelRequestDto.getUserId());
+            return ResponseEntity.status(HttpStatus.OK).body(approveCancel);
         } catch (Exception e){
             log.info("[getRefund] error");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("환불 중 오류가 발생했습니다.");

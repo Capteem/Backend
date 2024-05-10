@@ -38,10 +38,6 @@ public class ReservationServiceImpl implements ReservationService{
 
         log.info("[deleteReservation] 예약 삭제를 시작합니다.");
         ReservationTable reservationTable = reservationTableRepository.findById(reservationId).get();
-        if(reservationTable == null){
-            log.info("[deleteReservation] 예약이 존재하지 않습니다.");
-            return;
-        }
         try{
             reservationTable.setStatus(ReservationStatus.CANCELLED.getCode());
             reservationTableRepository.save(reservationTable);

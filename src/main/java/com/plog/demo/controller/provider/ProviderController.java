@@ -79,6 +79,17 @@ public class ProviderController {
 
     }
 
+    @GetMapping("/confirmed")
+    @Operation(summary = "확인된 제공자 목록", description = "확인된 제공자 목록을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "확인된 제공자 목록 조회 성공", content = @Content(schema = @Schema(implementation = ProviderTable.class)))
+    public ResponseEntity<List<ProviderTable>> getConfirmedProviderList() throws CustomException {
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(providerService.getConfirmedProviderList());
+        } catch (CustomException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
     @PostMapping("/checkProvider")
     @Operation(summary = "제공자 등록 체크", description = "제공자를 등록하고 체크합니다.")
     @ApiResponse(responseCode = "200", description = "제공자 등록 성공", content = @Content(schema = @Schema(implementation = SuccessDto.class)))

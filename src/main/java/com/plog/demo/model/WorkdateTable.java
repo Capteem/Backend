@@ -26,4 +26,5 @@ public class WorkdateTable {
     @ManyToOne
     @JoinColumn(name="providerId")
     private ProviderTable providerId;
+
 }

@@ -2,12 +2,14 @@ package com.plog.demo.model;
 
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @Entity
+@AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class ComplaintTable {
@@ -22,17 +24,15 @@ public class ComplaintTable {
     private String complaintContent;
     @Column
     private String complaintDate;
+    @Column
+    private int complaintType;
 
     @ManyToOne
     @JoinColumn(name = "id")
     private IdTable userId;
 
-    public ComplaintTable(int complaintId, String complaintTitle, int complaintStatus, String complaintContent, String complaintDate, IdTable userId) {
-        this.complaintId = complaintId;
-        this.complaintTitle = complaintTitle;
-        this.complaintStatus = complaintStatus;
-        this.complaintContent = complaintContent;
-        this.complaintDate = complaintDate;
-        this.userId = userId;
-    }
+    @OneToOne
+    @JoinColumn(name = "complaintAnswerId")
+    private ComplaintAnswerTable complaintAnswerId;
+
 }

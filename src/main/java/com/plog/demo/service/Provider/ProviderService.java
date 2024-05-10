@@ -17,6 +17,8 @@ public interface ProviderService {
 
     List<ProviderAdminDto> getProviderList() throws CustomException;
 
+    List<ProviderTable> getConfirmedProviderList() throws CustomException;
+
     void checkProvider(ProviderCheckRequestDto providerCheckRequestDto) throws CustomException;
 
 }

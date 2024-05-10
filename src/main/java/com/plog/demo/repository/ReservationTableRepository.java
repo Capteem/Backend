@@ -1,5 +1,6 @@
 package com.plog.demo.repository;
 
+import com.plog.demo.dto.reservation.ReservationResponseDto;
 import com.plog.demo.model.IdTable;
 import com.plog.demo.model.ReservationTable;
 import jakarta.persistence.LockModeType;
@@ -35,5 +36,6 @@ public interface ReservationTableRepository extends JpaRepository<ReservationTab
             @Param("endDate") LocalDateTime endDate
             );
 
+    List<ReservationTable> findAllByUserId(IdTable idTable);
 }
 
