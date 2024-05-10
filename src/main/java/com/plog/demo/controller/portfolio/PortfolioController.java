@@ -33,7 +33,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/portfolio")
-@Tag(name = "Payment", description = "포트폴리오 API")
+@Tag(name = "Portfolio", description = "포트폴리오 API")
 public class PortfolioController {
 
     private final PortfolioService portfolioService;

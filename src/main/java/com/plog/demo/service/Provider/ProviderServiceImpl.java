@@ -1,5 +1,8 @@
 package com.plog.demo.service.Provider;
 
+
+import com.plog.demo.common.UserStatus;
+
 import com.plog.demo.dto.Provider.ProviderAdminDto;
 import com.plog.demo.dto.Provider.ProviderDto;
 import com.plog.demo.dto.Provider.ProviderResponseDto;
@@ -10,6 +13,7 @@ import com.plog.demo.model.IdTable;
 import com.plog.demo.model.ProviderTable;
 import com.plog.demo.repository.IdTableRepository;
 import com.plog.demo.repository.ProviderTableRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,14 +43,14 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerSubArea(providerDto.getProviderSubArea())
                 .providerDetailArea(providerDto.getProviderDetail())
                 .providerPhoneNum(providerDto.getProviderPhoneNum())
-                .providerStatus(1)
+                .providerStatus(UserStatus.STOP.getCode())
                 .build();
 
         try{
             log.info("[addProvider] save제공자 저장 로직 시작");
             providerTableRepository.save(providerTable);
         }catch (Exception e){
-            log.info("[addProvider] db데이터 베이스 접근 오류");
+            log.error("[addProvider] db데이터 베이스 접근 오류");
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
         }
 
@@ -66,20 +70,20 @@ public class ProviderServiceImpl implements ProviderService{
                     .providerStatus(providerTable.getProviderStatus())
                     .build()).toList();
             if(providerTables.isEmpty()){
-                log.info("[getProvider] 제공자가 존재하지 않습니다.");
+                log.error("[getProvider] 제공자가 존재하지 않습니다.");
                 throw new CustomException("제공자가 존재하지 않습니다.");
             }
             return providerDtos;
         } catch (Exception e){
-            log.info("[getProvider] db데이터 베이스 접근 오류");
+            log.error("[getProvider] db데이터 베이스 접근 오류");
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
         }
     }
 
     @Override
-    public List<ProviderAdminDto> getProviderList() throws CustomException{
+    public List<ProviderAdminDto> getProviderList() throws CustomException {
 
-        try{
+        try {
             log.info("[getProviderList] 제공자 리스트 조회 로직 시작");
             List<ProviderTable> providerTables = providerTableRepository.findAll();
             List<ProviderAdminDto> providerDtos = providerTables.stream().map(providerTable -> ProviderAdminDto.builder()
@@ -90,13 +94,30 @@ public class ProviderServiceImpl implements ProviderService{
                     .providerPhoneNum(providerTable.getProviderPhoneNum())
                     .providerId(providerTable.getProviderId())
                     .build()).toList();
-            if(providerTables.isEmpty()){
-                log.info("[getProviderList] 제공자가 존재하지 않습니다.");
+            if (providerTables.isEmpty()) {
+                log.error("[getProviderList] 제공자가 존재하지 않습니다.");
                 throw new CustomException("제공자가 존재하지 않습니다.");
             }
             return providerDtos;
-        } catch (Exception e){
-            log.info("[getProviderList] db데이터 베이스 접근 오류");
+        } catch (Exception e) {
+            log.error("[getProviderList] db데이터 베이스 접근 오류");
+            throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    @Override
+    @Operation(summary = "허가된 제공자 목록 조회", description = "허가된 제공자 목록을 조회합니다.")
+    public List<ProviderTable> getConfirmedProviderList() throws CustomException {
+        try {
+            log.info("[getConfirmedProviderList] 제공자 리스트 조회 로직 시작");
+            List<ProviderTable> providerTables = providerTableRepository.findByProviderStatus(UserStatus.ACTIVE.getCode());
+            if (providerTables.isEmpty()) {
+                log.error("[getConfirmedProviderList] 제공자가 존재하지 않습니다.");
+                throw new CustomException("제공자가 존재하지 않습니다.");
+            }
+            return providerTables;
+        } catch (Exception e) {
+            log.error("[getConfirmedProviderList] db데이터 베이스 접근 오류");
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
         }
     }

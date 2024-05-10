@@ -26,7 +26,11 @@ public class PaymentTable {
     @Column
     private int paymentTaxFreeAmount;
 
-    @ManyToOne
+    @OneToOne
+    @JoinColumn(name = "reservationId")
+    private ReservationTable reservationId;
+
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "id")
     private IdTable userId;
 }

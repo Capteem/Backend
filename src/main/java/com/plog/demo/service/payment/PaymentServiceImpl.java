@@ -1,23 +1,30 @@
 package com.plog.demo.service.payment;
 
 import com.plog.demo.dto.payment.*;
+import com.plog.demo.dto.reservation.ReservationResponseDto;
+import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.IdTable;
 import com.plog.demo.model.PaymentTable;
+import com.plog.demo.model.ReservationTable;
 import com.plog.demo.repository.IdTableRepository;
 import com.plog.demo.repository.PaymentTableRepository;
+import com.plog.demo.repository.ReservationTableRepository;
 import com.plog.demo.service.reservation.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 @Service
@@ -29,6 +36,7 @@ public class PaymentServiceImpl implements PaymentService{
     private final IdTableRepository idTableRepository;
     private final PaymentTableRepository paymentTableRepository;
     private final ReservationService reservationService;
+    private final ReservationTableRepository reservationTableRepository;
 
     @Value("${pay.admin_key}")
     private String adminKey;
@@ -74,16 +82,29 @@ public class PaymentServiceImpl implements PaymentService{
             throw new RuntimeException("예약 정보 저장 중 오류가 발생했습니다.", e);
         }
 
+        List<ReservationTable> reservationTables;
+        ReservationTable currentReservation;
+        try{
+            reservationTables = reservationTableRepository.findAllByUserId(idTable);
+            currentReservation = reservationTables.get(reservationTables.size() - 1);
+        } catch (Exception e){
+            log.info("[payReady] 예약 정보 조회 중 오류 발생");
+            throw new RuntimeException("예약 정보 조회 중 오류가 발생했습니다.", e);
+        }
+
         try {
             PaymentTable paymentTable = PaymentTable.builder()
                     .paymentId(paymentId)
                     .paymentAmount(payInfoDto.getPurchaseAmount())
                     .paymentTaxFreeAmount(0)
+                    .reservationId(currentReservation)
                     .userId(idTable)
                     .build();
             paymentTableRepository.save(paymentTable);
         } catch (Exception e) {
             log.info("[payReady] 데이터 베이스 접근 오류");
+            currentReservation.setUserId(null);
+            reservationTableRepository.delete(currentReservation);
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
         }
 
@@ -91,15 +112,18 @@ public class PaymentServiceImpl implements PaymentService{
     }
 
     @Override
-    public PayApproveResDto getApprove(String id, String pgToken) throws Exception {
+    public PayApproveResDto getApprove(String id, String pgToken) throws CustomException {
 
+        List<PaymentTable> paymentTables;
         PaymentTable paymentTable;
         IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("[getApprove] no such id exists."));
         try{
-            paymentTable = paymentTableRepository.findByUserId(idTable);
+            paymentTables = paymentTableRepository.findAllByUserId(idTable);
+            paymentTable = paymentTables.get(paymentTables.size() - 1);
         } catch (Exception e){
             log.info("[getApprove] paymentTable is null");
-            throw new RuntimeException("결제 정보가 존재하지 않습니다.", e);
+            reservationTableRepository.delete(reservationTableRepository.findAllByUserId(idTable).get(reservationTableRepository.findAllByUserId(idTable).size() - 1));
+            throw new CustomException("결제 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -119,17 +143,26 @@ public class PaymentServiceImpl implements PaymentService{
         try{
             payApproveResDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayApproveResDto.class);
         }catch (Exception e){
-            log.info("[getApprove] failure to get approve");
-            throw new RuntimeException("failure to get approve", e);
+            log.error("[getApprove] failure to get approve");
+            throw new CustomException("failure to get approve", HttpStatus.UNAUTHORIZED.value());
         }
 
         return payApproveResDto;
     }
 
     @Override
-    public PayCancelDto getCancelApprove(String tid, String id) throws Exception{
+    public PayCancelDto getCancelApprove(String tid, String id) throws CustomException{
         IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
-        PaymentTable paymentTable = paymentTableRepository.findByPaymentId(tid);
+        PaymentTable paymentTable;
+        try{
+            paymentTable = paymentTableRepository.findByPaymentId(tid);
+            if(paymentTable.getUserId() != idTable){
+                throw new CustomException("결제 정보와 유저가 다릅니다.", HttpStatus.BAD_REQUEST.value());
+            }
+        } catch (Exception e){
+            log.error("[getCancelApprove] paymentTable is null");
+            throw new CustomException("결제 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+        }
         PayCancelDto payCancelDto;
 
         HttpHeaders headers = new HttpHeaders();
@@ -145,10 +178,14 @@ public class PaymentServiceImpl implements PaymentService{
         RestTemplate restTemplate = new RestTemplate();
         try{
             payCancelDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayCancelDto.class);
+            ReservationTable reservationTable = reservationTableRepository.findAllByUserId(idTable).get(reservationTableRepository.findAllByUserId(idTable).size() - 1);
+            paymentTableRepository.deleteById(paymentTable.getPaymentId());
+            reservationTable.setUserId(null);
+            reservationTableRepository.deleteById(reservationTable.getReservationId());
         }catch (Exception e){
-            log.info("[getCancelApprove] failure to get cancel approve");
-            throw new RuntimeException("failure to get cancel approve", e);
+            log.error("[getCancelApprove] failure to get cancel approve");
+            throw new CustomException("failure to get cancel approve", HttpStatus.UNAUTHORIZED.value());
         }
-        return restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayCancelDto.class);
+        return payCancelDto;
     }
 }

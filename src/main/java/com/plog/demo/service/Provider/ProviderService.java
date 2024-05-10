@@ -1,7 +1,6 @@
 package com.plog.demo.service.Provider;
 
 import com.plog.demo.dto.Provider.ProviderAdminDto;
-import com.plog.demo.dto.Provider.ProviderCheckRequestDto;
 import com.plog.demo.dto.Provider.ProviderDto;
 import com.plog.demo.dto.Provider.ProviderResponseDto;
 import com.plog.demo.exception.CustomException;
@@ -16,6 +15,9 @@ public interface ProviderService {
     List<ProviderResponseDto> getSelectedProvider(String userId) throws CustomException;
 
     List<ProviderAdminDto> getProviderList() throws CustomException;
+
+
+    List<ProviderTable> getConfirmedProviderList() throws CustomException;
 
 
 }

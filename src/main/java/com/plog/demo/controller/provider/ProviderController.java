@@ -8,6 +8,7 @@ import com.plog.demo.dto.Provider.ProviderDto;
 import com.plog.demo.dto.Provider.ProviderResponseDto;
 import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.exception.CustomException;
+import com.plog.demo.model.ProviderTable;
 import com.plog.demo.service.Provider.ProviderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -78,6 +79,17 @@ public class ProviderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
+    }
+
+    @GetMapping("/confirmed")
+    @Operation(summary = "확인된 제공자 목록", description = "확인된 제공자 목록을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "확인된 제공자 목록 조회 성공", content = @Content(schema = @Schema(implementation = ProviderTable.class)))
+    public ResponseEntity<List<ProviderTable>> getConfirmedProviderList() throws CustomException {
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(providerService.getConfirmedProviderList());
+        } catch (CustomException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
 

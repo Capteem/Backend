@@ -12,4 +12,8 @@ import java.util.Optional;
 public interface ProviderTableRepository extends JpaRepository<ProviderTable, Integer> {
     Optional<ProviderTable> findByProviderName(String providerName);
     List<ProviderTable> findAllByUserId(IdTable userId);
+
+    Optional<ProviderTable> findByUserId(IdTable idTable);
+
+    List<ProviderTable> findByProviderStatus(int providerStatus);
 }
