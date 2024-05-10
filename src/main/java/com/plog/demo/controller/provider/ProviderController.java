@@ -1,5 +1,6 @@
 package com.plog.demo.controller.provider;
 
+import com.plog.demo.common.file.ProviderCheckFileStore;
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.Provider.ProviderAdminDto;
 import com.plog.demo.dto.Provider.ProviderCheckRequestDto;
@@ -7,7 +8,6 @@ import com.plog.demo.dto.Provider.ProviderDto;
 import com.plog.demo.dto.Provider.ProviderResponseDto;
 import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.exception.CustomException;
-import com.plog.demo.model.ProviderTable;
 import com.plog.demo.service.Provider.ProviderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,11 +16,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.apache.bcel.classfile.Module;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +36,7 @@ import java.util.Map;
 public class ProviderController {
 
     private final ProviderService providerService;
+    private final ProviderCheckFileStore providerCheckFileStore;
 
     @PostMapping("/service")
     @Operation(summary = "서비스 등록", description = "서비스를 등록합니다.")
@@ -94,6 +95,11 @@ public class ProviderController {
     @Operation(summary = "제공자 등록 체크", description = "제공자를 등록하고 체크합니다.")
     @ApiResponse(responseCode = "200", description = "제공자 등록 성공", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
     public ResponseEntity<SuccessDto> checkProvider(@ModelAttribute ProviderCheckRequestDto providerCheckRequestDto) throws CustomException {
+
+        List<MultipartFile> providerCheckFiles = providerCheckRequestDto.getProviderCheckFiles();
+
+        providerCheckFileStore.validateFiles(providerCheckFiles);
+
         providerService.checkProvider(providerCheckRequestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());

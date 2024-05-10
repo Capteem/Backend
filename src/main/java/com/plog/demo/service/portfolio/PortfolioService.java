@@ -16,14 +16,10 @@ public interface PortfolioService {
     List<UploadFileDto> addPortfolios(PortfolioUploadDto portfolioUploadDto) throws CustomException;
 
 
-    /**
-     * TODO 포트폴리오 수정 제목 등
-     */
+
     PortfolioUpdateDto updatePortfolio(PortfolioUpdateDto portfolioUpdateDto) throws CustomException;
 
-    /**
-     * TODO 포트폴리오 이미지 보기 등
-     */
+
 
     boolean deletePortfolio(int portfolioId) throws CustomException;
 
