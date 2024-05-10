@@ -26,7 +26,4 @@ public class CommentTable {
     @Column
     private LocalDateTime CommentDate;
 
-    @OneToOne
-    @JoinColumn(name="reviewId")
-    private ReviewTable reviewId;
 }

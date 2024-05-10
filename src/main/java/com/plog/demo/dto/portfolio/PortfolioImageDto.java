@@ -1,16 +1,15 @@
 package com.plog.demo.dto.portfolio;
 
-
 import lombok.*;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PortfolioUpdateDto {
+@Builder
+public class PortfolioImageDto {
 
-    private int portfolioId;
+    private String fileExtension;
 
-    private String portfolioTitle;
+    private String imgFullPath;
 }

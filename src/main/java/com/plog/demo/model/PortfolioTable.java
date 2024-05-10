@@ -18,9 +18,6 @@ public class PortfolioTable {
     private int portfolioId;
 
     @Column
-    private String portfolioTitle;
-
-    @Column
     private String storedFileName;
 
     //서버에 저장할 날짜 디렉토리

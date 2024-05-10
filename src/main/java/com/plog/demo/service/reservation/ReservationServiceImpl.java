@@ -6,10 +6,10 @@ import com.plog.demo.dto.reservation.ReservationRequestDto;
 import com.plog.demo.dto.reservation.ReservationResponseDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.IdTable;
-import com.plog.demo.model.ProviderTable;
+
 import com.plog.demo.model.ReservationTable;
 import com.plog.demo.repository.IdTableRepository;
-import com.plog.demo.repository.ProviderTableRepository;
+
 import com.plog.demo.repository.ReservationTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -30,7 +29,6 @@ import java.util.Optional;
 public class ReservationServiceImpl implements ReservationService{
 
     private final ReservationTableRepository reservationTableRepository;
-    private final ProviderTableRepository providerTableRepository;
     private final IdTableRepository idTableRepository;
 
     @Override
@@ -95,7 +93,6 @@ public class ReservationServiceImpl implements ReservationService{
         IdTable idTable = idTableRepository.findById(userId)
                 .orElseThrow(() -> new CustomException("존재하지 않는 회원입니다.", HttpStatus.NOT_FOUND.value()));
 
-
         List<ReservationTable> reservations = reservationTableRepository.findByUserId(idTable);
 
         //예약 없을 때
@@ -119,9 +116,9 @@ public class ReservationServiceImpl implements ReservationService{
 
             ReservationResponseDto reservationResponseDto = ReservationResponseDto.builder()
                     .reservationTableId(reservation.getReservationId())
-                    .reservationCameraName(getProviderName(reservation.getReservation_camera()))
-                    .reservationStudioName(getProviderName(reservation.getReservation_studio()))
-                    .reservationHairName(getProviderName(reservation.getReservation_hair()))
+                    .reservationCameraId(reservation.getReservation_camera())
+                    .reservationStudioId(reservation.getReservation_studio())
+                    .reservationHairId(reservation.getReservation_hair())
                     .reservationStartDate(reservation.getReservation_start_date())
                     .reservationEndDate(reservation.getReservation_end_date())
                     .status(reservation.getStatus())
@@ -133,16 +130,6 @@ public class ReservationServiceImpl implements ReservationService{
         return reservationResponseDtoList;
     }
 
-    private String getProviderName(int providerId) throws CustomException {
-
-        ProviderTable providerTable = providerTableRepository.findById(providerId).orElse(null);
-
-        if(providerTable == null){
-            return null;
-        }
-
-        return providerTable.getProviderName();
-    }
 
 
     private boolean isOverlappingReservation(ReservationRequestDto reservationRequestDto) {

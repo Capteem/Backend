@@ -31,6 +31,11 @@ public class PortfolioFileStore {
         return portfolioFileDir + fileMiddleDir + "/" + fileName;
     }
 
+    //임시
+    public String getFileDirPath(){
+        return portfolioFileDir;
+    }
+
     public List<UploadFileDto> storeFiles(List<MultipartFile> multipartFiles) {
 
         log.info("[storeFiles] 파일 저장 로직 시작");

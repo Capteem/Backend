@@ -80,19 +80,6 @@ public class ProviderController {
 
     }
 
-    @PostMapping("/checkProvider")
-    @Operation(summary = "제공자 등록 체크", description = "제공자를 등록하고 체크합니다.")
-    @ApiResponse(responseCode = "200", description = "제공자 등록 성공", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
-    public ResponseEntity<SuccessDto> checkProvider(@ModelAttribute ProviderCheckRequestDto providerCheckRequestDto) throws CustomException {
-
-        List<MultipartFile> providerCheckFiles = providerCheckRequestDto.getProviderCheckFiles();
-
-        providerCheckFileStore.validateFiles(providerCheckFiles);
-
-        providerService.checkProvider(providerCheckRequestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
-    }
 
     /**
      * 커스텀 예외

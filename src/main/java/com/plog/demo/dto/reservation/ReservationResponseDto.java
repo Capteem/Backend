@@ -14,11 +14,11 @@ public class ReservationResponseDto {
 
     private int reservationTableId;
 
-    private String reservationCameraName;
+    private int reservationCameraId;
 
-    private String reservationStudioName;
+    private int reservationStudioId;
 
-    private String reservationHairName;
+    private int reservationHairId;
 
     private int status;
 

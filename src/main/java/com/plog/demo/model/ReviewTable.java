@@ -2,6 +2,8 @@ package com.plog.demo.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.time.LocalDateTime;
 
@@ -29,5 +31,9 @@ public class ReviewTable {
     @ManyToOne
     @JoinColumn(name = "providerId")
     private ProviderTable providerId;
+
+    @OneToOne
+    @JoinColumn(name = "commentId")
+    private CommentTable comment;
 
 }

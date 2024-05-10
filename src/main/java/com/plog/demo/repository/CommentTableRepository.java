@@ -10,5 +10,4 @@ import java.util.Optional;
 @Repository
 public interface CommentTableRepository extends JpaRepository<CommentTable, Integer> {
 
-    Optional<CommentTable> findByReviewId(ReviewTable reviewTable);
 }

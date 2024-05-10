@@ -13,7 +13,7 @@ public class PortfolioResponseDto {
 
     private int providerId;
 
-    private List<PortfolioDto> portfolioList;
+    private List<Integer> portfolioIdList;
 
     private List<ReviewResponseDto> reviewList;
 

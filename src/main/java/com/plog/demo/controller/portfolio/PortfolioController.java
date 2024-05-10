@@ -5,9 +5,7 @@ import com.plog.demo.common.file.PortfolioFileStore;
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.file.UploadFileDto;
-import com.plog.demo.dto.portfolio.PortfolioResponseDto;
-import com.plog.demo.dto.portfolio.PortfolioUpdateDto;
-import com.plog.demo.dto.portfolio.PortfolioUploadDto;
+import com.plog.demo.dto.portfolio.*;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.portfolio.PortfolioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,9 +24,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.net.MalformedURLException;
+
 import java.util.List;
 
 @RestController
@@ -39,7 +37,6 @@ import java.util.List;
 public class PortfolioController {
 
     private final PortfolioService portfolioService;
-    private final PortfolioFileStore portfolioFileStore;
 
     @Operation(summary = "포트 폴리오 조회", description = "포트 폴리오 조회합니다.")
     @ApiResponses({
@@ -67,11 +64,6 @@ public class PortfolioController {
     })
     @PostMapping("/upload")
     public ResponseEntity<List<UploadFileDto>> addPortfolios(@ModelAttribute PortfolioUploadDto portfolioUploadDto) throws CustomException {
-
-        List<MultipartFile> portfolioUploadFiles = portfolioUploadDto.getPortfolioUploadFiles();
-
-
-        portfolioFileStore.validateFiles(portfolioUploadFiles);
 
 
         return ResponseEntity.status(HttpStatus.OK).body(portfolioService.addPortfolios(portfolioUploadDto));
@@ -102,50 +94,77 @@ public class PortfolioController {
 
     }
 
-    @PutMapping("/update")
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "포트폴리오 삭제 완료",
-                    content = @Content(schema = @Schema(implementation = PortfolioUpdateDto.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "포트폴리오 삭제 실패",
-                    content = @Content(schema = @Schema(implementation = ErrorDto.class))
-            )
-    })
-    public ResponseEntity<PortfolioUpdateDto> updatePortfolio(@RequestBody PortfolioUpdateDto portfolioUpdateDto) throws CustomException {
-        return ResponseEntity.status(HttpStatus.OK).body(portfolioService.updatePortfolio(portfolioUpdateDto));
-    }
 
     /**
      * TODO 수정필요
      */
     @GetMapping("/image/{middleDir}/{fileName}")
     public ResponseEntity<Resource> getImage(@PathVariable String middleDir, @PathVariable String fileName) throws CustomException, MalformedURLException {
-        String fileExtension = portfolioFileStore.extractExt(fileName);
 
-        if(portfolioFileStore.isNotSupportedExtension(fileExtension)){
-            throw new CustomException("지원되지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
-        }
-
+        PortfolioImageDto portfolioImageDto = portfolioService.getImage(middleDir, fileName);
         HttpHeaders httpHeaders = new HttpHeaders();
 
 
-        if(fileExtension.equalsIgnoreCase("jpg")){
+        if(portfolioImageDto.getFileExtension().equalsIgnoreCase("jpg")){
             httpHeaders.setContentType(MediaType.IMAGE_JPEG);
         }
 
-        if(fileExtension.equalsIgnoreCase("png")){
+        if(portfolioImageDto.getFileExtension().equalsIgnoreCase("png")){
             httpHeaders.setContentType(MediaType.IMAGE_PNG);
         }
 
         return ResponseEntity.status(HttpStatus.OK)
                 .headers(httpHeaders)
-                .body(new UrlResource("file:" + portfolioFileStore.getFullPath(middleDir, fileName)));
+                .body(new UrlResource("file:" + portfolioImageDto.getImgFullPath()));
     }
 
+    //테스트 TODO 이미지 어떻게 받을지 클라이언트라 회의
+/*    @PostMapping("/image/list")
+    public ResponseEntity<byte[]> getImages(@RequestBody PortfolioViewDto portfolioViewDto) throws CustomException, MalformedURLException {
+
+        List<byte[]> imagesBytes  = downloadImages(portfolioViewDto.getImgUrls());
+
+
+        // 이미지들을 하나의 바이트 배열로 합칩니다.
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        for (byte[] imageBytes : imagesBytes) {
+            try {
+                outputStream.write(imageBytes);
+            } catch (IOException e) {
+                e.printStackTrace(); // 에러 처리를 추가해야 합니다.
+            }
+        }
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.IMAGE_JPEG);
+
+        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(outputStream.toByteArray());
+    }
+
+    public List<byte[]> downloadImages(List<String> imageUrls) {
+        List<byte[]> imagesBytes = new ArrayList<>();
+
+        for (String imageUrl : imageUrls) {
+            byte[] imageData = downloadImage(imageUrl);
+            if (imageData != null) {
+                imagesBytes.add(imageData);
+            }
+        }
+
+        return imagesBytes;
+    }
+
+    private byte[] downloadImage(String imageUrl) {
+        try {
+
+            Path imagePath = Paths.get(portfolioFileStore.getFileDirPath(), imageUrl);
+            return Files.readAllBytes(imagePath);
+
+        } catch (IOException e) {
+            e.printStackTrace(); // 에러 처리를 추가해야 합니다.
+            return null;
+        }
+    }*/
 
     /**
      * 커스텀 예외

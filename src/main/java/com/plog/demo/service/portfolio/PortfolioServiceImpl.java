@@ -9,9 +9,11 @@ import com.plog.demo.model.*;
 import com.plog.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.List;
@@ -25,7 +27,6 @@ public class PortfolioServiceImpl implements PortfolioService{
 
     private final PortfolioTableRepository portfolioTableRepository;
     private final ReviewTableRepository reviewTableRepository;
-    private final CommentTableRepository commentTableRepository;
     private final ProviderTableRepository providerTableRepository;
     private final PortfolioFileStore portfolioFileStore;
 
@@ -51,7 +52,7 @@ public class PortfolioServiceImpl implements PortfolioService{
         //정상로직
 
         //포토폴리오 dto 생성
-        List<PortfolioDto> portfolioDtos = createPortfolioDtos(portfolios);
+        List<Integer> portfolioIds = createPortfolioDtos(portfolios);
 
         //이미지 url list
         List<String> imgUrls = portfolios.stream()
@@ -59,16 +60,15 @@ public class PortfolioServiceImpl implements PortfolioService{
                 .toList();
 
 
-        List<ReviewResponseDto> reviewResponseDtos = reviewTableRepository.findByProviderId(providerTable).stream().
-                map(reviewTable -> {
-                    CommentTable comment = commentTableRepository.findByReviewId(reviewTable).orElse(null);
-                    return createReviewResponseDto(reviewTable, comment);
-                }).toList();
+        List<ReviewResponseDto> reviewResponseDtos = reviewTableRepository.findReviewTableWithCommentTableByProviderId(providerTable).stream().
+                map(reviewTable ->
+                   createReviewResponseDto(reviewTable, reviewTable.getComment())
+                ).toList();
 
 
         PortfolioResponseDto portfolioResponseDto = PortfolioResponseDto.builder()
                 .providerId(providerId)
-                .portfolioList(portfolioDtos)
+                .portfolioIdList(portfolioIds)
                 .reviewList(reviewResponseDtos)
                 .imgUrlList(imgUrls)
                 .build();
@@ -84,6 +84,9 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         log.info("[addPortfolio] 포토폴리오 추가 시작");
 
+        //파일 검증
+        List<MultipartFile> portfolioUploadFiles = portfolioUploadDto.getPortfolioUploadFiles();
+        portfolioFileStore.validateFiles(portfolioUploadFiles);
 
         //서버에 파일 저장
         List<UploadFileDto> storedFiles = portfolioFileStore.storeFiles(portfolioUploadDto.getPortfolioUploadFiles());
@@ -100,7 +103,6 @@ public class PortfolioServiceImpl implements PortfolioService{
         List<PortfolioTable> portfolioTables = storedFiles.stream()
                 .map(uploadFileDto -> portfolioTableRepository.save(
                         PortfolioTable.builder()
-                                .portfolioTitle(portfolioUploadDto.getPortfolioTitle())
                                 .dateBasedImagePath(uploadFileDto.getDateBasedImagePath())
                                 .storedFileName(uploadFileDto.getStoreFileName())
                                 .providerId(providerTable)
@@ -117,16 +119,18 @@ public class PortfolioServiceImpl implements PortfolioService{
     }
 
     @Override
-    public PortfolioUpdateDto updatePortfolio(PortfolioUpdateDto portfolioUpdateDto) throws CustomException {
+    public PortfolioImageDto getImage(String middleDir, String fileName) throws CustomException {
 
-        PortfolioTable portfolioTable = portfolioTableRepository.findById(portfolioUpdateDto.getPortfolioId())
-                .orElseThrow(
-                        () -> new CustomException("포트폴리오가 존재하지 않습니다", HttpStatus.NOT_FOUND.value())
-                );
+        String fileExtension = portfolioFileStore.extractExt(fileName);
 
-        portfolioTable.setPortfolioTitle(portfolioUpdateDto.getPortfolioTitle());
+        if(portfolioFileStore.isNotSupportedExtension(fileExtension)){
+            throw new CustomException("지원되지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
+        }
 
-        return portfolioUpdateDto;
+        return PortfolioImageDto.builder()
+                .imgFullPath(portfolioFileStore.getFullPath(middleDir, fileName))
+                .fileExtension(fileExtension)
+                .build();
     }
 
     @Override
@@ -159,12 +163,9 @@ public class PortfolioServiceImpl implements PortfolioService{
         return portfolio.getDateBasedImagePath() + portfolio.getStoredFileName();
     }
 
-    private List<PortfolioDto> createPortfolioDtos(List<PortfolioTable> portfolios) {
+    private List<Integer> createPortfolioDtos(List<PortfolioTable> portfolios) {
         return portfolios.stream().map(
-                portfolio -> PortfolioDto.builder()
-                        .portfolioId(portfolio.getPortfolioId())
-                        .portfolioTitle(portfolio.getPortfolioTitle())
-                        .build()
+                portfolio -> portfolio.getPortfolioId()
         ).toList();
     }
 

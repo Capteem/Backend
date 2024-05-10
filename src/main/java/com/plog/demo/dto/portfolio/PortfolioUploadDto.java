@@ -15,7 +15,5 @@ public class PortfolioUploadDto {
 
     private int providerId;
 
-    private String portfolioTitle;
-
     private List<MultipartFile> portfolioUploadFiles;
 }
