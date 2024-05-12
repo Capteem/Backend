@@ -14,8 +14,6 @@ public interface ProviderService {
 
     List<ProviderResponseDto> getSelectedProvider(String userId) throws CustomException;
 
-    List<ProviderAdminDto> getProviderList() throws CustomException;
-
 
     List<ProviderTable> getConfirmedProviderList() throws CustomException;
 

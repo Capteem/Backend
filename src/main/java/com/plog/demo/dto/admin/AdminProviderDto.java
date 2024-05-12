@@ -10,6 +10,7 @@ import lombok.Getter;
 @Builder
 public class AdminProviderDto {
 
+    private String userId;
     private Integer providerId;
     private int providerStatus;
 

@@ -69,18 +69,6 @@ public class ProviderController {
         }
     }
 
-    @GetMapping("/all")
-    @Operation(summary = "제공자 목록", description = "제공자 목록을 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "제공자 목록 조회 성공", content = @Content(schema = @Schema(implementation = ProviderAdminDto.class)))
-    public ResponseEntity<List<ProviderAdminDto>> getAllProvider() throws CustomException {
-        try{
-            return ResponseEntity.status(HttpStatus.OK).body(providerService.getProviderList());
-        } catch (CustomException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-
-    }
-
     @GetMapping("/confirmed")
     @Operation(summary = "확인된 제공자 목록", description = "확인된 제공자 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "확인된 제공자 목록 조회 성공", content = @Content(schema = @Schema(implementation = ProviderTable.class)))

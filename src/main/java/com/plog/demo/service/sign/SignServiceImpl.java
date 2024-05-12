@@ -83,12 +83,12 @@ public class SignServiceImpl implements SignService{
 
         if(user.get().getStatus() == UserStatus.STOP.getCode()){
             log.info("[login] 유저 비활성화");
-            throw new CustomException("정지된 유저입니다.", HttpStatus.UNAUTHORIZED.value());
+            throw new CustomException("정지된 유저입니다.", HttpStatus.NOT_ACCEPTABLE.value());
         }
 
         if(user.get().getStatus() == UserStatus.BANNED.getCode()){
             log.info("[login] 유저 탈퇴");
-            throw new CustomException("탈퇴된 유저입니다.", HttpStatus.UNAUTHORIZED.value());
+            throw new CustomException("탈퇴된 유저입니다.", HttpStatus.NOT_ACCEPTABLE.value());
         }
 
         log.info("[login] 패스워드 일치");

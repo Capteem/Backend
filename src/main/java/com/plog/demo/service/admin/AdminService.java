@@ -12,13 +12,11 @@ import java.util.List;
 
 public interface AdminService {
 
-    void changeStatus(AdminRequestDto adminRequestDto) throws CustomException;
+    void changeUserStatus(AdminRequestDto adminRequestDto) throws CustomException;
 
-    void approveProvider(AdminProviderApproveDto adminProviderApproveDto) throws CustomException;
+    void changeProviderStatus(AdminProviderDto adminProviderDto) throws CustomException;
 
     void addComplainReply(ComplaintReplyDto complaintReplyDto) throws CustomException;
-
-    void refuseProvider(AdminProviderApproveDto adminProviderApproveDto) throws CustomException;
 
     List<ProviderTable> getProviderList(String adminId) throws CustomException;
 

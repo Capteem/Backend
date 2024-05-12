@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 public class AdminRequestDto {
 
     private String userId;
-    private Integer providerId;
     private int status;
 
 }

@@ -5,10 +5,10 @@ import lombok.Getter;
 @Getter
 public enum ComplaintType {
 
-    RESERVATION(0, "예약"),
-    PAYMENT(1, "결제"),
-    SCAM(2, "사기"),
-    ETC(3, "기타");
+    RESERVATION(1, "예약"),
+    PAYMENT(2, "결제"),
+    SCAM(3, "사기"),
+    ETC(4, "기타");
 
     private final int code;
     private final String description;

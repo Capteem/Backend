@@ -16,4 +16,6 @@ public interface ProviderTableRepository extends JpaRepository<ProviderTable, In
     Optional<ProviderTable> findByUserId(IdTable idTable);
 
     List<ProviderTable> findByProviderStatus(int providerStatus);
+
+    Optional<ProviderTable> findByUserIdAndProviderId(IdTable idTable, Integer providerId);
 }
