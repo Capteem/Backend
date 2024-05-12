@@ -65,6 +65,9 @@ public class ReservationServiceImpl implements ReservationService{
                 .reservation_hair(reservationRequestDto.getReservationHairId())
                 .reservation_start_date(reservationRequestDto.getReservationStartDate())
                 .reservation_end_date(reservationRequestDto.getReservationEndDate())
+                .reservationCameraName(reservationRequestDto.getReservationCameraName())
+                .reservationStudioName(reservationRequestDto.getReservationStudioName())
+                .reservationHairName(reservationRequestDto.getReservationHairName())
                 .status(ReservationStatus.WAITING.getCode())
                 .build();
 
@@ -117,6 +120,10 @@ public class ReservationServiceImpl implements ReservationService{
                     .reservationHairId(reservation.getReservation_hair())
                     .reservationStartDate(reservation.getReservation_start_date())
                     .reservationEndDate(reservation.getReservation_end_date())
+                    .reservationCameraName(reservation.getReservationCameraName())
+                    .reservationStudioName(reservation.getReservationStudioName())
+                    .reservationHairName(reservation.getReservationHairName())
+                    .amount(reservation.getAmount())
                     .status(reservation.getStatus())
                     .build();
 

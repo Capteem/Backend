@@ -16,9 +16,17 @@ public class ReservationResponseDto {
 
     private int reservationCameraId;
 
+    private String reservationCameraName;
+
     private int reservationStudioId;
 
+    private String reservationStudioName;
+
     private int reservationHairId;
+
+    private String reservationHairName;
+
+    private int amount;
 
     private int status;
 

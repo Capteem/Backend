@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "reviewTable",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"userId", "providerId", "reviewDate"})})
 public class ReviewTable {
 
     @Id
@@ -26,14 +28,20 @@ public class ReviewTable {
     private int reviewScore;
 
     @Column
+    private String userId;
+
+    @Column
+    private String userNickName;
+
+    @Column
     private LocalDateTime reviewDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "providerId")
     private ProviderTable providerId;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "commentId")
-    private CommentTable comment;
+    private CommentTable commentId;
 
 }

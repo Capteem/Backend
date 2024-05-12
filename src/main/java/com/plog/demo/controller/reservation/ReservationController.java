@@ -68,9 +68,7 @@ public class ReservationController {
             }
     }
 
-    /**
-     * 커스텀 예외
-     */
+
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorDto> customExceptionHandler(CustomException e){
         log.warn("customExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
@@ -83,9 +81,7 @@ public class ReservationController {
         return ResponseEntity.status(e.getResultCode()).body(errorDto);
     }
 
-    /**
-     * 서부 내부 에러 TODO 나중에 더 손좀 봐줘야함 이녀석
-     */
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorDto> runtimeExceptionHandler(Exception e){
         log.error("runtimeExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
