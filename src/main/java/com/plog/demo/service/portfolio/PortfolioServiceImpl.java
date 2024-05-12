@@ -60,9 +60,10 @@ public class PortfolioServiceImpl implements PortfolioService{
                 .toList();
 
 
-        List<ReviewResponseDto> reviewResponseDtos = reviewTableRepository.findReviewTableWithCommentTableByProviderId(providerTable).stream().
+        List<ReviewResponseDto> reviewResponseDtos = reviewTableRepository.findByProviderId(providerTable).stream().
                 map(reviewTable ->
-                   createReviewResponseDto(reviewTable, reviewTable.getComment())
+                   createReviewResponseDto(reviewTable, reviewTable.getCommentId())
+
                 ).toList();
 
 
@@ -190,6 +191,8 @@ public class PortfolioServiceImpl implements PortfolioService{
                 .reviewContent(reviewTable.getReviewContent())
                 .reviewScore(reviewTable.getReviewScore())
                 .reviewDate(reviewTable.getReviewDate())
+                .userId(reviewTable.getUserId())
+                .userNickName(reviewTable.getUserNickName())
                 .comment(commentResponseDto)
                 .build();
     }

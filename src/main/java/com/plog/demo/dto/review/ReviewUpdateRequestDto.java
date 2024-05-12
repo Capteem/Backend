@@ -1,16 +1,15 @@
-package com.plog.demo.dto.portfolio;
+package com.plog.demo.dto.review;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class ReviewResponseDto {
+@AllArgsConstructor
+@NoArgsConstructor
+public class ReviewUpdateRequestDto {
 
     private int reviewId;
 
@@ -22,8 +21,6 @@ public class ReviewResponseDto {
 
     private String userNickName;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reviewDate;
 
-    private CommentResponseDto comment;
 }

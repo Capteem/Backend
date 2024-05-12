@@ -16,9 +16,15 @@ public class ReservationRequestDto {
 
     private int reservationCameraId;
 
+    private String reservationCameraName;
+
     private int reservationStudioId;
 
+    private String reservationStudioName;
+
     private int reservationHairId;
+
+    private String reservationHairName;
 
     private LocalDateTime reservationStartDate;
 

@@ -27,10 +27,19 @@ public class ReservationTable {
     private int reservation_camera;
 
     @Column
+    private String reservationCameraName;
+
+    @Column
     private int reservation_studio;
 
     @Column
+    private String reservationStudioName;
+
+    @Column
     private int reservation_hair;
+
+    @Column
+    private String reservationHairName;
 
     @Column
     private LocalDateTime reservation_start_date;
@@ -40,6 +49,9 @@ public class ReservationTable {
 
     @Column
     private int status;
+
+    @Column
+    private int amount;
 
     @ManyToOne
     @JoinColumn(name="id")
