@@ -5,11 +5,16 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
+@Table(indexes = {
+        @Index(columnList = "paymentId")
+})
 public class PaymentDataTable {
 
     @Id
@@ -27,6 +32,6 @@ public class PaymentDataTable {
     private String kakaopayPurchaseCorp;
 
     @ManyToOne
-    @JoinColumn(name = "id")
-    private IdTable idTable;
+    @JoinColumn(name = "paymentId")
+    private PaymentTable paymentId;
 }

@@ -1,5 +1,6 @@
 package com.plog.demo.service.payment;
 
+import com.plog.demo.common.ReservationStatus;
 import com.plog.demo.dto.payment.*;
 import com.plog.demo.dto.reservation.ReservationResponseDto;
 import com.plog.demo.exception.CustomException;
@@ -48,8 +49,6 @@ public class PaymentServiceImpl implements PaymentService{
     public PayReadyResDto payReady(PayInfoDto payInfoDto) {
 
         IdTable idTable = idTableRepository.findById(payInfoDto.getReservationRequestDto().getUserId()).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
-        log.info("[payReady] idTable : " + idTable.toString());
-        String payId = idTable.getId();
         String paymentId;
         PayReadyResDto payReadyResDto;
 
@@ -61,7 +60,6 @@ public class PaymentServiceImpl implements PaymentService{
         PayRequestDto payRequestDto = new MakePayRequest().getReadyRequest(payInfoDto);
 
         HttpEntity<Map<String, Object>> urlRequest = new HttpEntity<>(payRequestDto.getMap(), headers);
-        log.info("[payReady] urlRequest : " + urlRequest.toString());
         RestTemplate restTemplate = new RestTemplate();
         try{
             payReadyResDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayReadyResDto.class);
@@ -120,12 +118,15 @@ public class PaymentServiceImpl implements PaymentService{
         List<PaymentTable> paymentTables;
         PaymentTable paymentTable;
         IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("[getApprove] no such id exists."));
+        log.info("[getApprove] idTable : " + idTable.toString());
         try{
             paymentTables = paymentTableRepository.findAllByUserId(idTable);
+            log.info("[getApprove] paymentTables : " + paymentTables.toString());
             paymentTable = paymentTables.get(paymentTables.size() - 1);
+            log.info("[getApprove] paymentTable : " + paymentTable.toString());
         } catch (Exception e){
             log.info("[getApprove] paymentTable is null");
-            reservationTableRepository.delete(reservationTableRepository.findAllByUserId(idTable).get(reservationTableRepository.findAllByUserId(idTable).size() - 1));
+            reservationTableRepository.deleteById(reservationTableRepository.findAllByUserId(idTable).get(reservationTableRepository.findAllByUserId(idTable).size() - 1).getReservationId());
             throw new CustomException("결제 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
         }
 
@@ -152,8 +153,8 @@ public class PaymentServiceImpl implements PaymentService{
                     .vat(payApproveResDto.getAmount().getVat())
                     .discount(payApproveResDto.getAmount().getDiscount())
                     .point(payApproveResDto.getAmount().getPoint())
-                    .idTable(idTable)
-                    .kakaopayPurchaseCorp(payApproveResDto.getCard_info().getKakaopay_purchase_corp())
+                    .paymentId(paymentTable)
+                    .kakaopayPurchaseCorp(payApproveResDto.getCard_info() == null ? null : payApproveResDto.getCard_info().getKakaopay_purchase_corp())
                     .build();
 
             paymentDataTableRepository.save(paymentDataTable);
@@ -168,16 +169,20 @@ public class PaymentServiceImpl implements PaymentService{
     @Override
     public PaymentInfoDto getPaymentInfo(String id) throws CustomException{
         IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
+        PaymentTable paymentTable = paymentTableRepository.findAllByUserId(idTable).get(paymentTableRepository.findAllByUserId(idTable).size() - 1);
+        log.info("[getPaymentInfo] paymentTable : " + paymentTable.toString());
         List<PaymentDataTable> paymentDataTables;
         try{
-            paymentDataTables = paymentDataTableRepository.findAllByUserId(idTable);
+            paymentDataTables = paymentDataTableRepository.findAllByPaymentId(paymentTable);
             PaymentDataTable paymentDatatable = paymentDataTables.get(paymentDataTables.size() - 1);
+            log.info("[getPaymentInfo] paymentDatatable : " + paymentDatatable.toString());
 
             return PaymentInfoDto.builder()
                     .paymentAmount(paymentDatatable.getTotal())
                     .paymentDate(paymentDatatable.getCreated_at())
                     .paymentPoint(paymentDatatable.getPoint())
-                    .paymentType(paymentDatatable.getKakaopayPurchaseCorp())
+                    .paymentType(paymentDatatable.getKakaopayPurchaseCorp() == null ? "카카오페이" : "카드")
+                    .paymentId(paymentTable.getPaymentId())
                     .build();
         } catch (Exception e){
             log.error("[getPaymentInfo] paymentDataTable is null");
@@ -214,9 +219,9 @@ public class PaymentServiceImpl implements PaymentService{
         try{
             payCancelDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayCancelDto.class);
             ReservationTable reservationTable = reservationTableRepository.findAllByUserId(idTable).get(reservationTableRepository.findAllByUserId(idTable).size() - 1);
-            paymentTableRepository.deleteById(paymentTable.getPaymentId());
-            reservationTable.setUserId(null);
-            reservationTableRepository.deleteById(reservationTable.getReservationId());
+            reservationTable.setStatus(ReservationStatus.CANCELLED.getCode());
+            reservationTableRepository.save(reservationTable);
+            paymentTableRepository.save(paymentTable);
         }catch (Exception e){
             log.error("[getCancelApprove] failure to get cancel approve");
             throw new CustomException("failure to get cancel approve", HttpStatus.UNAUTHORIZED.value());
