@@ -88,7 +88,6 @@ public class ConfirmServiceImpl implements ConfirmService{
         providerCheckTableRepository.saveAll(providerCheckTables);
 
 
-
     }
 
     @Override

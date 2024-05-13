@@ -15,10 +15,11 @@ public class ProviderCheckTable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int providerCheckId;
 
+
     @Column
     private String storedFileName;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "userId")
     IdTable id;
 }

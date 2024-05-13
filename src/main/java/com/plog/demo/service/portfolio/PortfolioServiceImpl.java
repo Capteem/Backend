@@ -4,12 +4,13 @@ import com.plog.demo.common.file.PortfolioFileStore;
 import com.plog.demo.dto.file.DeleteFileDto;
 import com.plog.demo.dto.file.UploadFileDto;
 import com.plog.demo.dto.portfolio.*;
+import com.plog.demo.dto.review.ReviewGetResponseDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.*;
 import com.plog.demo.repository.*;
+import com.plog.demo.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,7 @@ import java.util.List;
 public class PortfolioServiceImpl implements PortfolioService{
 
     private final PortfolioTableRepository portfolioTableRepository;
-    private final ReviewTableRepository reviewTableRepository;
+    private final ReviewService reviewService;
     private final ProviderTableRepository providerTableRepository;
     private final PortfolioFileStore portfolioFileStore;
 
@@ -51,27 +52,17 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         //정상로직
 
+
         //포토폴리오 dto 생성
-        List<Integer> portfolioIds = createPortfolioDtos(portfolios);
+        List<PortfolioGetDto> portfolioGetDtos = createPortfolioGetDtos(portfolios);
 
-        //이미지 url list
-        List<String> imgUrls = portfolios.stream()
-                .map(this::getImgUrl)
-                .toList();
-
-
-        List<ReviewResponseDto> reviewResponseDtos = reviewTableRepository.findByProviderId(providerTable).stream().
-                map(reviewTable ->
-                   createReviewResponseDto(reviewTable, reviewTable.getCommentId())
-
-                ).toList();
+        ReviewGetResponseDto reviewGetResponseDto = reviewService.getReviewsByProviderId(providerId);
 
 
         PortfolioResponseDto portfolioResponseDto = PortfolioResponseDto.builder()
                 .providerId(providerId)
-                .portfolioIdList(portfolioIds)
-                .reviewList(reviewResponseDtos)
-                .imgUrlList(imgUrls)
+                .portfolioList(portfolioGetDtos)
+                .reviewList(reviewGetResponseDto.getReviewList())
                 .build();
 
         log.info("[getPortfolio] 포토폴리오 조회 완료");
@@ -164,36 +155,15 @@ public class PortfolioServiceImpl implements PortfolioService{
         return portfolio.getDateBasedImagePath() + portfolio.getStoredFileName();
     }
 
-    private List<Integer> createPortfolioDtos(List<PortfolioTable> portfolios) {
+    private List<PortfolioGetDto> createPortfolioGetDtos(List<PortfolioTable> portfolios) {
+
+
         return portfolios.stream().map(
-                portfolio -> portfolio.getPortfolioId()
+                portfolio -> PortfolioGetDto.builder()
+                        .portfolioId(portfolio.getPortfolioId())
+                        .imgUrl(getImgUrl(portfolio))
+                        .build()
         ).toList();
     }
 
-    /**
-     *  리뷰 응답 dto 생성
-     */
-    private ReviewResponseDto createReviewResponseDto(ReviewTable reviewTable, CommentTable comment) {
-
-        CommentResponseDto commentResponseDto = null;
-        if(comment != null){
-
-            commentResponseDto = CommentResponseDto.builder()
-                        .commentId(comment.getCommentId())
-                        .commentContent(comment.getCommentContent())
-                        .commentDate(comment.getCommentDate())
-                        .build();
-
-        }
-
-        return ReviewResponseDto.builder()
-                .reviewId(reviewTable.getReviewId())
-                .reviewContent(reviewTable.getReviewContent())
-                .reviewScore(reviewTable.getReviewScore())
-                .reviewDate(reviewTable.getReviewDate())
-                .userId(reviewTable.getUserId())
-                .userNickName(reviewTable.getUserNickName())
-                .comment(commentResponseDto)
-                .build();
-    }
 }

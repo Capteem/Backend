@@ -108,7 +108,7 @@ public class ReviewServiceImpl implements ReviewService{
                 }).toList();
 
         return ReviewGetResponseDto.builder()
-                .reviewGetDtoList(reviewGetDtos)
+                .reviewList(reviewGetDtos)
                 .build();
     }
 
@@ -134,7 +134,7 @@ public class ReviewServiceImpl implements ReviewService{
                 }).toList();
 
         return ReviewGetResponseDto.builder()
-                .reviewGetDtoList(reviewGetDtos)
+                .reviewList(reviewGetDtos)
                 .build();
     }
 

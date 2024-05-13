@@ -1,5 +1,7 @@
 package com.plog.demo.dto.portfolio;
 
+import com.plog.demo.dto.review.ReviewGetDto;
+import com.plog.demo.dto.review.ReviewGetResponseDto;
 import lombok.*;
 
 import java.util.List;
@@ -13,9 +15,8 @@ public class PortfolioResponseDto {
 
     private int providerId;
 
-    private List<Integer> portfolioIdList;
+    private List<PortfolioGetDto> portfolioList;
 
-    private List<ReviewResponseDto> reviewList;
+    private List<ReviewGetDto> reviewList;
 
-    private List<String> imgUrlList;
 }

@@ -1,10 +1,16 @@
 package com.plog.demo.controller.reservation;
 import com.plog.demo.dto.ErrorDto;
+import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.reservation.ReservationRequestDto;
 import com.plog.demo.dto.reservation.ReservationResponseDto;
+import com.plog.demo.dto.review.ReviewGetResponseDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.reservation.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,28 +29,38 @@ import java.util.Map;
 @Tag(name = "Reservation", description = "예약 관련 API")
 public class ReservationController {
 
-    /**
-     * TODO 인터셉터로 토큰 검증 미리 해야함
-     */
 
     private final ReservationService reservationService;
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "사용자가 예약",
+                    content = @Content(schema = @Schema(implementation = SuccessDto.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "예약 실패",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+    })
+    @Operation(summary = "사용자가 예약 ", description = "예약을 시작합니다.")
     @PostMapping("/booking")
-    @Operation(summary = "예약하기", description = "사용자가 예약을 합니다.(API 콜 X)")
-    public ResponseEntity<Map<String, String>> makeReservation(@RequestBody ReservationRequestDto reservationRequestDto) throws CustomException {
+    public ResponseEntity<SuccessDto> makeReservation(@RequestBody ReservationRequestDto reservationRequestDto) throws CustomException {
 
 
         reservationService.addReservation(reservationRequestDto);
+        
 
-        Map<String, String> responseData = new HashMap<>();
-
-        responseData.put("msg", "예약 성공");
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseData);
+        return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("예약 성공").build());
     }
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "사용자가 예약 목록 확인",
+                    content = @Content(schema = @Schema(implementation = ReservationResponseDto.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "예약 목록 확인 실패",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+    })
+    @Operation(summary = "사용자가 예약 목록 확인", description = "확인된 제공자 목록을 조회합니다.")
     @PostMapping("/list")
-    @Operation(summary = "예약 리스트 조회", description = "사용자의 예약 리스트를 조회합니다.")
     public ResponseEntity<List<ReservationResponseDto>> getReservations(@RequestBody Map<String, String> requestBody) throws CustomException {
 
 

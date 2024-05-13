@@ -14,7 +14,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "reviewTable",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"userId", "providerId", "reviewDate"})})
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"userId", "providerId", "reviewDate"})},
+        indexes = {@Index(columnList = "user_id")}
+)
 public class ReviewTable {
 
     @Id
