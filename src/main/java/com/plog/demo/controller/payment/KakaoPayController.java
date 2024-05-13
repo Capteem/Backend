@@ -1,6 +1,8 @@
 package com.plog.demo.controller.payment;
 
+import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.payment.*;
+import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.payment.PaymentService;
 import com.plog.demo.service.reservation.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,4 +76,29 @@ public class KakaoPayController {
     public ResponseEntity<Object> failPayment(){
         return ResponseEntity.status(HttpStatus.OK).body("결제에 실패했습니다.");
     }
+
+    @GetMapping("/success/info")
+    @Operation(summary = "결제 정보", description = "카카오페이 팝업창이 꺼지면 부르는 API, 결제 정보를 가져옵니다.")
+    public ResponseEntity<Object> getPaymentInfo(@RequestParam("userId") String id) throws CustomException {
+        try{
+            PaymentInfoDto paymentInfo = paymentService.getPaymentInfo(id);
+            return ResponseEntity.status(HttpStatus.OK).body(paymentInfo);
+        } catch (CustomException e){
+            log.info("[getPaymentInfo] error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
+    }
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorDto> handleCustomException(CustomException e) {
+        log.error("CustomException 호출 {} {}", e.getResultCode(), e.getMessage());
+
+        ErrorDto errorDto = ErrorDto.builder()
+                .resultCode(e.getResultCode())
+                .msg(e.getMessage())
+                .build();
+
+        return ResponseEntity.status(e.getResultCode()).body(errorDto);
+    }
+
 }

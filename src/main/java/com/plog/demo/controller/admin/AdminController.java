@@ -2,12 +2,15 @@ package com.plog.demo.controller.admin;
 
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.admin.AdminProviderApproveDto;
+import com.plog.demo.dto.admin.AdminProviderDto;
 import com.plog.demo.dto.admin.AdminRequestDto;
 import com.plog.demo.dto.complaint.ComplaintReplyDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.admin.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,32 +29,32 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    @PostMapping("/change")
-    @Operation(summary = "유저 및 제공자 상태 변경", description = "유저 및 제공자의 상태를 변경합니다.(providerId값을 넣지 않으면 사용자 상태 변경, providerId값을 넣으면 제공자 상태 변경)")
+    @PostMapping("/user/change")
+    @Operation(summary = "유저 상태 변경", description = "유저의 상태를 변경합니다.")
     @ApiResponse(responseCode = "200", description = "성공")
     public ResponseEntity<Object> changeStatus(@RequestBody AdminRequestDto adminRequestDto) throws CustomException {
         log.info("[changeStatus] 유저 및 제공자 상태 변경");
 
         try{
-            adminService.changeStatus(adminRequestDto);
+            adminService.changeUserStatus(adminRequestDto);
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
+        } catch (CustomException e) {
             log.error("[changeStatus] 유저 및 제공자 상태 변경 실패");
-            throw new CustomException("유저 및 제공자 상태 변경 실패", 500);
+            throw new CustomException(e.getMessage(), e.getResultCode());
         }
     }
 
-    @PostMapping("/approve")
-    @Operation(summary = "제공자 승인", description = "제공자를 승인합니다.")
+    @PostMapping("/provider/change")
+    @Operation(summary = "제공자 상태 변경", description = "제공자의 상태를 변경합니다.")
     @ApiResponse(responseCode = "200", description = "성공")
-    public ResponseEntity<Object> approveProvider(@RequestBody AdminProviderApproveDto adminProviderApproveDto) throws CustomException {
-        log.info("[approveProvider] start");
+    public ResponseEntity<Object> changeProviderStatus(@RequestBody AdminProviderDto adminProviderDto) throws CustomException {
+        log.info("[changeProviderStatus] 제공자 상태 변경");
         try{
-            adminService.approveProvider(adminProviderApproveDto);
+            adminService.changeProviderStatus(adminProviderDto);
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            log.error("[approveProvider] 제공자 승인 실패");
-            throw new CustomException("제공자 승인 실패", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        } catch (CustomException e) {
+            log.error("[changeProviderStatus] 제공자 상태 변경 실패");
+            throw new CustomException(e.getMessage(), e.getResultCode());
         }
     }
 
@@ -61,25 +64,12 @@ public class AdminController {
         log.info("[getProviderList] 제공자 목록 조회");
         try{
             return ResponseEntity.ok(adminService.getProviderList(adminId));
-        } catch (Exception e) {
+        } catch (CustomException e) {
             log.error("[getProviderList] 제공자 목록 조회 실패");
-            throw new CustomException("제공자 목록 조회 실패", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            throw new CustomException(e.getMessage(), e.getResultCode());
         }
     }
 
-    @PostMapping("/refuse")
-    @Operation(summary = "제공자 거절", description = "제공자를 거절합니다.")
-    @ApiResponse(responseCode = "200", description = "성공")
-    public ResponseEntity<Object> refuseProvider(@RequestBody AdminProviderApproveDto adminProviderApproveDto) throws CustomException {
-        log.info("[refuseProvider] start");
-        try{
-            adminService.refuseProvider(adminProviderApproveDto);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            log.error("[refuseProvider] 제공자 거절 실패");
-            throw new CustomException("제공자 거절 실패", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
-    }
 
     @GetMapping("/user")
     @Operation(summary = "유저 목록 조회", description = "유저 목록을 조회합니다.")
@@ -87,9 +77,9 @@ public class AdminController {
         log.info("[getUserList] 유저 목록 조회");
         try{
             return ResponseEntity.ok(adminService.getUserList(adminId));
-        } catch (Exception e) {
+        } catch (CustomException e) {
             log.error("[getUserList] 유저 목록 조회 실패");
-            throw new CustomException("유저 목록 조회 실패", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            throw new CustomException(e.getMessage(), e.getResultCode());
         }
     }
 
@@ -100,9 +90,9 @@ public ResponseEntity<Object> addComplainReply(@RequestBody ComplaintReplyDto co
         try{
             adminService.addComplainReply(complaintReplyDto);
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
+        } catch (CustomException e) {
             log.error("[addComplainReply] 신고 글 작성 실패");
-            throw new CustomException("신고 글 작성 실패", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            throw new CustomException(e.getMessage(), e.getResultCode());
         }
     }
 

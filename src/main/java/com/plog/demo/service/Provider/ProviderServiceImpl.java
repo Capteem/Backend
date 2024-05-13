@@ -80,30 +80,6 @@ public class ProviderServiceImpl implements ProviderService{
         }
     }
 
-    @Override
-    public List<ProviderAdminDto> getProviderList() throws CustomException {
-
-        try {
-            log.info("[getProviderList] 제공자 리스트 조회 로직 시작");
-            List<ProviderTable> providerTables = providerTableRepository.findAll();
-            List<ProviderAdminDto> providerDtos = providerTables.stream().map(providerTable -> ProviderAdminDto.builder()
-                    .providerName(providerTable.getProviderName())
-                    .providerType(providerTable.getProviderType())
-                    .providerStatus(providerTable.getProviderStatus())
-                    .providerArea(providerTable.getProviderArea() + " " + providerTable.getProviderSubArea() + " " + providerTable.getProviderDetailArea())
-                    .providerPhoneNum(providerTable.getProviderPhoneNum())
-                    .providerId(providerTable.getProviderId())
-                    .build()).toList();
-            if (providerTables.isEmpty()) {
-                log.error("[getProviderList] 제공자가 존재하지 않습니다.");
-                throw new CustomException("제공자가 존재하지 않습니다.");
-            }
-            return providerDtos;
-        } catch (Exception e) {
-            log.error("[getProviderList] db데이터 베이스 접근 오류");
-            throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
-        }
-    }
 
     @Override
     @Operation(summary = "허가된 제공자 목록 조회", description = "허가된 제공자 목록을 조회합니다.")

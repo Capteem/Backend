@@ -4,9 +4,11 @@ import com.plog.demo.dto.payment.*;
 import com.plog.demo.dto.reservation.ReservationResponseDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.IdTable;
+import com.plog.demo.model.PaymentDataTable;
 import com.plog.demo.model.PaymentTable;
 import com.plog.demo.model.ReservationTable;
 import com.plog.demo.repository.IdTableRepository;
+import com.plog.demo.repository.PaymentDataTableRepository;
 import com.plog.demo.repository.PaymentTableRepository;
 import com.plog.demo.repository.ReservationTableRepository;
 import com.plog.demo.service.reservation.ReservationService;
@@ -37,6 +39,7 @@ public class PaymentServiceImpl implements PaymentService{
     private final PaymentTableRepository paymentTableRepository;
     private final ReservationService reservationService;
     private final ReservationTableRepository reservationTableRepository;
+    private final PaymentDataTableRepository paymentDataTableRepository;
 
     @Value("${pay.admin_key}")
     private String adminKey;
@@ -142,12 +145,44 @@ public class PaymentServiceImpl implements PaymentService{
 
         try{
             payApproveResDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayApproveResDto.class);
+            PaymentDataTable paymentDataTable = PaymentDataTable.builder()
+                    .total(payApproveResDto.getAmount().getTotal())
+                    .approved_at(payApproveResDto.getApproved_at())
+                    .created_at(payApproveResDto.getCreated_at())
+                    .vat(payApproveResDto.getAmount().getVat())
+                    .discount(payApproveResDto.getAmount().getDiscount())
+                    .point(payApproveResDto.getAmount().getPoint())
+                    .idTable(idTable)
+                    .kakaopayPurchaseCorp(payApproveResDto.getCard_info().getKakaopay_purchase_corp())
+                    .build();
+
+            paymentDataTableRepository.save(paymentDataTable);
         }catch (Exception e){
             log.error("[getApprove] failure to get approve");
             throw new CustomException("failure to get approve", HttpStatus.UNAUTHORIZED.value());
         }
 
         return payApproveResDto;
+    }
+
+    @Override
+    public PaymentInfoDto getPaymentInfo(String id) throws CustomException{
+        IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
+        List<PaymentDataTable> paymentDataTables;
+        try{
+            paymentDataTables = paymentDataTableRepository.findAllByUserId(idTable);
+            PaymentDataTable paymentDatatable = paymentDataTables.get(paymentDataTables.size() - 1);
+
+            return PaymentInfoDto.builder()
+                    .paymentAmount(paymentDatatable.getTotal())
+                    .paymentDate(paymentDatatable.getCreated_at())
+                    .paymentPoint(paymentDatatable.getPoint())
+                    .paymentType(paymentDatatable.getKakaopayPurchaseCorp())
+                    .build();
+        } catch (Exception e){
+            log.error("[getPaymentInfo] paymentDataTable is null");
+            throw new CustomException("결제 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+        }
     }
 
     @Override
@@ -188,4 +223,6 @@ public class PaymentServiceImpl implements PaymentService{
         }
         return payCancelDto;
     }
+
+
 }

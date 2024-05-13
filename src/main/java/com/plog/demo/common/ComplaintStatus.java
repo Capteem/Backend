@@ -3,7 +3,7 @@ package com.plog.demo.common;
 public enum ComplaintStatus {
 
         WAITING(0, "처리 대기"),
-        COMPLETED(2, "처리 완료");
+        COMPLETED(1, "처리 완료");
 
 
         private final int code;
