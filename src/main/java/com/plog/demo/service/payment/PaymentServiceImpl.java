@@ -1,5 +1,6 @@
 package com.plog.demo.service.payment;
 
+import com.plog.demo.common.PaymentStatus;
 import com.plog.demo.common.ReservationStatus;
 import com.plog.demo.dto.payment.*;
 import com.plog.demo.dto.reservation.ReservationResponseDto;
@@ -100,6 +101,7 @@ public class PaymentServiceImpl implements PaymentService{
                     .paymentTaxFreeAmount(0)
                     .reservationId(currentReservation)
                     .userId(idTable)
+                    .paymentStatus(PaymentStatus.COMPLETE.getCode())
                     .build();
             paymentTableRepository.save(paymentTable);
         } catch (Exception e) {
@@ -110,6 +112,36 @@ public class PaymentServiceImpl implements PaymentService{
         }
 
         return payReadyResDto;
+    }
+
+    @Override
+    public void payCancel(String id, String tid) throws CustomException {
+        IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
+        try {
+            List<PaymentTable> paymentTables = paymentTableRepository.findALlByUserIdAndPaymentId(idTable, tid);
+            PaymentTable paymentTable = paymentTables.get(paymentTables.size() - 1);
+
+            paymentTable.setPaymentStatus(PaymentStatus.CANCEL.getCode());
+            paymentTableRepository.save(paymentTable);
+        } catch (Exception e){
+            log.info("[payCancel] 결제 취소 중 오류 발생");
+            throw new CustomException("결제 취소 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    @Override
+    public void payFail(String tid, String id) throws CustomException {
+        IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
+        try {
+            List<PaymentTable> paymentTables = paymentTableRepository.findALlByUserIdAndPaymentId(idTable, tid);
+            PaymentTable paymentTable = paymentTables.get(paymentTables.size() - 1);
+
+            paymentTable.setPaymentStatus(PaymentStatus.FAIL.getCode());
+            paymentTableRepository.save(paymentTable);
+        } catch (Exception e){
+            log.info("[payFail] 결제 실패 중 오류 발생");
+            throw new CustomException("결제 실패 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     @Override
@@ -158,6 +190,9 @@ public class PaymentServiceImpl implements PaymentService{
                     .build();
 
             paymentDataTableRepository.save(paymentDataTable);
+            ReservationTable reservationTable = reservationTableRepository.findAllByUserId(idTable).get(reservationTableRepository.findAllByUserId(idTable).size() - 1);
+            reservationTable.setTid(paymentTable.getPaymentId());
+            reservationTableRepository.save(reservationTable);
         }catch (Exception e){
             log.error("[getApprove] failure to get approve");
             throw new CustomException("failure to get approve", HttpStatus.UNAUTHORIZED.value());
@@ -183,6 +218,7 @@ public class PaymentServiceImpl implements PaymentService{
                     .paymentPoint(paymentDatatable.getPoint())
                     .paymentType(paymentDatatable.getKakaopayPurchaseCorp() == null ? "카카오페이" : "카드")
                     .paymentId(paymentTable.getPaymentId())
+                    .paymentStatus(paymentTable.getPaymentStatus())
                     .build();
         } catch (Exception e){
             log.error("[getPaymentInfo] paymentDataTable is null");

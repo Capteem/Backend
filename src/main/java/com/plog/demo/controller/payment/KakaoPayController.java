@@ -67,14 +67,26 @@ public class KakaoPayController {
 
     @GetMapping("/cancel")
     @Operation(summary = "결제 취소", description = "결제를 취소합니다.(API 콜 X)")
-    public ResponseEntity<Object> cancelPayment(){
-        return ResponseEntity.status(HttpStatus.OK).body("결제가 취소되었습니다.");
+    public ResponseEntity<Object> cancelPayment(@RequestBody CancelRequestDto cancelRequestDto) throws CustomException {
+        try{
+            paymentService.payCancel(cancelRequestDto.getTid(), cancelRequestDto.getUserId());
+            return ResponseEntity.status(HttpStatus.OK).body("결제가 취소되었습니다.");
+        } catch (CustomException e){
+            log.info("[cancelPayment] error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
     }
 
     @GetMapping("/fail")
     @Operation(summary = "결제 실패", description = "결제에 실패했습니다.(API 콜 X)")
-    public ResponseEntity<Object> failPayment(){
-        return ResponseEntity.status(HttpStatus.OK).body("결제에 실패했습니다.");
+    public ResponseEntity<Object> failPayment(@RequestBody CancelRequestDto cancelRequestDto) throws CustomException {
+        try{
+            paymentService.payFail(cancelRequestDto.getTid(), cancelRequestDto.getUserId());
+            return ResponseEntity.status(HttpStatus.OK).body("결제가 실패되었습니다.");
+        } catch (CustomException e){
+            log.info("[failPayment] error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
     }
 
     @GetMapping("/success/info")

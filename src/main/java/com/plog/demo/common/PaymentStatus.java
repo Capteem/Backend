@@ -3,16 +3,15 @@ package com.plog.demo.common;
 import lombok.Getter;
 
 @Getter
-public enum UserStatus {
-    ACTIVE(1, "활성화"),
-    STOP(2, "정지"),
-    BANNED(3, "차단"),
-    DELETED(4, "삭제");
+public enum PaymentStatus {
+    COMPLETE(1, "결제 완료"),
+    CANCEL(2, "결제 취소"),
+    FAIL(3, "결제 실패");
 
     private final int code;
     private final String description;
 
-    UserStatus(int code, String description){
+    PaymentStatus(int code, String description){
         this.code = code;
         this.description = description;
     }

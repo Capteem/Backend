@@ -11,4 +11,8 @@ public interface PaymentService {
     PayCancelDto getCancelApprove(String tid, String id) throws CustomException;
 
     PaymentInfoDto getPaymentInfo(String id) throws CustomException;
+
+    void payCancel(String tid, String id) throws CustomException;
+
+    void payFail(String tid, String id) throws CustomException;
 }

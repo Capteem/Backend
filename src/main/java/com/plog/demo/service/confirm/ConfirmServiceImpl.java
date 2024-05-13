@@ -11,10 +11,13 @@ import com.plog.demo.repository.IdTableRepository;
 import com.plog.demo.repository.ProviderCheckTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -22,8 +25,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.internet.MimeMessage;
 import java.net.URI;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @Slf4j
@@ -35,6 +40,8 @@ public class ConfirmServiceImpl implements ConfirmService{
     private final IdTableRepository idTableRepository;
     private final ProviderCheckFileStore providerCheckFileStore;
 
+    @Autowired
+    private JavaMailSender mailSender;
     @Value("${openapi.authkey}")
     private String authKey;
     @Override
@@ -109,6 +116,48 @@ public class ConfirmServiceImpl implements ConfirmService{
 
 
         return true;
+    }
+
+    private int makeRandomNumber(){
+        Random r = new Random();
+        String randomNumber = "";
+        for(int i = 0 ; i < 6 ; i++){
+            randomNumber += r.nextInt(10);
+        }
+        int authNumber = Integer.parseInt(randomNumber);
+        return authNumber;
+    }
+
+    @Override
+    public void mailSend(String setForm, String toMail, String title, String content) throws CustomException{
+        MimeMessage message = mailSender.createMimeMessage();
+
+        try{
+            MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+            messageHelper.setFrom(setForm);
+            messageHelper.setTo(toMail);
+            messageHelper.setSubject(title);
+            messageHelper.setText(content);
+            mailSender.send(message);
+        } catch (Exception e){
+            throw new CustomException("메일 전송 실패", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    @Override
+    public String joinEmail(String email) throws CustomException {
+        int authNumber = makeRandomNumber();
+        String setForm = "taehun9606@ajou.ac.kr";
+        String toMail = email;
+        String title = "[Plog] 비밀번호 변경 인증 메일입니다.";
+        String content = "인증번호는 " + authNumber + "입니다.";
+        try {
+            mailSend(setForm, toMail, title, content);
+            return Integer.toString(authNumber);
+        } catch (CustomException e){
+            log.info("[joinEmail]"+e.getMessage());
+            throw new CustomException(e.getMessage(),e.getResultCode());
+        }
     }
 
     private ProviderCheckTable getProviderCheckTable(ProviderCheckFileDto providerCheckFileDto, IdTable idTable) {

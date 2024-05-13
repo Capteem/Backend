@@ -5,6 +5,7 @@ import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.confirm.ConfirmCheckProviderRequestDto;
 import com.plog.demo.dto.confirm.ConfirmRequestDto;
 import com.plog.demo.dto.confirm.ConfirmResponseDto;
+import com.plog.demo.dto.confirm.EmailRequestDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.confirm.ConfirmService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -75,6 +78,18 @@ public class ConfirmController {
         confirmService.checkProvider(confirmCheckProviderRequestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
+    }
+
+    @PostMapping("/user/pwauth")
+    @Operation(summary = "비밀번호 찾기 메일 전송", description = "비밀번호 찾기 메일을 전송합니다.")
+    @ApiResponse(responseCode = "200", description = "메일 전송 성공")
+    public ResponseEntity<Object> sendMail(@RequestBody EmailRequestDto emailRequestDto) throws CustomException {
+        try{
+            confirmService.joinEmail(emailRequestDto.getEmail());
+            return ResponseEntity.status(HttpStatus.OK).body("메일 전송 성공");
+        } catch (CustomException e){
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
     }
 
 

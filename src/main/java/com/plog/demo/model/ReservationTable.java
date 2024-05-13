@@ -53,6 +53,9 @@ public class ReservationTable {
     @Column
     private int amount;
 
+    @Column
+    private String tid;
+
     @ManyToOne
     @JoinColumn(name="id")
     private IdTable userId;
