@@ -32,7 +32,6 @@ public class PortfolioServiceImpl implements PortfolioService{
     private final PortfolioFileStore portfolioFileStore;
 
 
-
     @Override
     public PortfolioResponseDto getPortfolio(int providerId) throws CustomException {
 
@@ -76,6 +75,9 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         log.info("[addPortfolio] 포토폴리오 추가 시작");
 
+        ProviderTable providerTable = providerTableRepository.findById(portfolioUploadDto.getProviderId())
+                .orElseThrow(() -> new CustomException("존재 하지 않은 서비스 제공자입니다", HttpStatus.NOT_FOUND.value()));
+
         //파일 검증
         List<MultipartFile> portfolioUploadFiles = portfolioUploadDto.getPortfolioUploadFiles();
         portfolioFileStore.validateFiles(portfolioUploadFiles);
@@ -86,9 +88,6 @@ public class PortfolioServiceImpl implements PortfolioService{
         if(storedFiles.isEmpty()){
             throw new CustomException("포트폴리오 파일 저장 오류");
         }
-
-        ProviderTable providerTable = providerTableRepository.findById(portfolioUploadDto.getProviderId())
-                .orElseThrow(() -> new CustomException("존재 하지 않은 서비스 제공자입니다", HttpStatus.NOT_FOUND.value()));
 
 
         //db에 포트폴리오 저장

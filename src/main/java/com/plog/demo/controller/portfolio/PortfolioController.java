@@ -1,7 +1,5 @@
 package com.plog.demo.controller.portfolio;
 
-
-import com.plog.demo.common.file.PortfolioFileStore;
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.file.UploadFileDto;
@@ -70,8 +68,6 @@ public class PortfolioController {
     }
 
 
-
-
     @Operation(summary = "포트 폴리오 삭제", description = "포트 폴리오 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
@@ -82,7 +78,7 @@ public class PortfolioController {
                     content = @Content(schema = @Schema(implementation = ErrorDto.class)))
     })
     @DeleteMapping("/{portfolioId}")
-    public ResponseEntity<SuccessDto> deletePortfolios(@PathVariable int portfolioId) throws CustomException {
+    public ResponseEntity<SuccessDto> deletePortfolio(@PathVariable int portfolioId) throws CustomException {
 
         boolean isDeleted = portfolioService.deletePortfolio(portfolioId);
 

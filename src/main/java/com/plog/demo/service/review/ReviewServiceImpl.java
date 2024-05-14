@@ -35,6 +35,8 @@ public class ReviewServiceImpl implements ReviewService{
         ProviderTable provider = providerTableRepository.findById(reviewAddRequestDto.getProviderId())
                 .orElseThrow(() -> new CustomException("존재하지 않는 서비스 제공자입니다.", HttpStatus.NOT_FOUND.value()));
 
+        // TODO 예약이 완료된 유저만 리뷰 작성 가능하도록
+
         //리뷰에 저장
         ReviewTable review = ReviewTable.builder()
                 .providerId(provider)
@@ -57,6 +59,7 @@ public class ReviewServiceImpl implements ReviewService{
 
         ReviewTable review = reviewTableRepository.findById(reviewUpdateRequestDto.getReviewId())
                 .orElseThrow(() -> new CustomException("존재하지 않는 리뷰입니다.", HttpStatus.NOT_FOUND.value()));
+
 
         review.setReviewContent(reviewUpdateRequestDto.getReviewContent());
         review.setReviewScore(reviewUpdateRequestDto.getReviewScore());

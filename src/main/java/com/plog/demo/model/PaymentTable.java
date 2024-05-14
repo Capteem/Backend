@@ -26,7 +26,6 @@ public class PaymentTable {
     @Column
     private int paymentTaxFreeAmount;
 
-
     @OneToOne
     @JoinColumn(name = "reservationId")
     private ReservationTable reservationId;

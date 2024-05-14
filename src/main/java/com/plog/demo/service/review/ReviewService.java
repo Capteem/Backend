@@ -1,6 +1,5 @@
 package com.plog.demo.service.review;
 
-import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.review.ReviewAddRequestDto;
 import com.plog.demo.dto.review.ReviewGetResponseDto;
 import com.plog.demo.dto.review.ReviewUpdateRequestDto;
