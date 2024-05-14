@@ -14,14 +14,20 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @NoArgsConstructor
+@Table(indexes = {
+        @Index(columnList = "providerId")
+})
 public class WorkdateTable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int workdateId;
+    private int workDateId;
 
     @Column
-    private LocalDateTime workdate;
+    private String workDate;
+
+    @Column
+    private String workTime;
 
     @ManyToOne
     @JoinColumn(name="providerId")

@@ -13,4 +13,7 @@ public interface ConfirmService {
 
     boolean deleteFiles(String userId) throws CustomException;
 
+    void mailSend(String setForm, String toMail, String title, String content) throws CustomException;
+
+    String joinEmail(String email) throws CustomException;
 }

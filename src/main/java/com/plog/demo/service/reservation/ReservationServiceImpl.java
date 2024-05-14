@@ -125,6 +125,7 @@ public class ReservationServiceImpl implements ReservationService{
                     .reservationHairName(reservation.getReservationHairName())
                     .amount(reservation.getAmount())
                     .status(reservation.getStatus())
+                    .tid(reservation.getTid())
                     .build();
 
             reservationResponseDtoList.add(reservationResponseDto);

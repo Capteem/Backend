@@ -7,6 +7,7 @@ import com.plog.demo.dto.Provider.ProviderCheckRequestDto;
 import com.plog.demo.dto.Provider.ProviderDto;
 import com.plog.demo.dto.Provider.ProviderResponseDto;
 import com.plog.demo.dto.SuccessDto;
+import com.plog.demo.dto.workdate.WorkdateDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.ProviderTable;
 import com.plog.demo.service.Provider.ProviderService;
@@ -80,6 +81,18 @@ public class ProviderController {
         }
     }
 
+    @PostMapping("/workdate")
+    @Operation(summary = "제공자 근무일 업데이트", description = "제공자 근무일을 업데이트합니다.")
+    @ApiResponse(responseCode = "200", description = "제공자 근무일 업데이트 성공")
+    public ResponseEntity<SuccessDto> updateProviderWorkDate(@RequestBody WorkdateDto workdateDto) throws CustomException {
+        try{
+            providerService.updateProviderWorkDate(workdateDto);
+            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("제공자 근무일 업데이트 성공").build());
+        } catch (CustomException e){
+            log.info("updateProviderWorkDate error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
+    }
 
     /**
      * 커스텀 예외

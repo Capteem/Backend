@@ -14,4 +14,6 @@ public interface PaymentTableRepository extends JpaRepository<PaymentTable, Stri
     PaymentTable findByPaymentId(String tid);
 
     List<PaymentTable> findAllByUserId(IdTable userId);
+
+    List<PaymentTable> findALlByUserIdAndPaymentId(IdTable userId, String paymentId);
 }

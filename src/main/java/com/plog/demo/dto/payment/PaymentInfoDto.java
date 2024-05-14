@@ -18,5 +18,6 @@ public class PaymentInfoDto {
     private String paymentType;
     private int paymentPoint;
     private String paymentId;
+    private int paymentStatus;
 
 }

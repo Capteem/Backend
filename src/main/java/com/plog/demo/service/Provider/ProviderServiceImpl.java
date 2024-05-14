@@ -7,10 +7,13 @@ import com.plog.demo.dto.Provider.ProviderAdminDto;
 import com.plog.demo.dto.Provider.ProviderDto;
 import com.plog.demo.dto.Provider.ProviderResponseDto;
 
+import com.plog.demo.dto.workdate.WorkdateDto;
+import com.plog.demo.dto.workdate.DateListDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.IdTable;
 
 import com.plog.demo.model.ProviderTable;
+import com.plog.demo.model.WorkdateTable;
 import com.plog.demo.repository.IdTableRepository;
 import com.plog.demo.repository.ProviderTableRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Provider;
 import java.util.List;
 
 @Service
@@ -95,6 +99,29 @@ public class ProviderServiceImpl implements ProviderService{
         } catch (Exception e) {
             log.error("[getConfirmedProviderList] db데이터 베이스 접근 오류");
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    @Override
+    public void updateProviderWorkDate(WorkdateDto workdateDto) throws CustomException {
+        IdTable idTable = idTableRepository.findById(workdateDto.getUserId()).orElseThrow(() -> new CustomException("존재하지 않는 사용자입니다."));
+        ProviderTable providerTable = providerTableRepository.findByUserId(idTable).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
+
+        for(DateListDto dateListDto : workdateDto.getDateList()){
+            for(String date : dateListDto.getTime()){
+                WorkdateTable workdateTable = WorkdateTable.builder()
+                        .providerId(providerTable)
+                        .workDate(dateListDto.getDate())
+                        .workTime(date)
+                        .build();
+                try{
+                    log.info("[updateProviderWorkDate] save제공자 근무일 저장 로직 시작");
+                    providerTableRepository.save(providerTable);
+                }catch (Exception e){
+                    log.error("[updateProviderWorkDate] db데이터 베이스 접근 오류");
+                    throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
+                }
+            }
         }
     }
 
