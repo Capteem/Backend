@@ -20,7 +20,6 @@ public interface ReservationTableRepository extends JpaRepository<ReservationTab
 
     List<ReservationTable> findByUserId(IdTable userId);
 
-
     /**
      * 예약 날짜 겹치는 경우
      */
@@ -38,7 +37,5 @@ public interface ReservationTableRepository extends JpaRepository<ReservationTab
             );
 
     List<ReservationTable> findAllByUserId(IdTable idTable);
-    List<ReservationTable> findAllByProviderId(ProviderTable providerId);
-
 }
 

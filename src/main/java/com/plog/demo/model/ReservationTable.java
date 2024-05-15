@@ -15,8 +15,7 @@ import java.time.LocalDateTime;
 @Table(indexes = {
         @Index(columnList = "reservation_camera"),
         @Index(columnList = "reservation_studio"),
-        @Index(columnList = "reservation_hair"),
-        @Index(columnList = "providerId")
+        @Index(columnList = "reservation_hair")
 })
 public class ReservationTable {
 
@@ -43,10 +42,10 @@ public class ReservationTable {
     private String reservationHairName;
 
     @Column
-    private LocalDateTime reservationStartDate;
+    private LocalDateTime reservation_start_date;
 
     @Column
-    private LocalDateTime reservationEndDate;
+    private LocalDateTime reservation_end_date;
 
     @Column
     private int status;

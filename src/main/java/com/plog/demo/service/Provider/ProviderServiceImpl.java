@@ -39,7 +39,6 @@ public class ProviderServiceImpl implements ProviderService{
     private final ProviderTableRepository providerTableRepository;
     private final IdTableRepository idTableRepository;
     private final WorkdateTableRepository workdateTableRepository;
-    private final ReservationTableRepository reservationTableRepository;
 
 
     @Override
@@ -109,7 +108,7 @@ public class ProviderServiceImpl implements ProviderService{
                     .providerType(providerTable.getProviderType())
                     .providerRepPhoto(providerTable.getProviderRepPhoto())
                     .providerRepPhotoPath(providerTable.getProviderRepPhotoPath())
-                    .dateList(getProviderWorkDateList(providerTable) == null ? null : getProviderWorkDateList(providerTable))
+                    .dateList(null)
                     .build()).toList();
             if (providerTables.isEmpty()) {
                 log.error("[getConfirmedProviderList] 제공자가 존재하지 않습니다.");
@@ -124,38 +123,7 @@ public class ProviderServiceImpl implements ProviderService{
 
     private List<DateListDto> getProviderWorkDateList(ProviderTable providerTable){
         List<WorkdateTable> workdateTables = workdateTableRepository.findByProviderId(providerTable);
-        List<ReservationTable> reservationTables = reservationTableRepository.findAllByProviderId(providerTable);
-        List<DateListDto> reservationDateList = new ArrayList<>();
         List<DateListDto> workDateList = new ArrayList<>();
-
-        for (ReservationTable reservationTable : reservationTables){
-            String startDateTime = String.valueOf(reservationTable.getReservationStartDate());
-            String endDateTime = String.valueOf(reservationTable.getReservationEndDate());
-
-            String startDate = startDateTime.split("T")[0];
-            String endDate = endDateTime.split("T")[0];
-            String startTime = startDateTime.split("T")[1];
-            String endTime = endDateTime.split("T")[1];
-
-            boolean isExist = false;
-            for(DateListDto dateListDto : reservationDateList){
-                if(dateListDto.getDate().equals(startDate)){
-                    dateListDto.getTime().add(startTime);
-                    dateListDto.getTime().add(endTime);
-                    isExist = true;
-                    break;
-                }
-            }
-            if(!isExist){
-                DateListDto dateListDto = DateListDto.builder()
-                        .date(startDate)
-                        .time(new ArrayList<>())
-                        .build();
-                dateListDto.getTime().add(startTime);
-                dateListDto.getTime().add(endTime);
-                reservationDateList.add(dateListDto);
-            }
-        }
 
         for(WorkdateTable workdateTable : workdateTables){
             String workdate = workdateTable.getWorkDate();
