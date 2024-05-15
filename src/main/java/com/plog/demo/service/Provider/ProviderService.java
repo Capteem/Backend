@@ -2,6 +2,7 @@ package com.plog.demo.service.Provider;
 
 import com.plog.demo.dto.Provider.ProviderAdminDto;
 import com.plog.demo.dto.Provider.ProviderDto;
+import com.plog.demo.dto.Provider.ProviderListDto;
 import com.plog.demo.dto.Provider.ProviderResponseDto;
 import com.plog.demo.dto.workdate.WorkdateDto;
 import com.plog.demo.exception.CustomException;
@@ -16,7 +17,7 @@ public interface ProviderService {
     List<ProviderResponseDto> getSelectedProvider(String userId) throws CustomException;
 
 
-    List<ProviderTable> getConfirmedProviderList() throws CustomException;
+    List<ProviderListDto> getConfirmedProviderList() throws CustomException;
 
     void updateProviderWorkDate(WorkdateDto workdateDto) throws CustomException;
 

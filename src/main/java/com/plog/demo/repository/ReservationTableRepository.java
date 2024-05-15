@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.plog.demo.model.ProviderTable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,5 +38,7 @@ public interface ReservationTableRepository extends JpaRepository<ReservationTab
             );
 
     List<ReservationTable> findAllByUserId(IdTable idTable);
+    List<ReservationTable> findAllByProviderId(ProviderTable providerId);
+
 }
 

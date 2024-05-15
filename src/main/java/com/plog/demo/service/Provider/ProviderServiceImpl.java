@@ -5,6 +5,7 @@ import com.plog.demo.common.UserStatus;
 
 import com.plog.demo.dto.Provider.ProviderAdminDto;
 import com.plog.demo.dto.Provider.ProviderDto;
+import com.plog.demo.dto.Provider.ProviderListDto;
 import com.plog.demo.dto.Provider.ProviderResponseDto;
 
 import com.plog.demo.dto.workdate.WorkdateDto;
@@ -13,9 +14,12 @@ import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.IdTable;
 
 import com.plog.demo.model.ProviderTable;
+import com.plog.demo.model.ReservationTable;
 import com.plog.demo.model.WorkdateTable;
 import com.plog.demo.repository.IdTableRepository;
 import com.plog.demo.repository.ProviderTableRepository;
+import com.plog.demo.repository.ReservationTableRepository;
+import com.plog.demo.repository.WorkdateTableRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Provider;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,6 +38,9 @@ public class ProviderServiceImpl implements ProviderService{
 
     private final ProviderTableRepository providerTableRepository;
     private final IdTableRepository idTableRepository;
+    private final WorkdateTableRepository workdateTableRepository;
+    private final ReservationTableRepository reservationTableRepository;
+
 
     @Override
     public ProviderDto addProvider(ProviderDto providerDto) throws CustomException{
@@ -47,6 +55,7 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerSubArea(providerDto.getProviderSubArea())
                 .providerDetailArea(providerDto.getProviderDetail())
                 .providerPhoneNum(providerDto.getProviderPhoneNum())
+                .providerPrice(-1)
                 .providerStatus(UserStatus.STOP.getCode())
                 .build();
 
@@ -87,19 +96,87 @@ public class ProviderServiceImpl implements ProviderService{
 
     @Override
     @Operation(summary = "허가된 제공자 목록 조회", description = "허가된 제공자 목록을 조회합니다.")
-    public List<ProviderTable> getConfirmedProviderList() throws CustomException {
+    public List<ProviderListDto> getConfirmedProviderList() throws CustomException {
         try {
             log.info("[getConfirmedProviderList] 제공자 리스트 조회 로직 시작");
             List<ProviderTable> providerTables = providerTableRepository.findByProviderStatus(UserStatus.ACTIVE.getCode());
+            List<ProviderListDto> providerListDtos = providerTables.stream().map(providerTable -> ProviderListDto.builder()
+                    .providerId(providerTable.getProviderId())
+                    .providerName(providerTable.getProviderName())
+                    .providerPhone(providerTable.getProviderPhoneNum())
+                    .providerAddress(providerTable.getProviderArea() + " " + providerTable.getProviderSubArea() + " " + providerTable.getProviderDetailArea())
+                    .providerPrice(providerTable.getProviderPrice())
+                    .providerType(providerTable.getProviderType())
+                    .providerRepPhoto(providerTable.getProviderRepPhoto())
+                    .providerRepPhotoPath(providerTable.getProviderRepPhotoPath())
+                    .dateList(getProviderWorkDateList(providerTable) == null ? null : getProviderWorkDateList(providerTable))
+                    .build()).toList();
             if (providerTables.isEmpty()) {
                 log.error("[getConfirmedProviderList] 제공자가 존재하지 않습니다.");
                 throw new CustomException("제공자가 존재하지 않습니다.");
             }
-            return providerTables;
+            return providerListDtos;
         } catch (Exception e) {
             log.error("[getConfirmedProviderList] db데이터 베이스 접근 오류");
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
         }
+    }
+
+    private List<DateListDto> getProviderWorkDateList(ProviderTable providerTable){
+        List<WorkdateTable> workdateTables = workdateTableRepository.findByProviderId(providerTable);
+        List<ReservationTable> reservationTables = reservationTableRepository.findAllByProviderId(providerTable);
+        List<DateListDto> reservationDateList = new ArrayList<>();
+        List<DateListDto> workDateList = new ArrayList<>();
+
+        for (ReservationTable reservationTable : reservationTables){
+            String startDateTime = String.valueOf(reservationTable.getReservationStartDate());
+            String endDateTime = String.valueOf(reservationTable.getReservationEndDate());
+
+            String startDate = startDateTime.split("T")[0];
+            String endDate = endDateTime.split("T")[0];
+            String startTime = startDateTime.split("T")[1];
+            String endTime = endDateTime.split("T")[1];
+
+            boolean isExist = false;
+            for(DateListDto dateListDto : reservationDateList){
+                if(dateListDto.getDate().equals(startDate)){
+                    dateListDto.getTime().add(startTime);
+                    dateListDto.getTime().add(endTime);
+                    isExist = true;
+                    break;
+                }
+            }
+            if(!isExist){
+                DateListDto dateListDto = DateListDto.builder()
+                        .date(startDate)
+                        .time(new ArrayList<>())
+                        .build();
+                dateListDto.getTime().add(startTime);
+                dateListDto.getTime().add(endTime);
+                reservationDateList.add(dateListDto);
+            }
+        }
+
+        for(WorkdateTable workdateTable : workdateTables){
+            String workdate = workdateTable.getWorkDate();
+            boolean isExist = false;
+            for(DateListDto dateListDto : workDateList){
+                if(dateListDto.getDate().equals(workdate)){
+                    dateListDto.getTime().add(workdateTable.getWorkTime());
+                    isExist = true;
+                    break;
+                }
+            }
+            if(!isExist){
+                DateListDto dateListDto = DateListDto.builder()
+                        .date(workdate)
+                        .time(new ArrayList<>())
+                        .build();
+                dateListDto.getTime().add(workdateTable.getWorkTime());
+                workDateList.add(dateListDto);
+            }
+        }
+        return workDateList;
     }
 
     @Override
@@ -116,7 +193,7 @@ public class ProviderServiceImpl implements ProviderService{
                         .build();
                 try{
                     log.info("[updateProviderWorkDate] save제공자 근무일 저장 로직 시작");
-                    providerTableRepository.save(providerTable);
+                    workdateTableRepository.save(workdateTable);
                 }catch (Exception e){
                     log.error("[updateProviderWorkDate] db데이터 베이스 접근 오류");
                     throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);

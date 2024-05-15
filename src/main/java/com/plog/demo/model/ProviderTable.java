@@ -22,7 +22,7 @@ public class ProviderTable {
     @Column
     private String providerDetailArea;
     @Column
-    private String providerPrice;
+    private int providerPrice;
     @Column
     private String providerPhoneNum;
     @Column
