@@ -1,20 +1,22 @@
 package com.plog.demo.controller.provider;
 
-import com.plog.demo.common.file.ProviderCheckFileStore;
 import com.plog.demo.dto.ErrorDto;
-import com.plog.demo.dto.Provider.ProviderAdminDto;
-import com.plog.demo.dto.Provider.ProviderCheckRequestDto;
 import com.plog.demo.dto.Provider.ProviderDto;
+import com.plog.demo.dto.Provider.ProviderRepRequestDto;
 import com.plog.demo.dto.Provider.ProviderResponseDto;
 import com.plog.demo.dto.SuccessDto;
+import com.plog.demo.dto.file.UploadFileDto;
 import com.plog.demo.dto.workdate.WorkdateDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.ProviderTable;
 import com.plog.demo.service.Provider.ProviderService;
+import com.plog.demo.service.portfolio.PortfolioService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +24,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,8 +39,7 @@ import java.util.Map;
 public class ProviderController {
 
     private final ProviderService providerService;
-    private final ProviderCheckFileStore providerCheckFileStore;
-
+    private final PortfolioService portfolioService;
     @PostMapping("/service")
     @Operation(summary = "서비스 등록", description = "서비스를 등록합니다.")
     public ResponseEntity<Map<String, String>> signUpProvider(@RequestBody ProviderDto providerDto){
@@ -94,19 +94,52 @@ public class ProviderController {
         }
     }
 
+    @Operation(summary = "대표 사진 등록 (+ 수정)", description = "대표 사진을 등록합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "대표사진 등록 성공",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = UploadFileDto.class)))),
+            @ApiResponse(responseCode = "400",
+                    description = "대표사진 등록 실패",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+    })
+    @PostMapping("/rep")
+    public ResponseEntity<UploadFileDto> addProviderRep(@ModelAttribute ProviderRepRequestDto providerRepRequestDto) throws CustomException {
+        UploadFileDto uploadFileDto = portfolioService.addProviderRep(providerRepRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(uploadFileDto);
+    }
+
+    @Operation(summary = "대표 사진 삭제", description = "대표 사진을 삭제합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "대표사진 삭제 성공",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SuccessDto.class)))),
+            @ApiResponse(responseCode = "400",
+                    description = "대표사진 삭제 실패",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+    })
+    @DeleteMapping("/rep/{providerId}")
+    public ResponseEntity<SuccessDto> deleteProviderRep(@PathVariable int providerId) throws CustomException {
+        if(!portfolioService.deleteProviderRep(providerId)){
+            throw new RuntimeException("대표 사진 삭제 에러");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("대표 사진 삭제 성공").build());
+    }
+
     /**
      * 커스텀 예외
      */
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorDto> customExceptionHandler(CustomException e){
-        log.warn("customExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
+        log.warn("customExceptionHandler 호출, {}, {}", e.getMessage(), e.getCause());
 
         ErrorDto errorDto = ErrorDto.builder()
                 .resultCode(e.getResultCode())
                 .msg(e.getMessage())
                 .build();
 
-        return ResponseEntity.status(e.getResultCode()).body(errorDto);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
     }
 
     /**
@@ -114,7 +147,7 @@ public class ProviderController {
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorDto> runtimeExceptionHandler(Exception e){
-        log.error("runtimeExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
+        log.error("runtimeExceptionHandler 호출, {}, {}", e.getMessage(), e.getCause());
 
         ErrorDto errorDto = ErrorDto.builder()
                 .resultCode(HttpStatus.INTERNAL_SERVER_ERROR.value())

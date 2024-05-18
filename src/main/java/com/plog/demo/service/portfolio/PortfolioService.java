@@ -1,11 +1,11 @@
 package com.plog.demo.service.portfolio;
 
+import com.plog.demo.dto.Provider.ProviderRepRequestDto;
 import com.plog.demo.dto.file.UploadFileDto;
 import com.plog.demo.dto.portfolio.PortfolioImageDto;
 import com.plog.demo.dto.portfolio.PortfolioResponseDto;
 import com.plog.demo.dto.portfolio.PortfolioUploadDto;
 import com.plog.demo.exception.CustomException;
-import org.springframework.core.io.Resource;
 
 import java.util.List;
 
@@ -20,6 +20,9 @@ public interface PortfolioService {
 
     boolean deletePortfolio(int portfolioId) throws CustomException;
 
+    UploadFileDto addProviderRep(ProviderRepRequestDto providerRepRequestDto) throws CustomException;
+
+    boolean deleteProviderRep(int providerId) throws CustomException;
 
 
 }

@@ -68,25 +68,22 @@ public class SignServiceImpl implements SignService{
     public LoginResponseDto login(String userId, String password) throws CustomException {
         log.info("[login] 시작");
 
-        Optional<IdTable> user = idTableRepository.findById(userId);
+        IdTable user = idTableRepository.findById(userId)
+                .orElseThrow(()-> new CustomException("존재 하지 않는 유저입니다.", HttpStatus.NOT_FOUND.value()));
 
-        //유저 존재
-        if(user.isEmpty()){
-            log.info("[login] 유저 존재 암함");
-            throw new CustomException("존재 하지 않는 유저입니다.", HttpStatus.UNAUTHORIZED.value());
-        }
 
-        if(!passwordEncoder.matches(password, user.get().getPassword())){
+
+        if(!passwordEncoder.matches(password, user.getPassword())){
             log.info("[login] 패스워드 불일치");
             throw new CustomException("패스워드 불일치", HttpStatus.BAD_REQUEST.value());
         }
 
-        if(user.get().getStatus() == UserStatus.STOP.getCode()){
+        if(user.getStatus() == UserStatus.STOP.getCode()){
             log.info("[login] 유저 비활성화");
             throw new CustomException("정지된 유저입니다.", HttpStatus.NOT_ACCEPTABLE.value());
         }
 
-        if(user.get().getStatus() == UserStatus.BANNED.getCode()){
+        if(user.getStatus() == UserStatus.BANNED.getCode()){
             log.info("[login] 유저 탈퇴");
             throw new CustomException("탈퇴된 유저입니다.", HttpStatus.NOT_ACCEPTABLE.value());
         }
@@ -99,6 +96,7 @@ public class SignServiceImpl implements SignService{
         return LoginResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .role(user.getRole())
                 .build();
     }
 }
