@@ -1,7 +1,5 @@
 package com.plog.demo.controller.portfolio;
 
-
-import com.plog.demo.common.file.PortfolioFileStore;
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.file.UploadFileDto;
@@ -70,8 +68,6 @@ public class PortfolioController {
     }
 
 
-
-
     @Operation(summary = "포트 폴리오 삭제", description = "포트 폴리오 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
@@ -82,7 +78,7 @@ public class PortfolioController {
                     content = @Content(schema = @Schema(implementation = ErrorDto.class)))
     })
     @DeleteMapping("/{portfolioId}")
-    public ResponseEntity<SuccessDto> deletePortfolios(@PathVariable int portfolioId) throws CustomException {
+    public ResponseEntity<SuccessDto> deletePortfolio(@PathVariable int portfolioId) throws CustomException {
 
         boolean isDeleted = portfolioService.deletePortfolio(portfolioId);
 
@@ -95,9 +91,8 @@ public class PortfolioController {
     }
 
 
-    /**
-     * TODO 수정필요
-     */
+    @Operation(summary = "이미지 파일 불러오기", description = "이미지 파일을 불러온다.")
+    @ApiResponse(responseCode = "200", description = "이미지 파일 불러오기 성공")
     @GetMapping("/image/{middleDir}/{fileName}")
     public ResponseEntity<Resource> getImage(@PathVariable String middleDir, @PathVariable String fileName) throws CustomException, MalformedURLException {
 
@@ -118,53 +113,6 @@ public class PortfolioController {
                 .body(new UrlResource("file:" + portfolioImageDto.getImgFullPath()));
     }
 
-    //테스트 TODO 이미지 어떻게 받을지 클라이언트라 회의
-/*    @PostMapping("/image/list")
-    public ResponseEntity<byte[]> getImages(@RequestBody PortfolioViewDto portfolioViewDto) throws CustomException, MalformedURLException {
-
-        List<byte[]> imagesBytes  = downloadImages(portfolioViewDto.getImgUrls());
-
-
-        // 이미지들을 하나의 바이트 배열로 합칩니다.
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        for (byte[] imageBytes : imagesBytes) {
-            try {
-                outputStream.write(imageBytes);
-            } catch (IOException e) {
-                e.printStackTrace(); // 에러 처리를 추가해야 합니다.
-            }
-        }
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.IMAGE_JPEG);
-
-        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(outputStream.toByteArray());
-    }
-
-    public List<byte[]> downloadImages(List<String> imageUrls) {
-        List<byte[]> imagesBytes = new ArrayList<>();
-
-        for (String imageUrl : imageUrls) {
-            byte[] imageData = downloadImage(imageUrl);
-            if (imageData != null) {
-                imagesBytes.add(imageData);
-            }
-        }
-
-        return imagesBytes;
-    }
-
-    private byte[] downloadImage(String imageUrl) {
-        try {
-
-            Path imagePath = Paths.get(portfolioFileStore.getFileDirPath(), imageUrl);
-            return Files.readAllBytes(imagePath);
-
-        } catch (IOException e) {
-            e.printStackTrace(); // 에러 처리를 추가해야 합니다.
-            return null;
-        }
-    }*/
 
     /**
      * 커스텀 예외

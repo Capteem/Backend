@@ -12,14 +12,7 @@ import java.util.List;
 @Builder
 public class ConfirmCheckProviderRequestDto {
 
-    private String providerName;
-    private String providerArea;
-    private String providerSubArea;
-    private String providerDetail;
-    private int providerType;
-    private int providerStatus;
     private String userId;
-    private String providerPhoneNum;
 
     List<MultipartFile> providerCheckFiles;
 }

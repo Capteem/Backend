@@ -29,7 +29,6 @@ public class PaymentTable {
     @Column
     private int paymentStatus;
 
-
     @OneToOne
     @JoinColumn(name = "reservationId")
     private ReservationTable reservationId;

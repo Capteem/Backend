@@ -92,8 +92,11 @@ public class ConfirmServiceImpl implements ConfirmService{
                 getProviderCheckTable(providerCheckFileDto, idTable)
         ).toList();
 
-        providerCheckTableRepository.saveAll(providerCheckTables);
-
+        try {
+            providerCheckTableRepository.saveAll(providerCheckTables);
+        }catch (Exception e){
+            throw new RuntimeException("서비스 등록용 파일을 db에 저장하는데 오류", e);
+        }
 
     }
 
@@ -111,7 +114,11 @@ public class ConfirmServiceImpl implements ConfirmService{
             if(!providerCheckFileStore.deleteFile(providerCheckTable.getStoredFileName())){
                 return false;
             }
-            providerCheckTableRepository.deleteById(providerCheckTable.getProviderCheckId());
+            try {
+                providerCheckTableRepository.deleteById(providerCheckTable.getProviderCheckId());
+            }catch (Exception e){
+                throw new RuntimeException("서비스 등록용 파일정보를 db에서 삭제하는 중 에러", e);
+            }
         }
 
 
