@@ -1,6 +1,7 @@
 package com.plog.demo.service.Provider;
 
 import com.plog.demo.dto.Provider.*;
+import com.plog.demo.dto.reservation.ReservationProviderResponseDto;
 import com.plog.demo.dto.workdate.WorkdateDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.ProviderTable;
@@ -21,5 +22,11 @@ public interface ProviderService {
     void updateProviderWorkDate(WorkdateDto workdateDto) throws CustomException;
 
     List<ProviderReservationDto> getProviderReservationList(int providerId) throws CustomException;
+
+    ReservationProviderResponseDto refuseReservation(int reservationId, int providerId) throws CustomException;
+
+    void acceptReservation(int reservationId) throws CustomException;
+
+    void completeReservation(int reservationId) throws CustomException;
 
 }

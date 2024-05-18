@@ -199,7 +199,7 @@ public class PaymentServiceImpl implements PaymentService{
 
             paymentDataTableRepository.save(paymentDataTable);
             ReservationTable reservationTable = reservationTableRepository.findAllByUserId(idTable).get(reservationTableRepository.findAllByUserId(idTable).size() - 1);
-            reservationTable.setTid(paymentTable.getPaymentId());
+            reservationTable.setTid(paymentTable);
             reservationTableRepository.save(reservationTable);
         }catch (Exception e){
             log.error("[getApprove] failure to get approve");

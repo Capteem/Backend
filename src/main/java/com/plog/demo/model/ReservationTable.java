@@ -1,5 +1,7 @@
 package com.plog.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.Builder;
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
         @Index(columnList = "reservation_studio"),
         @Index(columnList = "reservation_hair")
 })
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
 public class ReservationTable {
 
     @Id
@@ -53,8 +56,8 @@ public class ReservationTable {
     @Column
     private int amount;
 
-    @Column
-    private String tid;
+    @OneToOne
+    private PaymentTable tid;
 
     @ManyToOne
     @JoinColumn(name="id")

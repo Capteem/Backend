@@ -149,6 +149,45 @@ public class ProviderController {
         return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("대표 사진 삭제 성공").build());
     }
 
+    @PostMapping("/accept")
+    @Operation(summary = "예약 수락", description = "예약을 수락합니다.")
+    @ApiResponse(responseCode = "200", description = "예약 수락 성공")
+    public ResponseEntity<SuccessDto> acceptReservation(@RequestParam int reservationId) throws CustomException {
+        try{
+            providerService.acceptReservation(reservationId);
+            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("예약 수락 성공").build());
+        } catch (CustomException e){
+            log.info("acceptReservation error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
+    }
+
+    @PostMapping("/refuse")
+    @Operation(summary = "예약 거절", description = "예약을 거절합니다.")
+    @ApiResponse(responseCode = "200", description = "예약 거절 성공")
+    public ResponseEntity<SuccessDto> refuseReservation(@RequestParam int reservationId, @RequestParam int providerId) throws CustomException {
+        try{
+            providerService.refuseReservation(reservationId, providerId);
+            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("예약 거절 성공").build());
+        } catch (CustomException e){
+            log.info("refuseReservation error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
+    }
+
+    @PostMapping("/complete")
+    @Operation(summary = "예약 완료", description = "예약을 완료합니다.")
+    @ApiResponse(responseCode = "200", description = "예약 완료 성공")
+    public ResponseEntity<SuccessDto> completeReservation(@RequestParam int reservationId) throws CustomException {
+        try{
+            providerService.completeReservation(reservationId);
+            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("예약 완료 성공").build());
+        } catch (CustomException e){
+            log.info("completeReservation error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
+    }
+
     /**
      * 커스텀 예외
      */

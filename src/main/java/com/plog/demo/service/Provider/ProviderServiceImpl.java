@@ -8,13 +8,16 @@ import com.plog.demo.dto.Provider.ProviderListDto;
 import com.plog.demo.dto.Provider.ProviderReservationDto;
 import com.plog.demo.dto.Provider.ProviderResponseDto;
 
+import com.plog.demo.dto.reservation.ReservationProviderResponseDto;
 import com.plog.demo.dto.workdate.WorkDateRequestDto;
 import com.plog.demo.dto.workdate.WorkdateDto;
 import com.plog.demo.dto.workdate.DateListDto;
 import com.plog.demo.exception.CustomException;
+import com.plog.demo.common.ReservationStatus;
 import com.plog.demo.model.*;
 
 import com.plog.demo.repository.*;
+import com.plog.demo.service.payment.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +38,7 @@ public class ProviderServiceImpl implements ProviderService{
     private final IdTableRepository idTableRepository;
     private final WorkdateTableRepository workdateTableRepository;
     private final ReservationTableRepository reservationTableRepository;
-    private final ReservationTimeTableRepository reservationTimeTableRepository;
+    private final PaymentService paymentService;
 
     @Override
     public ProviderDto addProvider(ProviderDto providerDto) throws CustomException{
@@ -127,7 +130,6 @@ public class ProviderServiceImpl implements ProviderService{
         return providerReservationDtos;
     }
 
-
     @Override
     @Operation(summary = "허가된 제공자 목록 조회", description = "허가된 제공자 목록을 조회합니다.")
     public List<ProviderListDto> getConfirmedProviderList() throws CustomException {
@@ -164,13 +166,6 @@ public class ProviderServiceImpl implements ProviderService{
         }
     }
 
-    private LocalDateTime changeStringToLocalDatetime(String date, String time){
-        String[] dateArr = date.split("-");
-        String[] timeArr = time.split(":");
-        return LocalDateTime.of(Integer.parseInt(dateArr[0]), Integer.parseInt(dateArr[1]), Integer.parseInt(dateArr[2]), Integer.parseInt(timeArr[0]), Integer.parseInt(timeArr[1]), Integer.parseInt(timeArr[2]));
-    }
-
-
     @Override
     public void updateProviderWorkDate(WorkdateDto workdateDto) throws CustomException {
         IdTable idTable = idTableRepository.findById(workdateDto.getUserId()).orElseThrow(() -> new CustomException("존재하지 않는 사용자입니다."));
@@ -192,6 +187,59 @@ public class ProviderServiceImpl implements ProviderService{
             }
         }
     }
+
+    @Override
+    public ReservationProviderResponseDto refuseReservation(int reservationId, int providerId) throws CustomException {
+        ReservationTable reservationTable = reservationTableRepository.findById(reservationId).orElseThrow(() -> new CustomException("존재하지 않는 예약입니다."));
+        if(reservationTable.getStatus() != ReservationStatus.WAITING.getCode()){
+            log.error("[refuseReservation] 이미 처리된 예약입니다.");
+            throw new CustomException("이미 처리된 예약입니다.", HttpStatus.BAD_REQUEST.value());
+        }
+
+        if(reservationTable.getReservation_camera() != providerId && reservationTable.getReservation_hair() != providerId && reservationTable.getReservation_studio() != providerId){
+            log.error("[refuseReservation] 권한이 없습니다.");
+            throw new CustomException("권한이 없습니다.", HttpStatus.FORBIDDEN.value());
+        }
+
+        reservationTable.setStatus(ReservationStatus.CANCELLED.getCode());
+        try{
+            reservationTableRepository.save(reservationTable);
+            paymentService.getCancelApprove(reservationTable.getTid().getPaymentId(), reservationTable.getUserId().getId());
+            return ReservationProviderResponseDto.builder()
+                    .reservationId(reservationTable.getReservationId())
+                    .userId(reservationTable.getUserId().getId())
+                    .providerId(providerId)
+                    .build();
+        }catch (Exception e){
+            log.error("[refuseReservation] db데이터 베이스 접근 오류");
+            throw new CustomException("데이터베이스 접근 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    @Override
+    public void acceptReservation(int reservationId) throws CustomException {
+        ReservationTable reservationTable = reservationTableRepository.findById(reservationId).orElseThrow(() -> new CustomException("존재하지 않는 예약입니다."));
+        reservationTable.setStatus(ReservationStatus.CONFIRMED.getCode());
+        try{
+            reservationTableRepository.save(reservationTable);
+        }catch (Exception e){
+            log.error("[acceptReservation] db데이터 베이스 접근 오류");
+            throw new CustomException("데이터베이스 접근 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    @Override
+    public void completeReservation(int reservationId) throws CustomException {
+        ReservationTable reservationTable = reservationTableRepository.findById(reservationId).orElseThrow(() -> new CustomException("존재하지 않는 예약입니다."));
+        reservationTable.setStatus(ReservationStatus.COMPLETED.getCode());
+        try{
+            reservationTableRepository.save(reservationTable);
+        }catch (Exception e){
+            log.error("[completeReservation] db데이터 베이스 접근 오류");
+            throw new CustomException("데이터베이스 접근 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
 }
 
 
