@@ -1,9 +1,7 @@
 package com.plog.demo.controller.provider;
 
 import com.plog.demo.dto.ErrorDto;
-import com.plog.demo.dto.Provider.ProviderDto;
-import com.plog.demo.dto.Provider.ProviderRepRequestDto;
-import com.plog.demo.dto.Provider.ProviderResponseDto;
+import com.plog.demo.dto.Provider.*;
 import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.file.UploadFileDto;
 import com.plog.demo.dto.workdate.WorkdateDto;
@@ -73,7 +71,7 @@ public class ProviderController {
     @GetMapping("/confirmed")
     @Operation(summary = "확인된 제공자 목록", description = "확인된 제공자 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "확인된 제공자 목록 조회 성공", content = @Content(schema = @Schema(implementation = ProviderTable.class)))
-    public ResponseEntity<List<ProviderTable>> getConfirmedProviderList() throws CustomException {
+    public ResponseEntity<List<ProviderListDto>> getConfirmedProviderList() throws CustomException {
         try{
             return ResponseEntity.status(HttpStatus.OK).body(providerService.getConfirmedProviderList());
         } catch (CustomException e){
