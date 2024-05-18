@@ -66,15 +66,39 @@ public class ProviderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+    @GetMapping("/user/provider")
+    @Operation(summary = "자신의 서비스 목록 조회", description = "자신의 서비스 목록을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "자신의 서비스 목록 조회 성공", content = @Content(schema = @Schema(implementation = ProviderResponseDto.class)))
+    public ResponseEntity<List<ProviderResponseDto>> getProviderListWithConfirm(@RequestParam String userId) throws CustomException {
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(providerService.getProviderListWithConfirm(userId));
+        } catch (CustomException e){
+            log.info("getProviderListWithConfirm error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
+    }
+
+    @GetMapping("/reservation")
+    @Operation(summary = "제공자 예약 목록 조회", description = "제공자 예약 목록을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "제공자 예약 목록 조회 성공", content = @Content(schema = @Schema(implementation = ProviderReservationDto.class)))
+    public ResponseEntity<List<ProviderReservationDto>> getProviderReservationList(@RequestParam int providerId) throws CustomException {
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(providerService.getProviderReservationList(providerId));
+        } catch (CustomException e){
+            log.info("getProviderReservationList error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
+    }
 
     @GetMapping("/confirmed")
     @Operation(summary = "확인된 제공자 목록", description = "확인된 제공자 목록을 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "확인된 제공자 목록 조회 성공", content = @Content(schema = @Schema(implementation = ProviderTable.class)))
+    @ApiResponse(responseCode = "200", description = "확인된 제공자 목록 조회 성공", content = @Content(schema = @Schema(implementation = ProviderListDto.class)))
     public ResponseEntity<List<ProviderListDto>> getConfirmedProviderList() throws CustomException {
         try{
             return ResponseEntity.status(HttpStatus.OK).body(providerService.getConfirmedProviderList());
         } catch (CustomException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            log.info("getConfirmedProviderList error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
         }
     }
 

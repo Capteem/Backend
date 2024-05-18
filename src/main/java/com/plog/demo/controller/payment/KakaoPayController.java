@@ -91,6 +91,7 @@ public class KakaoPayController {
 
     @GetMapping("/success/info")
     @Operation(summary = "결제 정보", description = "카카오페이 팝업창이 꺼지면 부르는 API, 결제 정보를 가져옵니다.")
+    @ApiResponse(responseCode = "200", description = "결제 정보 성공",content = @Content(schema = @Schema(implementation = PaymentInfoDto.class)))
     public ResponseEntity<Object> getPaymentInfo(@RequestParam("userId") String id) throws CustomException {
         try{
             PaymentInfoDto paymentInfo = paymentService.getPaymentInfo(id);

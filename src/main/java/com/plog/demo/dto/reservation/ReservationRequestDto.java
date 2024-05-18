@@ -30,4 +30,8 @@ public class ReservationRequestDto {
 
     private LocalDateTime reservationEndDate;
 
+    public String toString(){
+        return "userId: " + userId + ", reservationCameraId: " + reservationCameraId + ", reservationCameraName: " + reservationCameraName + ", reservationStudioId: " + reservationStudioId + ", reservationStudioName: " + reservationStudioName + ", reservationHairId: " + reservationHairId + ", reservationHairName: " + reservationHairName + ", reservationStartDate: " + reservationStartDate + ", reservationEndDate: " + reservationEndDate;
+    }
+
 }

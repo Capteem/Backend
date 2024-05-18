@@ -3,16 +3,9 @@ package com.plog.demo.service.payment;
 import com.plog.demo.common.PaymentStatus;
 import com.plog.demo.common.ReservationStatus;
 import com.plog.demo.dto.payment.*;
-import com.plog.demo.dto.reservation.ReservationResponseDto;
 import com.plog.demo.exception.CustomException;
-import com.plog.demo.model.IdTable;
-import com.plog.demo.model.PaymentDataTable;
-import com.plog.demo.model.PaymentTable;
-import com.plog.demo.model.ReservationTable;
-import com.plog.demo.repository.IdTableRepository;
-import com.plog.demo.repository.PaymentDataTableRepository;
-import com.plog.demo.repository.PaymentTableRepository;
-import com.plog.demo.repository.ReservationTableRepository;
+import com.plog.demo.model.*;
+import com.plog.demo.repository.*;
 import com.plog.demo.service.reservation.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +35,8 @@ public class PaymentServiceImpl implements PaymentService{
     private final ReservationService reservationService;
     private final ReservationTableRepository reservationTableRepository;
     private final PaymentDataTableRepository paymentDataTableRepository;
+    private final ProviderTableRepository providerTableRepository;
+    private final ReservationTimeTableRepository reservationTimeTableRepository;
 
     @Value("${pay.admin_key}")
     private String adminKey;
@@ -73,14 +68,14 @@ public class PaymentServiceImpl implements PaymentService{
             assert payReadyResDto != null;
             paymentId = payReadyResDto.getTid();
         } catch (Exception e){
-            log.info("[payReady] 결제 준비 중 오류 발생");
+            log.info("[payReady] error while getting paymentId");
             throw new RuntimeException("결제 준비 중 오류가 발생했습니다.", e);
         }
 
         try{
             reservationService.addReservation(payInfoDto.getReservationRequestDto());
         } catch (Exception e){
-            log.info("[payReady] 예약 정보 저장 중 오류 발생");
+            log.info("[payReady] error while saving reservation info");
             throw new RuntimeException("예약 정보 저장 중 오류가 발생했습니다.", e);
         }
 
@@ -90,7 +85,7 @@ public class PaymentServiceImpl implements PaymentService{
             reservationTables = reservationTableRepository.findAllByUserId(idTable);
             currentReservation = reservationTables.get(reservationTables.size() - 1);
         } catch (Exception e){
-            log.info("[payReady] 예약 정보 조회 중 오류 발생");
+            log.info("[payReady] errow while getting reservation info");
             throw new RuntimeException("예약 정보 조회 중 오류가 발생했습니다.", e);
         }
 
@@ -105,13 +100,26 @@ public class PaymentServiceImpl implements PaymentService{
                     .build();
             paymentTableRepository.save(paymentTable);
         } catch (Exception e) {
-            log.info("[payReady] 데이터 베이스 접근 오류");
+            log.info("[payReady] error while saving payment info");
             currentReservation.setUserId(null);
             reservationTableRepository.delete(currentReservation);
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
         }
 
         return payReadyResDto;
+    }
+
+    private void saveReservationTimeTable(int providerid, LocalDateTime reservationStart, LocalDateTime reservationEnd){
+        LocalDateTime current = reservationStart;
+        while(current.isBefore(reservationEnd)){
+            ReservationTimeTable reservationTimeTable = ReservationTimeTable.builder()
+                    .reservationDate(current.toLocalDate().toString())
+                    .reservationTime(current.toLocalTime().toString())
+                    .providerId(providerTableRepository.findById(providerid).get())
+                    .build();
+            reservationTimeTableRepository.save(reservationTimeTable);
+            current = current.plusHours(1);
+        }
     }
 
     @Override

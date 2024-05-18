@@ -1,6 +1,5 @@
 package com.plog.demo.dto.workdate;
 
-
 import lombok.*;
 
 import java.util.List;
@@ -10,8 +9,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class WorkdateDto {
+public class WorkDateRequestDto {
 
-    private String userId;
-    private List<WorkDateRequestDto> dateList;
+    private String date;
+    private List<String> time;
 }
