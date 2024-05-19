@@ -16,6 +16,6 @@ public class ProviderReservationDto {
     private String providerName;
     private int providerType;
     private int reservationStatus;
-    private LocalDateTime reservationStartTime;
-    private LocalDateTime reservationEndTime;
+    private String reservationStartTime;
+    private String reservationEndTime;
 }

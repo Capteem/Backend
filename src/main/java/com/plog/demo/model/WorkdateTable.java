@@ -31,6 +31,9 @@ public class WorkdateTable {
     private String workDate;
 
     @Column
+    private String workDay;
+
+    @Column
     private String workTime;
 
     @ManyToOne

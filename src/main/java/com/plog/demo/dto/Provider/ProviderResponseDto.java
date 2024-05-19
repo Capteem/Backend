@@ -15,4 +15,5 @@ public class ProviderResponseDto {
     private int providerType;
     private String providerAddress;
     private String providerPhoneNum;
+    private int providerStatus;
 }

@@ -25,8 +25,12 @@ public interface ProviderService {
 
     ReservationProviderResponseDto refuseReservation(int reservationId, int providerId) throws CustomException;
 
-    void acceptReservation(int reservationId) throws CustomException;
+    void acceptReservation(int reservationId, int providerId) throws CustomException;
 
-    void completeReservation(int reservationId) throws CustomException;
+    void completeReservation(int reservationId, int providerId) throws CustomException;
 
+    ProviderInfoDto getProviderInfo(int providerId) throws CustomException;
+
+    void updateProviderInfo(ProviderInfoResponseDto providerInfoDto) throws CustomException;
+    void deleteWorkDate(WorkdateDto workdateDto) throws CustomException;
 }

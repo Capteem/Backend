@@ -3,10 +3,7 @@ package com.plog.demo.service.Provider;
 
 import com.plog.demo.common.UserStatus;
 
-import com.plog.demo.dto.Provider.ProviderDto;
-import com.plog.demo.dto.Provider.ProviderListDto;
-import com.plog.demo.dto.Provider.ProviderReservationDto;
-import com.plog.demo.dto.Provider.ProviderResponseDto;
+import com.plog.demo.dto.Provider.*;
 
 import com.plog.demo.dto.reservation.ReservationProviderResponseDto;
 import com.plog.demo.dto.workdate.WorkDateRequestDto;
@@ -25,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -81,6 +77,7 @@ public class ProviderServiceImpl implements ProviderService{
                     .providerId(providerTable.getProviderId())
                     .providerAddress(providerTable.getProviderArea() + " " + providerTable.getProviderSubArea() + " " + providerTable.getProviderDetailArea())
                     .providerPhoneNum(providerTable.getProviderPhoneNum())
+                    .providerStatus(providerTable.getProviderStatus())
                     .build()).toList();
             if(providerTables.isEmpty()){
                 log.error("[getProvider] 제공자가 존재하지 않습니다.");
@@ -103,6 +100,7 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerId(providerTable.getProviderId())
                 .providerAddress(providerTable.getProviderArea() + " " + providerTable.getProviderSubArea() + " " + providerTable.getProviderDetailArea())
                 .providerPhoneNum(providerTable.getProviderPhoneNum())
+                .providerStatus(providerTable.getProviderStatus())
                 .build()).toList();
         if(providerTables.isEmpty()){
             log.error("[getProviderListWithConfirm] 제공자가 존재하지 않습니다.");
@@ -117,8 +115,8 @@ public class ProviderServiceImpl implements ProviderService{
         List<ReservationTable> reservationTables = reservationTableRepository.findReservationTableByProviderId(providerTable.getProviderId());
         List<ProviderReservationDto> providerReservationDtos = reservationTables.stream().map(reservationTable -> ProviderReservationDto.builder()
                 .reservationId(reservationTable.getReservationId())
-                .reservationStartTime(reservationTable.getReservation_start_date())
-                .reservationEndTime(reservationTable.getReservation_end_date())
+                .reservationStartTime(reservationTable.getReservation_start_date().toString())
+                .reservationEndTime(reservationTable.getReservation_end_date().toString())
                 .reservationStatus(reservationTable.getStatus())
                 .providerType(providerTable.getProviderType())
                 .providerName(providerTable.getProviderName())
@@ -168,39 +166,64 @@ public class ProviderServiceImpl implements ProviderService{
 
     @Override
     public void updateProviderWorkDate(WorkdateDto workdateDto) throws CustomException {
-        IdTable idTable = idTableRepository.findById(workdateDto.getUserId()).orElseThrow(() -> new CustomException("존재하지 않는 사용자입니다."));
-        ProviderTable providerTable = providerTableRepository.findByUserId(idTable).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
-
-        for(WorkDateRequestDto dateListDto : workdateDto.getDateList()){
-            for(String time : dateListDto.getTime()) {
-                WorkdateTable workdateTable = WorkdateTable.builder()
-                        .providerId(providerTable)
-                        .workDate(dateListDto.getDate())
-                        .workTime(time)
-                        .build();
-                try{
-                    workdateTableRepository.save(workdateTable);
-                }catch (Exception e){
-                    log.error("[updateProviderWorkDate] db데이터 베이스 접근 오류");
-                    throw new CustomException("데이터베이스 접근 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
-                }
+        ProviderTable providerTable = providerTableRepository.findById(workdateDto.getProviderId()).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
+        for(WorkDateRequestDto workDateRequestDto : workdateDto.getDateList()){
+            WorkdateTable workdateTable = WorkdateTable.builder()
+                    .providerId(providerTable)
+                    .workDate(workDateRequestDto.getDate())
+                    .workTime(workDateRequestDto.getTime())
+                    .workDay(workDateRequestDto.getDay())
+                    .build();
+            try{
+                workdateTableRepository.save(workdateTable);
+            }catch (Exception e){
+                log.error("[updateProviderWorkDate] db데이터 베이스 접근 오류");
+                throw new CustomException("데이터베이스 접근 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
         }
     }
 
     @Override
+    public void deleteWorkDate(WorkdateDto workdateDto) throws CustomException {
+        ProviderTable providerTable = providerTableRepository.findById(workdateDto.getProviderId()).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
+
+        for(WorkDateRequestDto workDateRequestDto : workdateDto.getDateList()){
+            WorkdateTable workdateTable = workdateTableRepository.findByProviderIdAndWorkDateAndWorkTime(providerTable, workDateRequestDto.getDate(), workDateRequestDto.getTime());
+            if(workdateTable == null){
+                log.error("[deleteWorkDate] 존재하지 않는 일정입니다.");
+                throw new CustomException("존재하지 않는 일정입니다.", HttpStatus.NOT_FOUND.value());
+            }
+            try{
+                workdateTableRepository.delete(workdateTable);
+            }catch (Exception e){
+                log.error("[deleteWorkDate] db데이터 베이스 접근 오류");
+                throw new CustomException("데이터베이스 접근 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            }
+        }
+    }
+
+    @Override
+    public void updateProviderInfo(ProviderInfoResponseDto providerInfoResponseDto) throws CustomException {
+        ProviderTable providerTable = providerTableRepository.findById(providerInfoResponseDto.getProviderId()).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
+        providerTable.setProviderName(providerInfoResponseDto.getProviderName());
+        providerTable.setProviderPhoneNum(providerInfoResponseDto.getProviderPhoneNum());
+        providerTable.setProviderPrice(providerInfoResponseDto.getProviderPrice());
+        try{
+            providerTableRepository.save(providerTable);
+        }catch (Exception e){
+            log.error("[updateProviderInfo] db데이터 베이스 접근 오류");
+            throw new CustomException("데이터베이스 접근 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    @Override
     public ReservationProviderResponseDto refuseReservation(int reservationId, int providerId) throws CustomException {
-        ReservationTable reservationTable = reservationTableRepository.findById(reservationId).orElseThrow(() -> new CustomException("존재하지 않는 예약입니다."));
-        if(reservationTable.getStatus() != ReservationStatus.WAITING.getCode()){
-            log.error("[refuseReservation] 이미 처리된 예약입니다.");
-            throw new CustomException("이미 처리된 예약입니다.", HttpStatus.BAD_REQUEST.value());
+        ReservationTable reservationTable = reservationTableRepository.findReservationTableByProviderIdAndReservationId(providerId, reservationId);
+        log.info("[refuseReservation] reservationTable : " + reservationTable);
+        if(reservationTable == null){
+            log.error("[refuseReservation] 존재하지 않는 예약입니다.");
+            throw new CustomException("존재하지 않는 예약입니다.", HttpStatus.NOT_FOUND.value());
         }
-
-        if(reservationTable.getReservation_camera() != providerId && reservationTable.getReservation_hair() != providerId && reservationTable.getReservation_studio() != providerId){
-            log.error("[refuseReservation] 권한이 없습니다.");
-            throw new CustomException("권한이 없습니다.", HttpStatus.FORBIDDEN.value());
-        }
-
         reservationTable.setStatus(ReservationStatus.CANCELLED.getCode());
         try{
             reservationTableRepository.save(reservationTable);
@@ -217,8 +240,12 @@ public class ProviderServiceImpl implements ProviderService{
     }
 
     @Override
-    public void acceptReservation(int reservationId) throws CustomException {
-        ReservationTable reservationTable = reservationTableRepository.findById(reservationId).orElseThrow(() -> new CustomException("존재하지 않는 예약입니다."));
+    public void acceptReservation(int reservationId, int providerId) throws CustomException {
+        ReservationTable reservationTable = reservationTableRepository.findReservationTableByProviderIdAndReservationId(providerId, reservationId);
+        if(reservationTable == null){
+            log.error("[acceptReservation] 존재하지 않는 예약입니다.");
+            throw new CustomException("존재하지 않는 예약입니다.", HttpStatus.NOT_FOUND.value());
+        }
         reservationTable.setStatus(ReservationStatus.CONFIRMED.getCode());
         try{
             reservationTableRepository.save(reservationTable);
@@ -229,8 +256,12 @@ public class ProviderServiceImpl implements ProviderService{
     }
 
     @Override
-    public void completeReservation(int reservationId) throws CustomException {
+    public void completeReservation(int reservationId, int providerId) throws CustomException {
         ReservationTable reservationTable = reservationTableRepository.findById(reservationId).orElseThrow(() -> new CustomException("존재하지 않는 예약입니다."));
+        if(reservationTable == null){
+            log.error("[completeReservation] 존재하지 않는 예약입니다.");
+            throw new CustomException("존재하지 않는 예약입니다.", HttpStatus.NOT_FOUND.value());
+        }
         reservationTable.setStatus(ReservationStatus.COMPLETED.getCode());
         try{
             reservationTableRepository.save(reservationTable);
@@ -238,6 +269,19 @@ public class ProviderServiceImpl implements ProviderService{
             log.error("[completeReservation] db데이터 베이스 접근 오류");
             throw new CustomException("데이터베이스 접근 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
+    }
+
+    @Override
+    public ProviderInfoDto getProviderInfo(int providerId) throws CustomException{
+        ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
+        return ProviderInfoDto.builder()
+                .providerName(providerTable.getProviderName())
+                .providerPhoneNum(providerTable.getProviderPhoneNum())
+                .providerAddress(providerTable.getProviderArea() + " " + providerTable.getProviderSubArea() + " " + providerTable.getProviderDetailArea())
+                .providerRepPhotoPath(providerTable.getProviderRepPhotoPath())
+                .providerRepPhoto(providerTable.getProviderRepPhoto())
+                .providerPrice(providerTable.getProviderPrice())
+                .build();
     }
 
 }

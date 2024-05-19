@@ -2,6 +2,7 @@ package com.plog.demo.repository;
 
 import com.plog.demo.dto.reservation.ReservationResponseDto;
 import com.plog.demo.model.IdTable;
+import com.plog.demo.model.PaymentTable;
 import com.plog.demo.model.ReservationTable;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,5 +43,10 @@ public interface ReservationTableRepository extends JpaRepository<ReservationTab
             "OR r.reservation_hair = :providerId " + "OR r.reservation_studio = :providerId) ")
     List<ReservationTable> findReservationTableByProviderId(@Param("providerId") int providerId);
 
+    @Query("SELECT r FROM ReservationTable r WHERE r.reservationId = :reservationId and (r.reservation_camera = :providerId " +
+            "OR r.reservation_hair = :providerId " + "OR r.reservation_studio = :providerId) ")
+    ReservationTable findReservationTableByProviderIdAndReservationId(@Param("providerId") int providerId, @Param("reservationId") int reservationId);
+
+    ReservationTable findByTid(PaymentTable paymentTable);
 }
 

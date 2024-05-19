@@ -75,12 +75,10 @@ public class ReservationServiceImpl implements ReservationService{
 
         try {
             reservationTableRepository.save(reservation);
+            log.info("[addReservation] 예약 완료");
         }catch (Exception e){
             throw new RuntimeException("데이터 베이스 오류", e);
         }
-
-        log.info("[addReservation] 예약 완료");
-
     }
 
     @Override
@@ -123,7 +121,7 @@ public class ReservationServiceImpl implements ReservationService{
                     .reservationCameraName(reservation.getReservationCameraName())
                     .reservationStudioName(reservation.getReservationStudioName())
                     .reservationHairName(reservation.getReservationHairName())
-                    .amount(reservation.getAmount())
+                    .amount(reservation.getTid().getPaymentAmount())
                     .status(reservation.getStatus())
                     .tid(reservation.getTid().getPaymentId())
                     .build();

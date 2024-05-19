@@ -10,4 +10,6 @@ import java.util.List;
 public interface WorkdateTableRepository extends JpaRepository<WorkdateTable, Long> {
 
     List<WorkdateTable> findByProviderId(ProviderTable providerId);
+    WorkdateTable findByProviderIdAndWorkDateAndWorkTime(ProviderTable providerId, String workDate, String workTime);
+
 }

@@ -3,9 +3,12 @@ package com.plog.demo.service.payment;
 import com.plog.demo.common.PaymentStatus;
 import com.plog.demo.common.ReservationStatus;
 import com.plog.demo.dto.payment.*;
+import com.plog.demo.dto.workdate.WorkDateRequestDto;
+import com.plog.demo.dto.workdate.WorkdateDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.*;
 import com.plog.demo.repository.*;
+import com.plog.demo.service.Provider.ProviderService;
 import com.plog.demo.service.reservation.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,8 +39,7 @@ public class PaymentServiceImpl implements PaymentService{
     private final ReservationService reservationService;
     private final ReservationTableRepository reservationTableRepository;
     private final PaymentDataTableRepository paymentDataTableRepository;
-    private final ProviderTableRepository providerTableRepository;
-    private final ReservationTimeTableRepository reservationTimeTableRepository;
+
 
     @Value("${pay.admin_key}")
     private String adminKey;
@@ -47,6 +50,7 @@ public class PaymentServiceImpl implements PaymentService{
         IdTable idTable = idTableRepository.findById(payInfoDto.getReservationRequestDto().getUserId()).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
         String paymentId;
         PayReadyResDto payReadyResDto;
+        ReservationTable reservationTable;
 
         HttpHeaders headers = new HttpHeaders();
 
@@ -79,58 +83,30 @@ public class PaymentServiceImpl implements PaymentService{
             throw new RuntimeException("예약 정보 저장 중 오류가 발생했습니다.", e);
         }
 
-        List<ReservationTable> reservationTables;
-        ReservationTable currentReservation;
-        try{
-            reservationTables = reservationTableRepository.findAllByUserId(idTable);
-            currentReservation = reservationTables.get(reservationTables.size() - 1);
-        } catch (Exception e){
-            log.info("[payReady] errow while getting reservation info");
-            throw new RuntimeException("예약 정보 조회 중 오류가 발생했습니다.", e);
-        }
-
         try {
             PaymentTable paymentTable = PaymentTable.builder()
                     .paymentId(paymentId)
                     .paymentAmount(payInfoDto.getPurchaseAmount())
                     .paymentTaxFreeAmount(0)
-                    .reservationId(currentReservation)
                     .userId(idTable)
                     .paymentStatus(PaymentStatus.COMPLETE.getCode())
                     .build();
             paymentTableRepository.save(paymentTable);
         } catch (Exception e) {
             log.info("[payReady] error while saving payment info");
-            currentReservation.setUserId(null);
-            reservationTableRepository.delete(currentReservation);
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
         }
 
         return payReadyResDto;
     }
 
-    private void saveReservationTimeTable(int providerid, LocalDateTime reservationStart, LocalDateTime reservationEnd){
-        LocalDateTime current = reservationStart;
-        while(current.isBefore(reservationEnd)){
-            ReservationTimeTable reservationTimeTable = ReservationTimeTable.builder()
-                    .reservationDate(current.toLocalDate().toString())
-                    .reservationTime(current.toLocalTime().toString())
-                    .providerId(providerTableRepository.findById(providerid).get())
-                    .build();
-            reservationTimeTableRepository.save(reservationTimeTable);
-            current = current.plusHours(1);
-        }
-    }
-
     @Override
     public void payCancel(String id, String tid) throws CustomException {
-        IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
         try {
-            List<PaymentTable> paymentTables = paymentTableRepository.findALlByUserIdAndPaymentId(idTable, tid);
-            PaymentTable paymentTable = paymentTables.get(paymentTables.size() - 1);
-
-            paymentTable.setPaymentStatus(PaymentStatus.CANCEL.getCode());
-            paymentTableRepository.save(paymentTable);
+            PaymentTable paymentTable = paymentTableRepository.findByPaymentId(tid);
+            ReservationTable reservationTable = reservationTableRepository.findByTid(paymentTable);
+            reservationTableRepository.deleteById(reservationTable.getReservationId());
+            paymentTableRepository.deleteById(paymentTable.getPaymentId());
         } catch (Exception e){
             log.info("[payCancel] 결제 취소 중 오류 발생");
             throw new CustomException("결제 취소 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -139,13 +115,11 @@ public class PaymentServiceImpl implements PaymentService{
 
     @Override
     public void payFail(String tid, String id) throws CustomException {
-        IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
         try {
-            List<PaymentTable> paymentTables = paymentTableRepository.findALlByUserIdAndPaymentId(idTable, tid);
-            PaymentTable paymentTable = paymentTables.get(paymentTables.size() - 1);
-
-            paymentTable.setPaymentStatus(PaymentStatus.FAIL.getCode());
-            paymentTableRepository.save(paymentTable);
+            PaymentTable paymentTable = paymentTableRepository.findByPaymentId(tid);
+            ReservationTable reservationTable = reservationTableRepository.findByTid(paymentTable);
+            reservationTableRepository.deleteById(reservationTable.getReservationId());
+            paymentTableRepository.deleteById(paymentTable.getPaymentId());
         } catch (Exception e){
             log.info("[payFail] 결제 실패 중 오류 발생");
             throw new CustomException("결제 실패 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -198,7 +172,8 @@ public class PaymentServiceImpl implements PaymentService{
                     .build();
 
             paymentDataTableRepository.save(paymentDataTable);
-            ReservationTable reservationTable = reservationTableRepository.findAllByUserId(idTable).get(reservationTableRepository.findAllByUserId(idTable).size() - 1);
+            List<ReservationTable> reservationTableList = reservationTableRepository.findByUserId(idTable);
+            ReservationTable reservationTable = reservationTableList.get(reservationTableList.size() - 1);
             reservationTable.setTid(paymentTable);
             reservationTableRepository.save(reservationTable);
         }catch (Exception e){
@@ -262,7 +237,7 @@ public class PaymentServiceImpl implements PaymentService{
         RestTemplate restTemplate = new RestTemplate();
         try{
             payCancelDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayCancelDto.class);
-            ReservationTable reservationTable = reservationTableRepository.findAllByUserId(idTable).get(reservationTableRepository.findAllByUserId(idTable).size() - 1);
+            ReservationTable reservationTable = reservationTableRepository.findByTid(paymentTable);
             reservationTable.setStatus(ReservationStatus.CANCELLED.getCode());
             reservationTableRepository.save(reservationTable);
             paymentTableRepository.save(paymentTable);
@@ -273,5 +248,19 @@ public class PaymentServiceImpl implements PaymentService{
         return payCancelDto;
     }
 
+    private List<WorkDateRequestDto> getWorkDateList(LocalDateTime startDate, LocalDateTime endDate){
+        LocalDateTime current = startDate;
+        List<WorkDateRequestDto> workDateRequestList = new ArrayList<>();
+        while(current.isBefore(endDate)){
+            WorkDateRequestDto workDateRequestDto = WorkDateRequestDto.builder()
+                    .date(current.toLocalDate().toString())
+                    .day(current.getDayOfWeek().toString())
+                    .time(current.toLocalTime().toString())
+                    .build();
+            workDateRequestList.add(workDateRequestDto);
+            current = current.plusHours(1);
+        }
+        return workDateRequestList;
+    }
 
 }

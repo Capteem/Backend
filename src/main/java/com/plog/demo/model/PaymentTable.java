@@ -1,5 +1,8 @@
 package com.plog.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,10 +31,6 @@ public class PaymentTable {
 
     @Column
     private int paymentStatus;
-
-    @OneToOne
-    @JoinColumn(name = "reservationId")
-    private ReservationTable reservationId;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "id")
