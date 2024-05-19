@@ -14,15 +14,19 @@ import java.util.Date;
 @Slf4j
 public class JwtTokenProvider {
 
+    public static final String TOKEN_HEADER = "Auth-Token";
+
+
     /**
      * TODO 나중에 시크릿키, 만료시간 환경변수 처리해야함
      */
-    private String accessTokenSecretKey = "SecretKey111";
+    private String tokenSecretKey = "SecretKey111";
 
-    private String refreshTokenSecretKey = "SecretKey222";
+    //private String refreshTokenSecretKey = "SecretKey222";
 
     //한시간
-    private final long jwtAccessExpiration = 1000L * 60 * 60;
+    private final long jwtAccessExpiration = 1L;
+    //1000L * 60 * 60;
 
     //일주일
     private final long jwtRefreshExpiration = 1000L * 60 * 60 * 24 * 7;
@@ -33,8 +37,7 @@ public class JwtTokenProvider {
     @PostConstruct
     public void init(){
         log.info("[init] secret key 초기화");
-        accessTokenSecretKey = Base64.getEncoder().encodeToString(accessTokenSecretKey.getBytes(StandardCharsets.UTF_8));
-        refreshTokenSecretKey = Base64.getEncoder().encodeToString(accessTokenSecretKey.getBytes(StandardCharsets.UTF_8));
+        tokenSecretKey = Base64.getEncoder().encodeToString(tokenSecretKey.getBytes(StandardCharsets.UTF_8));
         log.info("[init] secret key 초기화 완료");
     }
 
@@ -50,7 +53,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + jwtAccessExpiration))
-                .signWith(SignatureAlgorithm.HS256, accessTokenSecretKey)
+                .signWith(SignatureAlgorithm.HS256, tokenSecretKey)
                 .compact();
 
         log.info("[createAccessToken] 액세스 토큰 생성 완료");
@@ -68,7 +71,7 @@ public class JwtTokenProvider {
         String refreshToken = Jwts.builder()
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + jwtRefreshExpiration))
-                .signWith(SignatureAlgorithm.HS256, refreshTokenSecretKey)
+                .signWith(SignatureAlgorithm.HS256, tokenSecretKey)
                 .compact();
 
         log.info("[createRefreshToken] 액세스 토큰 생성 완료");
@@ -81,10 +84,11 @@ public class JwtTokenProvider {
      */
     public String getUserId(String accessToken){
         log.info("[getUserId] 토큰 기반 회원 정보 추출 {}");
-        Claims info = Jwts.parser().setSigningKey(accessTokenSecretKey).parseClaimsJws(accessToken).getBody();
+        Claims info = Jwts.parser().setSigningKey(tokenSecretKey).parseClaimsJws(accessToken).getBody();
         log.info("[getUserId] info = {}, userId = {}", info, info.getSubject());
         return info.getSubject();
     }
+
 
     /**
      * request 헤더에서 token 추출
@@ -93,17 +97,17 @@ public class JwtTokenProvider {
      */
     public String resolveToken(HttpServletRequest request){
         log.info("[resolveToken] HTTP 헤더에서 Token 값 추출");
-        return request.getHeader("Auth-Token");
+        return request.getHeader(TOKEN_HEADER);
     }
 
     /**
      *  access token 토큰 유효 체크
      */
-    public boolean validationAccessToken(String accessToken){
+    public boolean validationToken(String token){
         log.info("[validationAccessToken] 토큰 유효 체크 시작");
 
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(accessTokenSecretKey).parseClaimsJws(accessToken);
+            Jws<Claims> claims = Jwts.parser().setSigningKey(tokenSecretKey).parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
         }catch (ExpiredJwtException e){
             log.info("[validationAccessToken] 시간 만료 토큰");
@@ -117,18 +121,18 @@ public class JwtTokenProvider {
     /**
      *  refresh token 토큰 유효 체크
      */
-    public boolean validationRefreshToken(String refreshToken){
-        log.info("[validationRefreshToken] 토큰 유효 체크 시작");
-
-        try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(refreshTokenSecretKey).parseClaimsJws(refreshToken);
-            return !claims.getBody().getExpiration().before(new Date());
-        }catch (ExpiredJwtException e){
-            log.info("[validationRefreshToken] 시간 만료 토큰");
-            return false;
-        }catch (Exception e){
-            log.info("[validateToken] 토큰 유효 체크 예외 발생");
-            return false;
-        }
-    }
+//    public boolean validationRefreshToken(String refreshToken){
+//        log.info("[validationRefreshToken] 토큰 유효 체크 시작");
+//
+//        try {
+//            Jws<Claims> claims = Jwts.parser().setSigningKey(refreshTokenSecretKey).parseClaimsJws(refreshToken);
+//            return !claims.getBody().getExpiration().before(new Date());
+//        }catch (ExpiredJwtException e){
+//            log.info("[validationRefreshToken] 시간 만료 토큰");
+//            return false;
+//        }catch (Exception e){
+//            log.info("[validateToken] 토큰 유효 체크 예외 발생");
+//            return false;
+//        }
+//    }
 }

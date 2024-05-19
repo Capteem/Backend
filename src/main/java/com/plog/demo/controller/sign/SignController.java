@@ -1,5 +1,7 @@
 package com.plog.demo.controller.sign;
 
+import com.plog.demo.dto.ErrorDto;
+import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.sign.LoginRequestDto;
 import com.plog.demo.dto.sign.LoginResponseDto;
 import com.plog.demo.dto.user.UserDto;
@@ -55,8 +57,8 @@ public class SignController {
             responseData.put("message", e.getMessage());
 
             //유저 없음
-            if(e.getResultCode() == HttpStatus.UNAUTHORIZED.value()){
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseData);
+            if(e.getResultCode() == HttpStatus.NOT_FOUND.value()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
             }
 
 
@@ -69,12 +71,38 @@ public class SignController {
 
     }
 
+    @GetMapping("/refresh")
+    public ResponseEntity<SuccessDto> refresh(){
+        return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("설공").build());
+    }
+
     /**
      * logout TODO
      */
 
 
-    /**
-     * exceptionHanlder TODO
-     */
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorDto> customExceptionHandler(CustomException e){
+        log.warn("customExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
+
+        ErrorDto errorDto = ErrorDto.builder()
+                .resultCode(e.getResultCode())
+                .msg(e.getMessage())
+                .build();
+
+        return ResponseEntity.status(e.getResultCode()).body(errorDto);
+    }
+
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorDto> runtimeExceptionHandler(Exception e){
+        log.error("runtimeExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
+
+        ErrorDto errorDto = ErrorDto.builder()
+                .resultCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .msg(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDto);
+    }
 }

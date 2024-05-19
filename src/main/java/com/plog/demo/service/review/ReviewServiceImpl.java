@@ -125,7 +125,9 @@ public class ReviewServiceImpl implements ReviewService{
         List<ReviewTable> reviews = reviewTableRepository.findByProviderId(provider);
 
         if(reviews.isEmpty()){
-            throw new CustomException("리뷰가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+            return ReviewGetResponseDto.builder()
+                    .reviewList(null)
+                    .build();
         }
 
         List<ReviewGetDto> reviewGetDtos = reviews.stream()
