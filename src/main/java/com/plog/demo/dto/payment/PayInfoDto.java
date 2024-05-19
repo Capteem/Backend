@@ -12,4 +12,9 @@ public class PayInfoDto {
     private int purchaseAmount;
     private String purchaseName;
     private ReservationRequestDto reservationRequestDto;
+
+    @Override
+    public String toString() {
+        return "purchaseAmount: " + purchaseAmount + ", purchaseName: " + purchaseName + ", reservationRequestDto: " + reservationRequestDto.toString() + "}";
+    }
 }

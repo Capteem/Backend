@@ -1,17 +1,15 @@
 package com.plog.demo.dto.workdate;
 
-import lombok.*;
 
-import java.util.List;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DateListDto {
+public class TestDto {
 
     private String date;
     private String time;
-
 }

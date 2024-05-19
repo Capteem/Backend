@@ -10,7 +10,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class ProviderResponseDto {
+    private int providerId;
     private String providerName;
     private int providerType;
-    private int providerStatus;
+    private String providerAddress;
+    private String providerPhoneNum;
 }

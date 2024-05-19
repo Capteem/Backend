@@ -2,6 +2,7 @@ package com.plog.demo.repository;
 
 import com.plog.demo.model.IdTable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import com.plog.demo.model.ProviderTable;
 
@@ -15,8 +16,13 @@ public interface ProviderTableRepository extends JpaRepository<ProviderTable, In
 
     Optional<ProviderTable> findByUserId(IdTable idTable);
 
-    List<ProviderTable> findByProviderStatus(int providerStatus);
+    @Query("select p from ProviderTable p "
+            + "join p.workdateTableList wd "
+            + "where p.providerStatus = :providerStatus "
+            + "and p.providerPrice != -1")
+    List<ProviderTable> findAllByProviderStatus(int providerStatus);
 
     Optional<ProviderTable> findByUserIdAndProviderId(IdTable idTable, Integer providerId);
+    List<ProviderTable> findByUserIdAndProviderStatus(IdTable idTable, int providerStatus);
 
 }

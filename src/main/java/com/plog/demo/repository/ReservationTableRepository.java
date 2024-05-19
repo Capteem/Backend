@@ -37,5 +37,10 @@ public interface ReservationTableRepository extends JpaRepository<ReservationTab
             );
 
     List<ReservationTable> findAllByUserId(IdTable idTable);
+
+    @Query("SELECT r FROM ReservationTable r WHERE (r.reservation_camera = :providerId " +
+            "OR r.reservation_hair = :providerId " + "OR r.reservation_studio = :providerId) ")
+    List<ReservationTable> findReservationTableByProviderId(@Param("providerId") int providerId);
+
 }
 

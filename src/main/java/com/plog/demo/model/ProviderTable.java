@@ -1,13 +1,20 @@
 package com.plog.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.plog.demo.dto.workdate.TestDto;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Data
 @Entity
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
 public class ProviderTable {
 
     @Id
@@ -36,7 +43,8 @@ public class ProviderTable {
     @Column
     private String providerRepPhotoPath;
 
-
+    @OneToMany(mappedBy = "providerId", fetch = FetchType.EAGER)
+    private List<WorkdateTable> workdateTableList;
 
     @ManyToOne
     @JoinColumn(name = "Id")
