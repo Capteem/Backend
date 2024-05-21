@@ -1,7 +1,7 @@
 name: Java CI with Gradle and CodeDeploy
 
 env:
-  AWS_REGION:
+  AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: plog-action-s3-bucket
   CODE_DEPLOY_APPLICATION_NAME: plog
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: producion
