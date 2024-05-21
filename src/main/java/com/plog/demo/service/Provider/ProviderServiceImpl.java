@@ -80,8 +80,7 @@ public class ProviderServiceImpl implements ProviderService{
                     .providerStatus(providerTable.getProviderStatus())
                     .build()).toList();
             if(providerTables.isEmpty()){
-                log.error("[getProvider] 제공자가 존재하지 않습니다.");
-                throw new CustomException("제공자가 존재하지 않습니다.");
+                return providerDtos;
             }
             return providerDtos;
         } catch (Exception e){
@@ -109,6 +108,12 @@ public class ProviderServiceImpl implements ProviderService{
         return providerDtos;
     }
 
+    private int getProviderPrice(ProviderTable providerTable, ReservationTable reservationTable){
+        int perPrice = providerTable.getProviderPrice();
+        int reservationTime = reservationTable.getReservation_end_date().getHour() - reservationTable.getReservation_start_date().getHour();
+        return perPrice * reservationTime;
+    }
+
     @Override
     public List<ProviderReservationDto> getProviderReservationList(int providerId) throws CustomException{
         ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
@@ -120,10 +125,10 @@ public class ProviderServiceImpl implements ProviderService{
                 .reservationStatus(reservationTable.getStatus())
                 .providerType(providerTable.getProviderType())
                 .providerName(providerTable.getProviderName())
+                .reservationPrice(getProviderPrice(providerTable, reservationTable))
                 .build()).toList();
         if(reservationTables.isEmpty()){
-            log.error("[getProviderReservationList] 예약이 존재하지 않습니다.");
-           throw new CustomException("예약이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+            return providerReservationDtos;
         }
         return providerReservationDtos;
     }
@@ -132,8 +137,6 @@ public class ProviderServiceImpl implements ProviderService{
     @Operation(summary = "허가된 제공자 목록 조회", description = "허가된 제공자 목록을 조회합니다.")
     public List<ProviderListDto> getConfirmedProviderList() throws CustomException {
         try {
-            log.info("[getConfirmedProviderList] 제공자 리스트 조회 로직 시작");
-            long now = System.currentTimeMillis();
             List<ProviderTable> providerTables = providerTableRepository.findAllByProviderStatus(UserStatus.ACTIVE.getCode());
             List<ProviderListDto> providerList = providerTables.stream().map(providerTable -> ProviderListDto.builder()
                     .providerId(providerTable.getProviderId())
@@ -152,11 +155,8 @@ public class ProviderServiceImpl implements ProviderService{
                             .build()).toList())
                     .build()).toList();
             if (providerTables.isEmpty()) {
-                log.error("[getConfirmedProviderList] not exist.");
-                throw new CustomException("제공자가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+                return providerList;
             }
-            long end = System.currentTimeMillis();
-            log.info("[getConfirmedProviderList] 제공자 리스트 조회 로직 종료, 소요시간 : " + (end - now) + "ms");
             return providerList;
         } catch (Exception e) {
             log.error("[getConfirmedProviderList] db데이터 베이스 접근 오류");

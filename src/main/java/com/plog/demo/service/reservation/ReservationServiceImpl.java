@@ -46,7 +46,7 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
-    public ReservationTable addReservation(ReservationRequestDto reservationRequestDto) throws CustomException {
+    public void addReservation(ReservationRequestDto reservationRequestDto) throws CustomException {
 
 
         log.info("[addReservation] 예약 서비스 로직 시작");
@@ -76,7 +76,6 @@ public class ReservationServiceImpl implements ReservationService{
         try {
             reservationTableRepository.save(reservation);
             log.info("[addReservation] 예약 완료");
-            return reservation;
         }catch (Exception e){
             throw new RuntimeException("데이터 베이스 오류", e);
         }
@@ -95,7 +94,7 @@ public class ReservationServiceImpl implements ReservationService{
 
         //예약 없을 때
         if(reservations.isEmpty()){
-            throw new CustomException("예약이 없습니다.", HttpStatus.NOT_FOUND.value());
+            return new ArrayList<>();
         }
 
         List<ReservationResponseDto> reservationResponseDtoList = getReservationResponseDtoList(reservations);

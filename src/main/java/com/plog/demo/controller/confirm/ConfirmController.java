@@ -2,10 +2,7 @@ package com.plog.demo.controller.confirm;
 
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.SuccessDto;
-import com.plog.demo.dto.confirm.ConfirmCheckProviderRequestDto;
-import com.plog.demo.dto.confirm.ConfirmRequestDto;
-import com.plog.demo.dto.confirm.ConfirmResponseDto;
-import com.plog.demo.dto.confirm.EmailRequestDto;
+import com.plog.demo.dto.confirm.*;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.confirm.ConfirmService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -80,15 +78,27 @@ public class ConfirmController {
         return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
     }
 
-    @PostMapping("/user/pwauth")
-    @Operation(summary = "비밀번호 찾기 메일 전송", description = "비밀번호 찾기 메일을 전송합니다.")
-    @ApiResponse(responseCode = "200", description = "메일 전송 성공")
-    public ResponseEntity<Object> sendMail(@RequestBody EmailRequestDto emailRequestDto) throws CustomException {
+    @PostMapping("/sendEmail")
+    @Operation(summary = "이메일 전송", description = "인증번호를 이메일로 전송합니다.")
+    @ApiResponse(responseCode = "200", description = "이메일 전송 성공", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
+    public ResponseEntity<SuccessDto> sendEmail(@RequestBody EmailRequestDto emailRequestDto) throws CustomException {
         try{
             confirmService.joinEmail(emailRequestDto.getEmail());
-            return ResponseEntity.status(HttpStatus.OK).body("메일 전송 성공");
+            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(SuccessDto.builder().message("실패").build());
+        }
+    }
+
+    @PostMapping("/checkAuthNumber")
+    @Operation(summary = "인증번호 확인", description = "인증번호를 확인합니다.")
+    @ApiResponse(responseCode = "200", description = "인증번호 확인 성공", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
+    public ResponseEntity<SuccessDto> checkAuthNumber(@RequestBody EmailAuthCheckDto emailAuthCheckDto) throws CustomException {
+        try{
+            confirmService.checkAuthNumber(emailAuthCheckDto.getEmail(), emailAuthCheckDto.getAuthCode());
+            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
         } catch (CustomException e){
-            throw new CustomException(e.getMessage(), e.getResultCode());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(SuccessDto.builder().message(e.getMessage()).build());
         }
     }
 

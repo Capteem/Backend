@@ -46,7 +46,7 @@ public class ProviderTable {
     @OneToMany(mappedBy = "providerId", fetch = FetchType.EAGER)
     private List<WorkdateTable> workdateTableList;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "Id")
     private IdTable userId;
 }

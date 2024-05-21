@@ -23,7 +23,7 @@ public class ReservationTimeTable {
     private String reservationDate;
     private String reservationTime;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "providerId")
     private ProviderTable providerId;
 

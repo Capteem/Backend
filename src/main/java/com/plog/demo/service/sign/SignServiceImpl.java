@@ -4,6 +4,7 @@ import com.plog.demo.common.UserStatus;
 import com.plog.demo.config.JwtTokenProvider;
 import com.plog.demo.dto.sign.LoginResponseDto;
 import com.plog.demo.dto.user.UserDto;
+import com.plog.demo.dto.user.UserInfoDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.IdTable;
 import com.plog.demo.repository.IdTableRepository;
@@ -88,6 +89,11 @@ public class SignServiceImpl implements SignService{
             throw new CustomException("탈퇴된 유저입니다.", HttpStatus.NOT_ACCEPTABLE.value());
         }
 
+        if(user.getStatus() == UserStatus.DELETED.getCode()){
+            log.info("[login] 유저 삭제");
+            throw new CustomException("탈퇴된 유저입니다.", HttpStatus.NOT_ACCEPTABLE.value());
+        }
+
         log.info("[login] 패스워드 일치");
 
         String accessToken = jwtTokenProvider.createAccessToken(userId);
@@ -99,4 +105,5 @@ public class SignServiceImpl implements SignService{
                 .role(user.getRole())
                 .build();
     }
+
 }

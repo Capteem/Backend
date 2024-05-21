@@ -11,7 +11,7 @@ public interface ReservationService {
 
     void deleteReservation(int reservationId);
 
-    ReservationTable addReservation(ReservationRequestDto reservationRequestDto) throws CustomException;
+    void addReservation(ReservationRequestDto reservationRequestDto) throws CustomException;
 
     List<ReservationResponseDto> getReservationAll(String userId) throws CustomException;
 

@@ -59,7 +59,7 @@ public class ReservationTable {
     @OneToOne
     private PaymentTable tid;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name="id")
     private IdTable userId;
 

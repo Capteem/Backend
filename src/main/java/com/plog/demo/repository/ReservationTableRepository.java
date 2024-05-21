@@ -28,7 +28,7 @@ public interface ReservationTableRepository extends JpaRepository<ReservationTab
     @Query("SELECT r FROM ReservationTable r WHERE (r.reservation_camera = :cameraId " +
             "OR r.reservation_hair = :hairId " +
             "OR r.reservation_studio = :studioId) " +
-            "AND (r.reservation_start_date < :endDate AND r.reservation_end_date > :startDate)")
+            "AND (r.reservation_start_date < :endDate AND r.reservation_end_date > :startDate) ")
     List<ReservationTable> findReservationTableWithLock(
             @Param("cameraId") int cameraId,
             @Param("hairId") int hairId,

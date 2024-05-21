@@ -6,4 +6,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IdTableRepository extends JpaRepository<IdTable, String> {
+
+    IdTable findByEmailAndId(String email, String id);
+
+    IdTable findByEmail(String email);
 }

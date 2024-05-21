@@ -36,7 +36,7 @@ public class WorkdateTable {
     @Column
     private String workTime;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name="providerId")
     private ProviderTable providerId;
 

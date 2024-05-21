@@ -18,4 +18,5 @@ public class ProviderReservationDto {
     private int reservationStatus;
     private String reservationStartTime;
     private String reservationEndTime;
+    private int reservationPrice;
 }

@@ -31,7 +31,7 @@ public class PaymentDataTable {
 
     private String kakaopayPurchaseCorp;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "paymentId")
     private PaymentTable paymentId;
 }

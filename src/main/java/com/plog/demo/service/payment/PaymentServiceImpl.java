@@ -39,8 +39,6 @@ public class PaymentServiceImpl implements PaymentService{
     private final ReservationService reservationService;
     private final ReservationTableRepository reservationTableRepository;
     private final PaymentDataTableRepository paymentDataTableRepository;
-    private final WorkdateTableRepository workdateTableRepository;
-    private final ProviderTableRepository providerTableRepository;
 
 
     @Value("${pay.admin_key}")
@@ -52,7 +50,6 @@ public class PaymentServiceImpl implements PaymentService{
         IdTable idTable = idTableRepository.findById(payInfoDto.getReservationRequestDto().getUserId()).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
         String paymentId;
         PayReadyResDto payReadyResDto;
-        ReservationTable reservationTable;
 
         HttpHeaders headers = new HttpHeaders();
 
@@ -79,10 +76,20 @@ public class PaymentServiceImpl implements PaymentService{
         }
 
         try{
-            reservationTable = reservationService.addReservation(payInfoDto.getReservationRequestDto());
+            reservationService.addReservation(payInfoDto.getReservationRequestDto());
         } catch (Exception e){
             log.info("[payReady] error while saving reservation info");
             throw new RuntimeException("예약 정보 저장 중 오류가 발생했습니다.", e);
+        }
+
+        List<ReservationTable> reservationTables;
+        ReservationTable currentReservation;
+        try{
+            reservationTables = reservationTableRepository.findAllByUserId(idTable);
+            currentReservation = reservationTables.get(reservationTables.size() - 1);
+        } catch (Exception e){
+            log.info("[payReady] errow while getting reservation info");
+            throw new RuntimeException("예약 정보 조회 중 오류가 발생했습니다.", e);
         }
 
         try {
@@ -94,10 +101,10 @@ public class PaymentServiceImpl implements PaymentService{
                     .paymentStatus(PaymentStatus.COMPLETE.getCode())
                     .build();
             paymentTableRepository.save(paymentTable);
-            reservationTable.setTid(paymentTable);
-            reservationTableRepository.save(reservationTable);
         } catch (Exception e) {
             log.info("[payReady] error while saving payment info");
+            currentReservation.setUserId(null);
+            reservationTableRepository.delete(currentReservation);
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
         }
 
@@ -155,7 +162,6 @@ public class PaymentServiceImpl implements PaymentService{
         headers.add("Content-Type", "application/json");
 
         PayRequestDto payRequestDto = new MakePayRequest().getApproveRequest(paymentTable.getPaymentId(), idTable.getId(), pgToken);
-        log.info("[getApprove] payRequestDto : " + payRequestDto.toString());
 
         PayApproveResDto payApproveResDto;
         HttpEntity<Map<String, Object>> urlRequest = new HttpEntity<>(payRequestDto.getMap(), headers);
@@ -176,39 +182,9 @@ public class PaymentServiceImpl implements PaymentService{
                     .build();
 
             paymentDataTableRepository.save(paymentDataTable);
-            ReservationTable reservation = reservationTableRepository.findByTid(paymentTable);
-            List<WorkDateRequestDto> workDateList = getWorkDateList(reservation.getReservation_start_date(), reservation.getReservation_end_date());
-            List<Integer> providerList = new ArrayList<>();
-            if(reservation.getReservation_camera() != 0){
-                providerList.add(reservation.getReservation_camera());
-            }
-            if(reservation.getReservation_hair() != 0){
-                providerList.add(reservation.getReservation_hair());
-            }
-            if(reservation.getReservation_studio() != 0){
-                providerList.add(reservation.getReservation_studio());
-            }
-            for(int providerId : providerList){
-                ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new IllegalArgumentException("[getApprove] no such provider exists."));
-                WorkdateDto workdateDto = WorkdateDto.builder()
-                        .providerId(providerId)
-                        .dateList(workDateList)
-                        .build();
-                for (WorkDateRequestDto workDateRequestDto : workdateDto.getDateList()){
-                    WorkdateTable workdateTable = workdateTableRepository.findByProviderIdAndWorkDateAndWorkTime(providerTable, workDateRequestDto.getDate(), workDateRequestDto.getTime());
-                    if(workdateTable == null){
-                        log.error("[getApprove] workdateTable is null");
-                        throw new CustomException("workdateTable is null", HttpStatus.NOT_FOUND.value());
-                    }
-                    try{
-                        workdateTableRepository.delete(workdateTable);
-                    } catch (Exception e){
-                        log.error("[getApprove] failure to delete workdateTable");
-                        throw new CustomException("failure to delete workdateTable", HttpStatus.UNAUTHORIZED.value());
-                    }
-                }
-            }
-
+            List<ReservationTable> reservationTables = reservationTableRepository.findAllByUserId(idTable);
+            ReservationTable reservationTable = reservationTables.get(reservationTables.size() - 1);
+            reservationTable.setTid(paymentTable);
         }catch (Exception e){
             log.error("[getApprove] failure to get approve");
             throw new CustomException("failure to get approve", HttpStatus.UNAUTHORIZED.value());
@@ -271,37 +247,6 @@ public class PaymentServiceImpl implements PaymentService{
         try{
             payCancelDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayCancelDto.class);
             ReservationTable reservationTable = reservationTableRepository.findByTid(paymentTable);
-            List<WorkDateRequestDto> workDateList = getWorkDateList(reservationTable.getReservation_start_date(), reservationTable.getReservation_end_date());
-            List<Integer> providerList = new ArrayList<>();
-            if(reservationTable.getReservation_camera() != 0){
-                providerList.add(reservationTable.getReservation_camera());
-            }
-            if(reservationTable.getReservation_hair() != 0){
-                providerList.add(reservationTable.getReservation_hair());
-            }
-            if(reservationTable.getReservation_studio() != 0){
-                providerList.add(reservationTable.getReservation_studio());
-            }
-            for(int providerId : providerList){
-                ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new IllegalArgumentException("[getApprove] no such provider exists."));
-                WorkdateDto workdateDto = WorkdateDto.builder()
-                        .providerId(providerId)
-                        .dateList(workDateList)
-                        .build();
-                for (WorkDateRequestDto workDateRequestDto : workdateDto.getDateList()){
-                    WorkdateTable workdateTable = workdateTableRepository.findByProviderIdAndWorkDateAndWorkTime(providerTable, workDateRequestDto.getDate(), workDateRequestDto.getTime());
-                    if(workdateTable == null){
-                        log.error("[getApprove] workdateTable is null");
-                        throw new CustomException("workdateTable is null", HttpStatus.NOT_FOUND.value());
-                    }
-                    try{
-                        workdateTableRepository.delete(workdateTable);
-                    } catch (Exception e){
-                        log.error("[getApprove] failure to delete workdateTable");
-                        throw new CustomException("failure to delete workdateTable", HttpStatus.UNAUTHORIZED.value());
-                    }
-                }
-            }
             reservationTable.setStatus(ReservationStatus.CANCELLED.getCode());
             reservationTableRepository.save(reservationTable);
             paymentTableRepository.save(paymentTable);
