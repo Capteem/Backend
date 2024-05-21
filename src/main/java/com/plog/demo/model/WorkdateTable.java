@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @Table(indexes = {
         @Index(columnList = "providerId")
-})
+})//
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
 public class WorkdateTable {
 
@@ -36,7 +36,7 @@ public class WorkdateTable {
     @Column
     private String workTime;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name="providerId")
     private ProviderTable providerId;
 
