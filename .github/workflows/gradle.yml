@@ -1,10 +1,10 @@
 name: Java CI with Gradle and CodeDeploy
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION:
   S3_BUCKET_NAME: plog-action-s3-bucket
-  CODE_DEPLOY_APPLICATION_NAME: plog-spring-boot
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: plog-codedeploy-deployment-group
+  CODE_DEPLOY_APPLICATION_NAME: plog
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: producion
 
 on:
   push:
@@ -53,36 +53,23 @@ jobs:
       - name: Make Directory
         run: mkdir -p deploy
 
-      - name: Copy Jar
-        run: cp ./build/libs/*.jar ./deploy
-
           # appspec.yml 파일 복사
       - name: Copy appspec.yml
         run: cp appspec.yml ./deploy
 
 
-          # script files 복사
-      - name: Copy script
-        run: cp ./scripts/*.sh ./deploy
+      - name: 📦 Zip project files
+        run: zip -r ./$GITHUB_SHA.zip .
 
-      - name: Make zip file
-        run: zip -r ./plog.zip ./deploy
-        shell: bash
-      - name: AWS 액세스 키 및 시크릿 키 설정
-        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name : Access to Aws
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: S3 업로드
-        run: aws s3 cp --region ${{ env.AWS_REGION }} ./plog.zip s3://${{ env.S3_BUCKET_NAME }}
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: AWS 액세스 키 및 시크릿 키 설정
-        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: aws s3 cp --region ${{ env.AWS_REGION }} ./$GITHUB_SHA.zip s3://${{ env.S3_BUCKET_NAME }}
 
       - name: AWS CodeDeploy에 배포
         run: |
@@ -90,4 +77,5 @@ jobs:
             --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
             --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
             --region ${{ env.AWS_REGION }} \
-            --s3-location bucket=${{ env.S3_BUCKET_NAME }},bundleType=zip,key=build/plog.zip
+            --s3-location bucket=${{ env.S3_BUCKET_NAME }},bundleType=zip,key=build/$GITHUB_SHA.zip
+      
