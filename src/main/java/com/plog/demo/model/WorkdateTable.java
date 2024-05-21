@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @Table(indexes = {
         @Index(columnList = "providerId")
-})//
+})
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
 public class WorkdateTable {
 
