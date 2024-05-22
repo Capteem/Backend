@@ -4,6 +4,7 @@ import com.plog.demo.common.file.ProviderCheckFileStore;
 import com.plog.demo.dto.confirm.ConfirmCheckProviderRequestDto;
 import com.plog.demo.dto.confirm.ConfirmResponseDto;
 import com.plog.demo.dto.file.ProviderCheckFileDto;
+import com.plog.demo.dto.user.CheckAuthDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.AuthTable;
 import com.plog.demo.model.IdTable;
@@ -13,6 +14,7 @@ import com.plog.demo.repository.IdTableRepository;
 import com.plog.demo.repository.ProviderCheckTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -26,6 +28,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.tags.form.CheckboxesTag;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -160,15 +163,52 @@ public class ConfirmServiceImpl implements ConfirmService{
         }
     }
 
+    private int validate(CheckAuthDto checkAuthDto){
+        if(checkAuthDto.getEmail() == null || checkAuthDto.getAuth() == 0){
+            return -1;
+        }
+        if(checkAuthDto.getUserId() == null){
+            return 0;
+        }
+        return 1;
+    }
 
     @Override
-    public void checkAuthNumber(String email, int authNumber) throws CustomException{
-        AuthTable authTable = authTableRepository.findByEmail(email);
-        if(authTable == null){
-            throw new CustomException("인증번호가 존재하지 않습니다.", HttpStatus.BAD_REQUEST.value());
+    public String checkAuthNumber(CheckAuthDto checkAuthDto) throws CustomException{
+        int check = validate(checkAuthDto);
+        if(check == -1){
+            throw new CustomException("이메일 또는 인증번호가 입력되지 않았습니다.", HttpStatus.BAD_REQUEST.value());
         }
-        if(authTable.getAuth() == authNumber){
+        if(check == 0){
+            return checkAuthNumberWithoutId(checkAuthDto);
+        }else{
+            return checkAuthNumberWithId(checkAuthDto);
+        }
+    }
+
+    private String checkAuthNumberWithId(CheckAuthDto checkAuthDto) throws CustomException {
+        IdTable idTable = idTableRepository.findById(checkAuthDto.getUserId())
+                .orElseThrow(() -> new CustomException("존재하지 않는 회원입니다.", HttpStatus.NOT_FOUND.value()));
+        AuthTable authTable = authTableRepository.findByEmail(checkAuthDto.getEmail());
+        if(authTable == null){
+            throw new CustomException("인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value());
+        }
+        if(authTable.getAuth() == checkAuthDto.getAuth()){
             authTableRepository.delete(authTable);
+            return idTable.getId();
+        }else{
+            throw new CustomException("인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value());
+        }
+    }
+
+    private String checkAuthNumberWithoutId(CheckAuthDto checkAuthDto) throws CustomException {
+        AuthTable authTable = authTableRepository.findByEmail(checkAuthDto.getEmail());
+        if(authTable == null){
+            throw new CustomException("인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value());
+        }
+        if(authTable.getAuth() == checkAuthDto.getAuth()){
+            authTableRepository.delete(authTable);
+            return idTableRepository.findByEmail(checkAuthDto.getEmail()).getId();
         }else{
             throw new CustomException("인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value());
         }

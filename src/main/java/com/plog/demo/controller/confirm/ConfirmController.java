@@ -3,6 +3,7 @@ package com.plog.demo.controller.confirm;
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.confirm.*;
+import com.plog.demo.dto.user.CheckAuthDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.confirm.ConfirmService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -93,10 +94,10 @@ public class ConfirmController {
     @PostMapping("/checkAuthNumber")
     @Operation(summary = "인증번호 확인", description = "인증번호를 확인합니다.")
     @ApiResponse(responseCode = "200", description = "인증번호 확인 성공", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
-    public ResponseEntity<SuccessDto> checkAuthNumber(@RequestBody EmailAuthCheckDto emailAuthCheckDto) throws CustomException {
+    public ResponseEntity<SuccessDto> checkAuthNumber(@RequestBody CheckAuthDto checkAuthDto) throws CustomException {
         try{
-            confirmService.checkAuthNumber(emailAuthCheckDto.getEmail(), emailAuthCheckDto.getAuthCode());
-            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
+            String result = confirmService.checkAuthNumber(checkAuthDto);
+            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message(result).build());
         } catch (CustomException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(SuccessDto.builder().message(e.getMessage()).build());
         }
