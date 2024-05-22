@@ -201,7 +201,7 @@ public class ConfirmServiceImpl implements ConfirmService{
         }
     }
 
-    private String checkAuthNumberWithoutId(CheckAuthDto checkAuthDto) throws CustomException {
+    private String checkAuthNumberWithoutId(CheckAuthDto checkAuthDto) throws CustomException {//
         AuthTable authTable = authTableRepository.findByEmail(checkAuthDto.getEmail());
         if(authTable == null){
             throw new CustomException("인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value());
