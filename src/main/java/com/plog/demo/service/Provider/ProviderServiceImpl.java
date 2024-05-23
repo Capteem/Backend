@@ -133,7 +133,7 @@ public class ProviderServiceImpl implements ProviderService{
         }
         return providerReservationDtos;
     }
-
+//
     @Override
     @Operation(summary = "허가된 제공자 목록 조회", description = "허가된 제공자 목록을 조회합니다.")
     public List<ProviderListDto> getConfirmedProviderList() throws CustomException {
