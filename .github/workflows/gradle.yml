@@ -6,6 +6,13 @@ env:
   DEPLOYMENT_GROUP_NAME: plog-instance
 # --------------------------추가
 
+
+on:
+  push:
+    branches: [ "feature" ]
+  pull_request:
+    branches: [ "develop"]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
