@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService{
         }
     }
     
-    //비밀번호 찾기
+    //비밀번호 찾기//
     @Override
     public String checkUserEmailAndId(String email, String id) throws CustomException {
         try {
