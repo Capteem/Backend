@@ -5,7 +5,7 @@ import com.plog.demo.dto.user.UserDto;
 import com.plog.demo.dto.user.UserInfoDto;
 import com.plog.demo.exception.CustomException;
 
-public interface SignService {
+public interface SignService {//
 
     UserDto register(UserDto userDto) throws CustomException;
 
