@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Entity
 @AllArgsConstructor
@@ -23,4 +25,6 @@ public class AuthTable {
     private String email;
 
     private int auth;
+
+    private LocalDateTime createdAt;
 }

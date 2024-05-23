@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @Builder
@@ -24,13 +26,10 @@ public class WorkdateTable {
     private int workDateId;
 
     @Column
-    private String workDate;
+    private LocalDateTime workDate;
 
     @Column
     private String workDay;
-
-    @Column
-    private String workTime;
 
     @ManyToOne
     @JoinColumn(name="providerId")

@@ -12,6 +12,7 @@ import com.plog.demo.service.Provider.ProviderService;
 import com.plog.demo.service.reservation.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.jdbc.Work;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -39,6 +40,8 @@ public class PaymentServiceImpl implements PaymentService{
     private final ReservationService reservationService;
     private final ReservationTableRepository reservationTableRepository;
     private final PaymentDataTableRepository paymentDataTableRepository;
+    private final WorkdateTableRepository workdateTableRepository;
+    private final ProviderTableRepository providerTableRepository;
 
 
     @Value("${pay.admin_key}")
@@ -184,6 +187,14 @@ public class PaymentServiceImpl implements PaymentService{
             paymentDataTableRepository.save(paymentDataTable);
             List<ReservationTable> reservationTables = reservationTableRepository.findAllByUserId(idTable);
             ReservationTable reservationTable = reservationTables.get(reservationTables.size() - 1);
+            List<Integer> providerIdList = new ArrayList<>();
+            providerIdList.add(reservationTable.getReservation_camera());
+            providerIdList.add(reservationTable.getReservation_studio());
+            providerIdList.add(reservationTable.getReservation_hair());
+            for(int providerId : providerIdList){
+                ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new IllegalArgumentException("[getApprove] no such provider exists."));
+                workdateTableRepository.deleteByProviderIdAndWorkTime(providerTable, reservationTable.getReservation_start_date(), reservationTable.getReservation_end_date());
+            }
             reservationTable.setTid(paymentTable);
         }catch (Exception e){
             log.error("[getApprove] failure to get approve");

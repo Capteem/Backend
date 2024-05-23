@@ -20,6 +20,10 @@ public class ReservationTimeTable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int timeId;
 
+    private int reservationCamera;
+    private int reservationStudio;
+    private int reservationHair;
+
     private String reservationDate;
     private String reservationTime;
 

@@ -156,6 +156,7 @@ public class ConfirmServiceImpl implements ConfirmService{
             AuthTable authTable = AuthTable.builder()
                     .email(toMail)
                     .auth(AUTH_NUMBER)
+                    .createdAt(java.time.LocalDateTime.now())
                     .build();
             authTableRepository.save(authTable);
         } catch (MessagingException e) {

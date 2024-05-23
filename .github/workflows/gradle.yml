@@ -2,9 +2,9 @@ name: Java CI with Gradle and CodeDeploy
 
 env:
   AWS_REGION: ap-northeast-2
-  S3_BUCKET_NAME: plog-action-bucket
+  S3_BUCKET_NAME: plog-server-s3-bucket
   CODE_DEPLOY_APPLICATION_NAME: plog
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: producion
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: plog-server-deploy
 
 on:
   push:
@@ -59,7 +59,7 @@ jobs:
 
 
       - name: 📦 Zip project files
-        run: zip -r ./plog.zip .
+        run: zip -r ./$GITHUB_SHA.zip .
 
       - name : Access to Aws
         uses: aws-actions/configure-aws-credentials@v2
@@ -69,13 +69,14 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: S3 업로드
-        run: aws s3 cp --region ${{ env.AWS_REGION }} ./plog.zip s3://${{ env.S3_BUCKET_NAME }}
+        run: aws s3 cp --region ${{ env.AWS_REGION }} ./$GITHUB_SHA.zip s3://${{ env.S3_BUCKET_NAME }}
 
       - name: AWS CodeDeploy에 배포
         run: |
           aws deploy create-deployment \
             --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
             --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
             --region ${{ env.AWS_REGION }} \
-            --s3-location bucket=${{ env.S3_BUCKET_NAME }},bundleType=zip,key=plog-deploy/plog.zip
+            --s3-location bucket=${{ env.S3_BUCKET_NAME }},bundleType=zip,key=plog-deploy/GITHUB_SHA.zip
       

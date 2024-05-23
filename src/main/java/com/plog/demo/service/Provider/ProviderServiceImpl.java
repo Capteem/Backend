@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -150,8 +151,8 @@ public class ProviderServiceImpl implements ProviderService{
                     .providerRepPhoto(providerTable.getProviderRepPhoto())
                     .providerRepPhotoPath(providerTable.getProviderRepPhotoPath())
                     .dateList(providerTable.getWorkdateTableList().stream().map(workdateTable -> DateListDto.builder()
-                            .date(workdateTable.getWorkDate())
-                            .time(workdateTable.getWorkTime())
+                            .date(String.valueOf(workdateTable.getWorkDate().toLocalDate()))
+                            .time(String.valueOf(workdateTable.getWorkDate().toLocalTime()))
                             .build()).toList())
                     .build()).toList();
             if (providerTables.isEmpty()) {
@@ -170,8 +171,7 @@ public class ProviderServiceImpl implements ProviderService{
         for(WorkDateRequestDto workDateRequestDto : workdateDto.getDateList()){
             WorkdateTable workdateTable = WorkdateTable.builder()
                     .providerId(providerTable)
-                    .workDate(workDateRequestDto.getDate())
-                    .workTime(workDateRequestDto.getTime())
+                    .workDate(LocalDateTime.parse(workDateRequestDto.getDate() + "T" + workDateRequestDto.getTime()))
                     .workDay(workDateRequestDto.getDay())
                     .build();
             try{
@@ -186,9 +186,9 @@ public class ProviderServiceImpl implements ProviderService{
     @Override
     public void deleteWorkDate(WorkdateDto workdateDto) throws CustomException {
         ProviderTable providerTable = providerTableRepository.findById(workdateDto.getProviderId()).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
-
+        LocalDateTime date = LocalDateTime.parse(workdateDto.getDateList().get(0).getDate() + "T" + workdateDto.getDateList().get(0).getTime());
         for(WorkDateRequestDto workDateRequestDto : workdateDto.getDateList()){
-            WorkdateTable workdateTable = workdateTableRepository.findByProviderIdAndWorkDateAndWorkTime(providerTable, workDateRequestDto.getDate(), workDateRequestDto.getTime());
+            WorkdateTable workdateTable = workdateTableRepository.findByProviderIdAndWorkDate(providerTable, date);
             if(workdateTable == null){
                 log.error("[deleteWorkDate] 존재하지 않는 일정입니다.");
                 throw new CustomException("존재하지 않는 일정입니다.", HttpStatus.NOT_FOUND.value());

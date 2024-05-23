@@ -2,6 +2,7 @@ package com.plog.demo.service.sign;
 
 import com.plog.demo.common.UserStatus;
 import com.plog.demo.config.JwtTokenProvider;
+import com.plog.demo.dto.sign.KakaoTokenDto;
 import com.plog.demo.dto.sign.LoginResponseDto;
 import com.plog.demo.dto.user.UserDto;
 import com.plog.demo.dto.user.UserInfoDto;
@@ -10,12 +11,18 @@ import com.plog.demo.model.IdTable;
 import com.plog.demo.repository.IdTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.spi.ObjectThreadContextMap;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -105,5 +112,7 @@ public class SignServiceImpl implements SignService{
                 .role(user.getRole())
                 .build();
     }
+
+
 
 }
