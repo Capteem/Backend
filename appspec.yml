@@ -3,10 +3,13 @@ os: linux
 
 files:
   - source: /
-    destination: /home/ubuntu/plog-deploy
-
+    destination: /home/ubuntu/moduform
 permissions:
-  - object: /home/ubuntu/plog-deploy
+  - object: /home/ubuntu/moduform/
     owner: ubuntu
     group: ubuntu
-    mode: 755
+hooks:
+  AfterInstall:
+    - location: scripts/deploy.sh
+      timeout: 60
+      runas: ubuntu
