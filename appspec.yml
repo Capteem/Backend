@@ -4,6 +4,7 @@ os: linux
 files:
   - source: /
     destination: /home/ubuntu/plog-deploy
+
 permissions:
   - object: /home/ubuntu/plog-deploy
     owner: ubuntu
