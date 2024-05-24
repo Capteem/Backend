@@ -3,9 +3,9 @@ os: linux
 
 files:
   - source: /
-    destination: /home/ubuntu/moduform
+    destination: /home/ubuntu/plog
 permissions:
-  - object: /home/ubuntu/moduform/
+  - object: /home/ubuntu/plog/
     owner: ubuntu
     group: ubuntu
 hooks:
