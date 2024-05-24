@@ -19,4 +19,4 @@ else
 fi
 
 echo "> Deploy - $JAR_PATH "
-nohup java -jar $JAR_PATH > logs/spring-app.log 2>&1 &" >> scripts/deploy.sh
+nohup java -jar $JAR_PATH > /dev/null 2> /dev/null < /dev/null &
