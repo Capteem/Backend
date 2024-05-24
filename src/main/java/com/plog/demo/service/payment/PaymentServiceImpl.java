@@ -173,6 +173,7 @@ public class PaymentServiceImpl implements PaymentService{
 
         try{
             payApproveResDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayApproveResDto.class);
+            assert payApproveResDto != null;
             PaymentDataTable paymentDataTable = PaymentDataTable.builder()
                     .total(payApproveResDto.getAmount().getTotal())
                     .approved_at(payApproveResDto.getApproved_at())
@@ -186,6 +187,9 @@ public class PaymentServiceImpl implements PaymentService{
 
             paymentDataTableRepository.save(paymentDataTable);
             List<ReservationTable> reservationTables = reservationTableRepository.findAllByUserId(idTable);
+            if(reservationTables.isEmpty()){
+                throw new CustomException("예약 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+            }
             ReservationTable reservationTable = reservationTables.get(reservationTables.size() - 1);
             List<Integer> providerIdList = new ArrayList<>();
             providerIdList.add(reservationTable.getReservation_camera());
