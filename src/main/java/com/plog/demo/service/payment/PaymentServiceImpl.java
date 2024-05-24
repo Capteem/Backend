@@ -191,14 +191,19 @@ public class PaymentServiceImpl implements PaymentService{
                 throw new CustomException("예약 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
             }
             ReservationTable reservationTable = reservationTables.get(reservationTables.size() - 1);
-            List<Integer> providerIdList = new ArrayList<>();
-            providerIdList.add(reservationTable.getReservation_camera());
-            providerIdList.add(reservationTable.getReservation_studio());
-            providerIdList.add(reservationTable.getReservation_hair());
-            for(int providerId : providerIdList){
-                ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new IllegalArgumentException("[getApprove] no such provider exists."));
-                workdateTableRepository.deleteByProviderIdAndWorkTime(providerTable, reservationTable.getReservation_start_date(), reservationTable.getReservation_end_date());
-            }
+//            List<Integer> providerIdList = new ArrayList<>();
+//            providerIdList.add(reservationTable.getReservation_camera());
+//            providerIdList.add(reservationTable.getReservation_studio());
+//            providerIdList.add(reservationTable.getReservation_hair());
+//            for(int providerId : providerIdList){
+//                try {
+//                    ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new IllegalArgumentException("[getApprove] no such provider exists."));
+//                    workdateTableRepository.deleteByProviderIdAndWorkTime(providerTable, reservationTable.getReservation_start_date(), reservationTable.getReservation_end_date());
+//                }catch (Exception e){
+//                    log.error("[getApprove] failure to delete workdate");
+//                    throw new CustomException("failure to delete workdate", HttpStatus.INTERNAL_SERVER_ERROR.value());
+//                }
+//            }
             reservationTable.setTid(paymentTable);
         }catch (Exception e){
             log.error("[getApprove] failure to get approve");
