@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-//c
+
 @Configuration
 @EnableWebMvc
 @RequiredArgsConstructor
@@ -23,11 +23,11 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*");
     }
 
-//    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(logInInterceptor)
-//                .order(1)
-//                .addPathPatterns("/**")
-//                .excludePathPatterns("/sign-api/signin", "/sign-api/signup", "/sign-api/refresh");
-//    }
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(logInInterceptor)
+                .order(1)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/sign-api/signin", "/sign-api/signup", "/sign-api/refresh");
+    }
 }

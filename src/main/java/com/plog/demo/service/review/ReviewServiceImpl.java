@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -124,19 +125,20 @@ public class ReviewServiceImpl implements ReviewService{
 
         List<ReviewTable> reviews = reviewTableRepository.findByProviderId(provider);
 
+        List<ReviewGetDto> reviewGetDtos = new ArrayList<>();
+
         if(reviews.isEmpty()){
-            return ReviewGetResponseDto.builder()
-                    .reviewList(null)
-                    .build();
+
+            reviewGetDtos = null;
+        }else {
+
+            for(ReviewTable review : reviews){
+                CommentGetDto commentGetDto = createCommentGetDto(review);
+                ReviewGetDto reviewGetDto = createReviewGetDto(review, commentGetDto);
+                reviewGetDtos.add(reviewGetDto);
+            }
+
         }
-
-        List<ReviewGetDto> reviewGetDtos = reviews.stream()
-                .map(review -> {
-                    CommentGetDto commentGetDto = createCommentGetDto(review);
-
-                    return createReviewGetDto(review, commentGetDto);
-
-                }).toList();
 
         return ReviewGetResponseDto.builder()
                 .reviewList(reviewGetDtos)

@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -14,22 +15,26 @@ import java.util.Date;
 @Slf4j
 public class JwtTokenProvider {
 
+    public static final String ACCESS = "access";
+    public static final String REFRESH = "refresh";
+    public static final String TOKEN_TYPE = "tokenType";
     public static final String TOKEN_HEADER = "Auth-Token";
 
 
     /**
      * TODO 나중에 시크릿키, 만료시간 환경변수 처리해야함
      */
-    private String tokenSecretKey = "SecretKey111";
+    @Value("${}")
+    private String tokenSecretKey = "plog_secretKey";
 
     //private String refreshTokenSecretKey = "SecretKey222";
 
     //한시간
-    private final long jwtAccessExpiration = 1L;
-    //1000L * 60 * 60;
+    private final long jwtAccessExpiration = 1000L * 60 * 60;
 
     //일주일
     private final long jwtRefreshExpiration = 1000L * 60 * 60 * 24 * 7;
+
 
     /**
      * secret key 초기화
@@ -53,6 +58,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + jwtAccessExpiration))
+                .claim(TOKEN_TYPE, ACCESS)
                 .signWith(SignatureAlgorithm.HS256, tokenSecretKey)
                 .compact();
 
@@ -65,16 +71,17 @@ public class JwtTokenProvider {
      * JWT refreshToken 생성
      */
     public String createRefreshToken(){
-        log.info("[createRefreshToken] 액세스 토큰 생성 시작");
+        log.info("[createRefreshToken] 리프레쉬 토큰 생성 시작");
         Date now = new Date();
 
         String refreshToken = Jwts.builder()
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + jwtRefreshExpiration))
+                .claim(TOKEN_TYPE, REFRESH)
                 .signWith(SignatureAlgorithm.HS256, tokenSecretKey)
                 .compact();
 
-        log.info("[createRefreshToken] 액세스 토큰 생성 완료");
+        log.info("[createRefreshToken] 리프레쉬 토큰 생성 완료");
 
         return refreshToken;
     }
@@ -89,6 +96,11 @@ public class JwtTokenProvider {
         return info.getSubject();
     }
 
+    public boolean isAccessToken(String token){
+        String tokenType = Jwts.parser().setSigningKey(tokenSecretKey).parseClaimsJws(token)
+                .getBody().get(TOKEN_TYPE, String.class);
+        return tokenType.equals(ACCESS);
+    }
 
     /**
      * request 헤더에서 token 추출

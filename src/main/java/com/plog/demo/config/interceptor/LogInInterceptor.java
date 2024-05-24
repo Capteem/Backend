@@ -14,7 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Slf4j
 public class LogInInterceptor implements HandlerInterceptor {
 
-    final private JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -22,11 +22,15 @@ public class LogInInterceptor implements HandlerInterceptor {
         log.info("[LogInInterceptor] 인터셉터 실행");
         String token = jwtTokenProvider.resolveToken(request);
 
-        if(token == null || !jwtTokenProvider.validationToken(token)) {
+        if(isNotValidatedToken(token)) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
         }
 
         return true;
+    }
+
+    private boolean isNotValidatedToken(String token) {
+        return token == null || !jwtTokenProvider.validationToken(token) || !jwtTokenProvider.isAccessToken(token);
     }
 }
