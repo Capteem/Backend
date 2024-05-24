@@ -13,5 +13,5 @@ public enum CommonStatus {
     CommonStatus(int code, String description){
         this.code = code;
         this.description = description;
-    }
+    }//
 }

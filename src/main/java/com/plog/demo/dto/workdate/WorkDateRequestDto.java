@@ -12,5 +12,6 @@ import java.util.List;
 public class WorkDateRequestDto {
 
     private String date;
-    private List<String> time;
+    private String time;
+    private String day;
 }

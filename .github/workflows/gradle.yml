@@ -1,11 +1,12 @@
-name: Java CI with Gradle and CodeDeploy
-
+# --------------------------추가
 env:
-  AWS_REGION: us-east-1
-  S3_BUCKET_NAME: plog-action-s3-bucket
-  CODE_DEPLOY_APPLICATION_NAME: plog-spring-boot
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: plog-codedeploy-deployment-group
+  PROJECT_NAME: plog
+  BUCKET_NAME: plog-server-bucket
+  CODE_DEPLOY_APP_NAME: plog
+  DEPLOYMENT_GROUP_NAME: plog-instance
+# --------------------------추가
 
+#
 on:
   push:
     branches: [ "feature" ]
@@ -27,14 +28,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # GitHub Actions에서 Gradle을 최적으로 사용하도록 구성합니다.1
-      # 자세한 내용은 https://github.com/gradle/actions/blob/main/setup-gradle/README.md를 참조하세요.
       - name: Gradle 설정
         uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
         with:
           gradle-version: '8.7'
 
-      # application.properties 파일을 GitHub 시크릿을 사용하여 생성합니다.
       - name: application.properties 생성
         run: echo "${{secrets.APPLICATION_PROPERTIES}}" > src/main/resources/application.properties
 
@@ -43,51 +41,25 @@ jobs:
 
       - name: Gradle Wrapper로 빌드
         run: ./gradlew build
-
-      - name: 아티팩트 업로드
-        uses: actions/upload-artifact@v2
-        with:
-          name: plog
-          path: build/libs
-
-      - name: Make Directory
-        run: mkdir -p deploy
-
-      - name: Copy Jar
-        run: cp ./build/libs/*.jar ./deploy
-
-          # appspec.yml 파일 복사
-      - name: Copy appspec.yml
-        run: cp appspec.yml ./deploy
-
-
-          # script files 복사
-      - name: Copy script
-        run: cp ./scripts/*.sh ./deploy
-
-      - name: Make zip file
-        run: zip -r ./plog.zip ./deploy
+      # --------------------------추가
+      - name: Make Zip File
+        run: zip -qq -r ./$GITHUB_SHA.zip .
         shell: bash
-      - name: AWS 액세스 키 및 시크릿 키 설정
-        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: S3 업로드
-        run: aws s3 cp --region ${{ env.AWS_REGION }} ./plog.zip s3://${{ env.S3_BUCKET_NAME }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip
 
-    steps:
-      - name: AWS 액세스 키 및 시크릿 키 설정
-        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: AWS CodeDeploy에 배포
-        run: |
-          aws deploy create-deployment \
-            --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
-            --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-            --region ${{ env.AWS_REGION }} \
-            --s3-location bucket=${{ env.S3_BUCKET_NAME }},bundleType=zip,key=build/plog.zip
+      - name: Code Deploy To EC2 instance
+        run: aws deploy create-deployment
+          --application-name $CODE_DEPLOY_APP_NAME
+          --deployment-config-name CodeDeployDefault.AllAtOnce
+          --deployment-group-name $DEPLOYMENT_GROUP_NAME
+          --s3-location bucket=$BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME/$GITHUB_SHA.zip
+# --------------------------추가

@@ -12,6 +12,6 @@ import java.util.List;
 @Builder
 public class WorkdateDto {
 
-    private String userId;
+    private int providerId;
     private List<WorkDateRequestDto> dateList;
 }

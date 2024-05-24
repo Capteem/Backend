@@ -58,7 +58,6 @@ public class AdminServiceImpl implements AdminService{
     public void changeProviderStatus(AdminProviderDto adminProviderDto) throws CustomException {
         IdTable idTable = idTableRepository.findById(adminProviderDto.getUserId()).orElseThrow(() -> new CustomException("not exist user.", HttpStatus.BAD_REQUEST.value()));
         ProviderTable providerTable = providerTableRepository.findByUserIdAndProviderId(idTable, adminProviderDto.getProviderId()).orElseThrow(() -> new CustomException("not exist provider.", HttpStatus.BAD_REQUEST.value()));
-
         if(providerTable.getProviderStatus() == adminProviderDto.getProviderStatus()){
             log.error("[changeProviderStatus] not match provider status.");
             throw new CustomException("제공자 상태가 같습니다.", HttpStatus.BAD_REQUEST.value());
@@ -66,6 +65,9 @@ public class AdminServiceImpl implements AdminService{
 
         try{
             providerTable.setProviderStatus(adminProviderDto.getProviderStatus());
+            if(adminProviderDto.getProviderStatus() == UserStatus.ACTIVE.getCode()){
+                idTable.setRole("PROVIDER");
+            }
             providerTableRepository.save(providerTable);
         }catch (Exception e){
             log.info("[changeProviderStatus] db connection error.");

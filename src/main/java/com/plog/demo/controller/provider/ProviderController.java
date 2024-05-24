@@ -152,9 +152,9 @@ public class ProviderController {
     @PostMapping("/accept")
     @Operation(summary = "예약 수락", description = "예약을 수락합니다.")
     @ApiResponse(responseCode = "200", description = "예약 수락 성공")
-    public ResponseEntity<SuccessDto> acceptReservation(@RequestParam int reservationId) throws CustomException {
+    public ResponseEntity<SuccessDto> acceptReservation(@RequestParam int reservationId, @RequestParam int providerId) throws CustomException {
         try{
-            providerService.acceptReservation(reservationId);
+            providerService.acceptReservation(reservationId, providerId);
             return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("예약 수락 성공").build());
         } catch (CustomException e){
             log.info("acceptReservation error");
@@ -178,12 +178,37 @@ public class ProviderController {
     @PostMapping("/complete")
     @Operation(summary = "예약 완료", description = "예약을 완료합니다.")
     @ApiResponse(responseCode = "200", description = "예약 완료 성공")
-    public ResponseEntity<SuccessDto> completeReservation(@RequestParam int reservationId) throws CustomException {
+    public ResponseEntity<SuccessDto> completeReservation(@RequestParam int reservationId, @RequestParam int providerId) throws CustomException {
         try{
-            providerService.completeReservation(reservationId);
+            providerService.completeReservation(reservationId, providerId);
             return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("예약 완료 성공").build());
         } catch (CustomException e){
             log.info("completeReservation error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
+    }
+
+    @GetMapping("/info")
+    @Operation(summary = "제공자 정보 조회", description = "제공자 정보를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "제공자 정보 조회 성공", content = @Content(schema = @Schema(implementation = ProviderInfoDto.class)))
+    public ResponseEntity<ProviderInfoDto> getProviderInfo(@RequestParam int providerId) throws CustomException {
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(providerService.getProviderInfo(providerId));
+        } catch (CustomException e){
+            log.info("getProviderInfo error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
+    }
+
+    @PostMapping("/delete/workdate")
+    @Operation(summary = "제공자 근무일 삭제", description = "제공자 근무일을 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "제공자 근무일 삭제 성공")
+    public ResponseEntity<SuccessDto> deleteWorkDate(@RequestBody WorkdateDto workdateDto) throws CustomException {
+        try{
+            providerService.deleteWorkDate(workdateDto);
+            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("제공자 근무일 삭제 성공").build());
+        } catch (CustomException e){
+            log.info("deleteWorkDate error");
             throw new CustomException(e.getMessage(), e.getResultCode());
         }
     }

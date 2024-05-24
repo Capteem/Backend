@@ -32,6 +32,7 @@ public class ReservationResponseDto {
 
     private String tid;
 
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reservationStartDate;
 

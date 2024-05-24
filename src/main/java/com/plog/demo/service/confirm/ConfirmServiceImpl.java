@@ -4,13 +4,17 @@ import com.plog.demo.common.file.ProviderCheckFileStore;
 import com.plog.demo.dto.confirm.ConfirmCheckProviderRequestDto;
 import com.plog.demo.dto.confirm.ConfirmResponseDto;
 import com.plog.demo.dto.file.ProviderCheckFileDto;
+import com.plog.demo.dto.user.CheckAuthDto;
 import com.plog.demo.exception.CustomException;
+import com.plog.demo.model.AuthTable;
 import com.plog.demo.model.IdTable;
 import com.plog.demo.model.ProviderCheckTable;
+import com.plog.demo.repository.AuthTableRepository;
 import com.plog.demo.repository.IdTableRepository;
 import com.plog.demo.repository.ProviderCheckTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -24,11 +28,12 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.tags.form.CheckboxesTag;
 
+import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.net.URI;
 import java.util.List;
-import java.util.Random;
 
 @Service
 @Slf4j
@@ -39,9 +44,12 @@ public class ConfirmServiceImpl implements ConfirmService{
     private final ProviderCheckTableRepository providerCheckTableRepository;
     private final IdTableRepository idTableRepository;
     private final ProviderCheckFileStore providerCheckFileStore;
-
     @Autowired
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
+    private final AuthTableRepository authTableRepository;
+    private static final String SENDER_EMAIL = "plog20240520@gmail.com";
+    private static int AUTH_NUMBER;
+
     @Value("${openapi.authkey}")
     private String authKey;
     @Override
@@ -120,50 +128,90 @@ public class ConfirmServiceImpl implements ConfirmService{
                 throw new RuntimeException("서비스 등록용 파일정보를 db에서 삭제하는 중 에러", e);
             }
         }
-
-
         return true;
     }
 
-    private int makeRandomNumber(){
-        Random r = new Random();
-        String randomNumber = "";
-        for(int i = 0 ; i < 6 ; i++){
-            randomNumber += r.nextInt(10);
-        }
-        int authNumber = Integer.parseInt(randomNumber);
-        return authNumber;
+    public static void createNumber() {
+        AUTH_NUMBER = (int)(Math.random() * (900000)) + 100000; //(int) Math.random() * (최댓값-최소값+1) + 최소값
     }
 
     @Override
-    public void mailSend(String setForm, String toMail, String title, String content) throws CustomException{
-        MimeMessage message = mailSender.createMimeMessage();
+    public void joinEmail(String email) throws CustomException {
+        createNumber();
+        String subject = "PLOG 인증번호입니다.";
+        String text = "인증번호는 " + AUTH_NUMBER + "입니다.";
+        sendEmail(SENDER_EMAIL, email, subject, text);
+    }
 
-        try{
+    @Override
+    public void sendEmail(String setFrom, String toMail, String title, String content) throws CustomException {
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
             MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
-            messageHelper.setFrom(setForm);
+            messageHelper.setFrom(setFrom);
             messageHelper.setTo(toMail);
             messageHelper.setSubject(title);
-            messageHelper.setText(content);
+            messageHelper.setText(content, true);
             mailSender.send(message);
-        } catch (Exception e){
-            throw new CustomException("메일 전송 실패", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            AuthTable authTable = AuthTable.builder()
+                    .email(toMail)
+                    .auth(AUTH_NUMBER)
+                    .createdAt(java.time.LocalDateTime.now())
+                    .build();
+            authTableRepository.save(authTable);
+        } catch (MessagingException e) {
+            throw new CustomException("메일 전송 중 오류가 발생했습니다.", HttpStatus.BAD_REQUEST.value());
         }
     }
 
+    private int validate(CheckAuthDto checkAuthDto){
+        if(checkAuthDto.getEmail() == null || checkAuthDto.getAuth() == 0){
+            return -1;
+        }
+        if(checkAuthDto.getUserId() == null){
+            return 0;
+        }
+        return 1;
+    }
+
     @Override
-    public String joinEmail(String email) throws CustomException {
-        int authNumber = makeRandomNumber();
-        String setForm = "taehun9606@ajou.ac.kr";
-        String toMail = email;
-        String title = "[Plog] 비밀번호 변경 인증 메일입니다.";
-        String content = "인증번호는 " + authNumber + "입니다.";
-        try {
-            mailSend(setForm, toMail, title, content);
-            return Integer.toString(authNumber);
-        } catch (CustomException e){
-            log.info("[joinEmail]"+e.getMessage());
-            throw new CustomException(e.getMessage(),e.getResultCode());
+    public String checkAuthNumber(CheckAuthDto checkAuthDto) throws CustomException{
+        int check = validate(checkAuthDto);
+        if(check == -1){
+            throw new CustomException("이메일 또는 인증번호가 입력되지 않았습니다.", HttpStatus.BAD_REQUEST.value());
+        }
+        if(check == 0){
+            return checkAuthNumberWithoutId(checkAuthDto);
+        }else{
+            return checkAuthNumberWithId(checkAuthDto);
+        }
+    }
+
+    private String checkAuthNumberWithId(CheckAuthDto checkAuthDto) throws CustomException {
+        IdTable idTable = idTableRepository.findById(checkAuthDto.getUserId())
+                .orElseThrow(() -> new CustomException("존재하지 않는 회원입니다.", HttpStatus.NOT_FOUND.value()));
+        AuthTable authTable = authTableRepository.findByEmail(checkAuthDto.getEmail());
+        if(authTable == null){
+            throw new CustomException("인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value());
+        }
+        if(authTable.getAuth() == checkAuthDto.getAuth()){
+            authTableRepository.delete(authTable);
+            return idTable.getId();
+        }else{
+            throw new CustomException("인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value());
+        }
+    }
+
+    private String checkAuthNumberWithoutId(CheckAuthDto checkAuthDto) throws CustomException {//
+        AuthTable authTable = authTableRepository.findByEmail(checkAuthDto.getEmail());
+        if(authTable == null){
+            throw new CustomException("인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value());
+        }
+        if(authTable.getAuth() == checkAuthDto.getAuth()){
+            authTableRepository.delete(authTable);
+            return idTableRepository.findByEmail(checkAuthDto.getEmail()).getId();
+        }else{
+            throw new CustomException("인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value());
         }
     }
 

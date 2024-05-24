@@ -2,7 +2,6 @@ package com.plog.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.plog.demo.dto.Provider.ProviderDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -28,10 +26,10 @@ public class WorkdateTable {
     private int workDateId;
 
     @Column
-    private String workDate;
+    private LocalDateTime workDate;
 
     @Column
-    private String workTime;
+    private String workDay;
 
     @ManyToOne
     @JoinColumn(name="providerId")

@@ -28,7 +28,6 @@ public class ComplaintServiceImpl implements ComplaintService{
 
     private final ComplaintTableRepository complaintTableRepository;
     private final IdTableRepository idTableRepository;
-    private final ComplaintAnswerTableRepository complaintAnswerTableRepository;
 
     @Override
     public void addComplain(ComplaintRequestDto complaintRequestDto) throws CustomException{

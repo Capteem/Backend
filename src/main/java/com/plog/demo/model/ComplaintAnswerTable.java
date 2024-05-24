@@ -23,7 +23,7 @@ public class ComplaintAnswerTable {
     @Column
     private String complaintAnswerDate;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "complaintId")
     private ComplaintTable complaintId;
 

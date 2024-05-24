@@ -3,10 +3,11 @@ package com.plog.demo.service.sign;
 import com.plog.demo.dto.sign.LoginResponseDto;
 import com.plog.demo.dto.sign.RenewAccessTokenResponseDto;
 import com.plog.demo.dto.user.UserDto;
+import com.plog.demo.dto.user.UserInfoDto;
 import com.plog.demo.exception.CustomException;
 import jakarta.servlet.http.HttpServletRequest;
 
-public interface SignService {
+public interface SignService {//
 
     UserDto register(UserDto userDto) throws CustomException;
 

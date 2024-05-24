@@ -27,6 +27,7 @@ import java.util.Map;
 @RequestMapping("/reservation")
 @Slf4j
 @Tag(name = "Reservation", description = "예약 관련 API")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ReservationController {
 
 

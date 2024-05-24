@@ -32,6 +32,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/portfolio")
 @Tag(name = "Portfolio", description = "포트폴리오 API")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class PortfolioController {
 
     private final PortfolioService portfolioService;

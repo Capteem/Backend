@@ -19,7 +19,7 @@ public class ProviderCheckTable {
     @Column
     private String storedFileName;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "userId")
     IdTable id;
 }
