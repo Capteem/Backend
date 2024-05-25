@@ -3,16 +3,12 @@ package com.plog.demo.service.payment;
 import com.plog.demo.common.PaymentStatus;
 import com.plog.demo.common.ReservationStatus;
 import com.plog.demo.dto.payment.*;
-import com.plog.demo.dto.workdate.WorkDateRequestDto;
-import com.plog.demo.dto.workdate.WorkdateDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.*;
 import com.plog.demo.repository.*;
-import com.plog.demo.service.Provider.ProviderService;
 import com.plog.demo.service.reservation.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.jdbc.Work;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,11 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
 
 
 @Service
@@ -42,7 +36,6 @@ public class PaymentServiceImpl implements PaymentService{
     private final PaymentDataTableRepository paymentDataTableRepository;
     private final WorkdateTableRepository workdateTableRepository;
     private final ProviderTableRepository providerTableRepository;
-
 
     @Value("${pay.admin_key}")
     private String adminKey;
@@ -191,19 +184,6 @@ public class PaymentServiceImpl implements PaymentService{
                 throw new CustomException("예약 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
             }
             ReservationTable reservationTable = reservationTables.get(reservationTables.size() - 1);
-//            List<Integer> providerIdList = new ArrayList<>();
-//            providerIdList.add(reservationTable.getReservation_camera());
-//            providerIdList.add(reservationTable.getReservation_studio());
-//            providerIdList.add(reservationTable.getReservation_hair());
-//            for(int providerId : providerIdList){
-//                try {
-//                    ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new IllegalArgumentException("[getApprove] no such provider exists."));
-//                    workdateTableRepository.deleteByProviderIdAndWorkTime(providerTable, reservationTable.getReservation_start_date(), reservationTable.getReservation_end_date());
-//                }catch (Exception e){
-//                    log.error("[getApprove] failure to delete workdate");
-//                    throw new CustomException("failure to delete workdate", HttpStatus.INTERNAL_SERVER_ERROR.value());
-//                }
-//            }
             reservationTable.setTid(paymentTable);
         }catch (Exception e){
             log.error("[getApprove] failure to get approve");
@@ -276,20 +256,4 @@ public class PaymentServiceImpl implements PaymentService{
         }
         return payCancelDto;
     }
-
-    private List<WorkDateRequestDto> getWorkDateList(LocalDateTime startDate, LocalDateTime endDate){
-        LocalDateTime current = startDate;
-        List<WorkDateRequestDto> workDateRequestList = new ArrayList<>();
-        while(current.isBefore(endDate)){
-            WorkDateRequestDto workDateRequestDto = WorkDateRequestDto.builder()
-                    .date(current.toLocalDate().toString())
-                    .day(current.getDayOfWeek().toString())
-                    .time(current.toLocalTime().toString())
-                    .build();
-            workDateRequestList.add(workDateRequestDto);
-            current = current.plusHours(1);
-        }
-        return workDateRequestList;
-    }
-
 }

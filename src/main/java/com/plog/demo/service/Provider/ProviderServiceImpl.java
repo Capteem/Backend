@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -138,6 +139,7 @@ public class ProviderServiceImpl implements ProviderService{
     @Operation(summary = "허가된 제공자 목록 조회", description = "허가된 제공자 목록을 조회합니다.")
     public List<ProviderListDto> getConfirmedProviderList() throws CustomException {
         try {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
             List<ProviderTable> providerTables = providerTableRepository.findAllByProviderStatus(UserStatus.ACTIVE.getCode());
             List<ProviderListDto> providerList = providerTables.stream().map(providerTable -> ProviderListDto.builder()
                     .providerId(providerTable.getProviderId())
@@ -152,7 +154,7 @@ public class ProviderServiceImpl implements ProviderService{
                     .providerRepPhotoPath(providerTable.getProviderRepPhotoPath())
                     .dateList(providerTable.getWorkdateTableList().stream().map(workdateTable -> DateListDto.builder()
                             .date(String.valueOf(workdateTable.getWorkDate().toLocalDate()))
-                            .time(String.valueOf(workdateTable.getWorkDate().toLocalTime()))
+                            .time(String.valueOf(workdateTable.getWorkDate().toLocalTime().format(dateTimeFormatter)))
                             .build()).toList())
                     .build()).toList();
             if (providerTables.isEmpty()) {
