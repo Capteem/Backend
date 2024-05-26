@@ -32,5 +32,6 @@ public interface ProviderService {
     ProviderInfoDto getProviderInfo(int providerId) throws CustomException;
 
     void updateProviderInfo(ProviderInfoResponseDto providerInfoDto) throws CustomException;
+
     void deleteWorkDate(WorkdateDto workdateDto) throws CustomException;
 }

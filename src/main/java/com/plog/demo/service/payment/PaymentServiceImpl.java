@@ -3,9 +3,12 @@ package com.plog.demo.service.payment;
 import com.plog.demo.common.PaymentStatus;
 import com.plog.demo.common.ReservationStatus;
 import com.plog.demo.dto.payment.*;
+import com.plog.demo.dto.workdate.WorkDateRequestDto;
+import com.plog.demo.dto.workdate.WorkdateDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.*;
 import com.plog.demo.repository.*;
+import com.plog.demo.service.Provider.ProviderService;
 import com.plog.demo.service.reservation.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +21,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Optional;
 
 
 @Service
@@ -185,6 +190,12 @@ public class PaymentServiceImpl implements PaymentService{
             }
             ReservationTable reservationTable = reservationTables.get(reservationTables.size() - 1);
             reservationTable.setTid(paymentTable);
+            reservationTableRepository.save(reservationTable);
+//            int[] providerIds = new int[]{reservationTable.getReservation_camera(), reservationTable.getReservation_hair(), reservationTable.getReservation_studio()};
+//            for(int providerId : providerIds){
+//                ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
+//                workdateTableRepository.deleteByProviderIdAndWorkTime(providerTable, reservationTable.getReservation_start_date(), reservationTable.getReservation_end_date());
+//            }
         }catch (Exception e){
             log.error("[getApprove] failure to get approve");
             throw new CustomException("failure to get approve", HttpStatus.UNAUTHORIZED.value());

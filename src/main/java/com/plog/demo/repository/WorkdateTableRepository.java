@@ -14,7 +14,7 @@ public interface WorkdateTableRepository extends JpaRepository<WorkdateTable, Lo
     List<WorkdateTable> findByProviderId(ProviderTable providerId);
     WorkdateTable findByProviderIdAndWorkDate(ProviderTable providerId, LocalDateTime workDate);
 
-    @Query("delete from WorkdateTable w where w.providerId = :providerId AND w.workDate > :workStart AND w.workDate < :workEnd")
+    @Query("delete from WorkdateTable w where w.providerId = :providerId AND w.workDate >= :workStart AND w.workDate <= :workEnd")
     void deleteByProviderIdAndWorkTime(ProviderTable providerId, LocalDateTime workStart, LocalDateTime workEnd);
 
 }
