@@ -194,7 +194,12 @@ public class PaymentServiceImpl implements PaymentService{
 //            int[] providerIds = new int[]{reservationTable.getReservation_camera(), reservationTable.getReservation_hair(), reservationTable.getReservation_studio()};
 //            for(int providerId : providerIds){
 //                ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
-//                workdateTableRepository.deleteByProviderIdAndWorkTime(providerTable, reservationTable.getReservation_start_date(), reservationTable.getReservation_end_date());
+//                try {
+//                    workdateTableRepository.deleteByProviderIdAndWorkTime(providerTable, makeWorkTime(reservationTable.getReservation_start_date()), makeWorkTime(reservationTable.getReservation_end_date()));
+//                }catch (Exception e){
+//                    log.error("[getApprove] failure to delete workdate");
+//                    throw new CustomException("failure to delete workdate", HttpStatus.UNAUTHORIZED.value());
+//                }
 //            }
         }catch (Exception e){
             log.error("[getApprove] failure to get approve");
@@ -202,6 +207,12 @@ public class PaymentServiceImpl implements PaymentService{
         }
 
         return payApproveResDto;
+    }
+
+    private String makeWorkTime(LocalDateTime workStart){
+        String worktime = workStart.toString();
+        worktime = worktime.replace("T", " ");
+        return worktime;
     }
 
     @Override
