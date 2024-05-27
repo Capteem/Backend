@@ -191,28 +191,21 @@ public class PaymentServiceImpl implements PaymentService{
             ReservationTable reservationTable = reservationTables.get(reservationTables.size() - 1);
             reservationTable.setTid(paymentTable);
             reservationTableRepository.save(reservationTable);
-//            int[] providerIds = new int[]{reservationTable.getReservation_camera(), reservationTable.getReservation_hair(), reservationTable.getReservation_studio()};
-//            for(int providerId : providerIds){
-//                ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
-//                try {
-//                    workdateTableRepository.deleteByProviderIdAndWorkTime(providerTable, makeWorkTime(reservationTable.getReservation_start_date()), makeWorkTime(reservationTable.getReservation_end_date()));
-//                }catch (Exception e){
-//                    log.error("[getApprove] failure to delete workdate");
-//                    throw new CustomException("failure to delete workdate", HttpStatus.UNAUTHORIZED.value());
-//                }
-//            }
+            List<ProviderTable> providerTables = getProviderList(reservationTable);
+            for(ProviderTable providerTable : providerTables){
+                try{
+                    workdateTableRepository.deleteByProviderIdAndWorkTime(providerTable, reservationTable.getReservation_start_date(), reservationTable.getReservation_end_date());
+                } catch (Exception e){
+                    log.error(e.getMessage());
+                    throw new CustomException("예약 정보 삭제 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+                }
+            }
         }catch (Exception e){
-            log.error("[getApprove] failure to get approve");
+            log.error(e.getMessage());
             throw new CustomException("failure to get approve", HttpStatus.UNAUTHORIZED.value());
         }
 
         return payApproveResDto;
-    }
-
-    private String makeWorkTime(LocalDateTime workStart){
-        String worktime = workStart.toString();
-        worktime = worktime.replace("T", " ");
-        return worktime;
     }
 
     @Override
@@ -272,10 +265,47 @@ public class PaymentServiceImpl implements PaymentService{
             reservationTable.setStatus(ReservationStatus.CANCELLED.getCode());
             reservationTableRepository.save(reservationTable);
             paymentTableRepository.save(paymentTable);
+            List<WorkdateTable> workdateTables = saveWorkDateList(reservationTable);
+            for(WorkdateTable workdateTable : workdateTables){
+                log.info("[getCancelApprove] workdateTable : " + workdateTable.getWorkDate());
+            }
+            workdateTableRepository.saveAll(workdateTables);
         }catch (Exception e){
             log.error("[getCancelApprove] failure to get cancel approve");
             throw new CustomException("failure to get cancel approve", HttpStatus.UNAUTHORIZED.value());
         }
         return payCancelDto;
+    }
+
+    private List<ProviderTable> getProviderList(ReservationTable reservationTable){
+        log.info("[getProviderList] start");
+        List<ProviderTable> providerTables = new ArrayList<>();
+        int[] providerIds = new int[]{reservationTable.getReservation_camera(), reservationTable.getReservation_hair(), reservationTable.getReservation_studio()};
+        for(int providerId : providerIds){
+            if(providerId != 0){
+                providerTables.add(providerTableRepository.findByProviderId(providerId));
+            }
+        }
+        return providerTables;
+    }
+
+    private List<WorkdateTable> saveWorkDateList(ReservationTable reservationTable){
+        List<WorkdateTable> workdateTables = new ArrayList<>();
+        List<ProviderTable> providerTables = getProviderList(reservationTable);
+        LocalDateTime startDate = reservationTable.getReservation_start_date();
+        LocalDateTime endDate = reservationTable.getReservation_end_date();
+        for(ProviderTable providerTable : providerTables){
+            LocalDateTime currentDate = startDate;
+            while (currentDate.isBefore(endDate)){
+                WorkdateTable workdateTable = WorkdateTable.builder()
+                        .providerId(providerTable)
+                        .workDate(currentDate)
+                        .workDay(currentDate.getDayOfWeek().toString())
+                        .build();
+                workdateTables.add(workdateTable);
+                currentDate = currentDate.plusHours(1);
+            }
+        }
+        return workdateTables;
     }
 }
