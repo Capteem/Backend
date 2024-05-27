@@ -276,6 +276,7 @@ public class ProviderServiceImpl implements ProviderService{
     @Override
     public ProviderInfoDto getProviderInfo(int providerId) throws CustomException{
         ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         return ProviderInfoDto.builder()
                 .providerName(providerTable.getProviderName())
                 .providerPhoneNum(providerTable.getProviderPhoneNum())
@@ -283,6 +284,10 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerRepPhotoPath(providerTable.getProviderRepPhotoPath())
                 .providerRepPhoto(providerTable.getProviderRepPhoto())
                 .providerPrice(providerTable.getProviderPrice())
+                .dateList(providerTable.getWorkdateTableList().stream().map(workdateTable -> DateListDto.builder()
+                        .date(String.valueOf(workdateTable.getWorkDate().toLocalDate()))
+                        .time(String.valueOf(workdateTable.getWorkDate().toLocalTime().format(dateTimeFormatter)))
+                        .build()).toList())
                 .build();
     }
 
