@@ -19,7 +19,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class LogInInterceptor implements HandlerInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
-
+//
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
