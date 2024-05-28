@@ -1,7 +1,7 @@
 package com.plog.demo.common;
 
 import lombok.Getter;
-
+//
 @Getter
 public enum CommonStatus {
     ACTIVE(1, "활성화"),
