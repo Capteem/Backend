@@ -38,7 +38,7 @@ public class ReviewTable {
     @Column
     private LocalDateTime reviewDate;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "providerId")
     private ProviderTable providerId;
 

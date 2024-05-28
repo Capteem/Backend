@@ -6,7 +6,6 @@ import com.plog.demo.dto.confirm.ConfirmGetCheckFilesDto;
 import com.plog.demo.dto.confirm.ConfirmImageDto;
 import com.plog.demo.dto.confirm.ConfirmResponseDto;
 import com.plog.demo.dto.file.ProviderCheckFileDto;
-import com.plog.demo.dto.portfolio.PortfolioImageDto;
 import com.plog.demo.dto.user.CheckAuthDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.AuthTable;
@@ -17,7 +16,6 @@ import com.plog.demo.repository.IdTableRepository;
 import com.plog.demo.repository.ProviderCheckTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -31,7 +29,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.tags.form.CheckboxesTag;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -48,6 +45,7 @@ public class ConfirmServiceImpl implements ConfirmService{
     private final ProviderCheckTableRepository providerCheckTableRepository;
     private final IdTableRepository idTableRepository;
     private final ProviderCheckFileStore providerCheckFileStore;
+
     @Autowired
     private final JavaMailSender mailSender;
     private final AuthTableRepository authTableRepository;
@@ -120,17 +118,18 @@ public class ConfirmServiceImpl implements ConfirmService{
 
         List<ProviderCheckTable> providerCheckTables = providerCheckTableRepository.findAllById(user);
 
-        if(providerCheckTables.isEmpty()) throw new CustomException("해당 유저가 등록한 파일이 없습니다.", HttpStatus.NOT_FOUND.value());
+        if(providerCheckTables.isEmpty()){
+            throw new CustomException("파일이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+        }
 
-        List<String> fileNames = new ArrayList<>();
+        List<String> fileNames = providerCheckTables.stream().map(providerCheckTable ->
+                providerCheckTable.getStoredFileName()
+        ).toList();
 
-//
-//        providerCheckTables.stream().map(
-//                providerCheckTable -> {
-//
-//                }
-//        )
-        return null;
+        return ConfirmGetCheckFilesDto.builder()
+                .userId(userId)
+                .fileNameList(fileNames)
+                .build();
     }
 
     @Override

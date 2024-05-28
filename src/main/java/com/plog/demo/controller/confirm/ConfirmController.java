@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -83,6 +84,21 @@ public class ConfirmController {
         confirmService.checkProvider(confirmCheckProviderRequestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
+    }
+
+    @PostMapping("/image/fileNames")
+    public ResponseEntity<ConfirmGetCheckFilesDto> getImageNames(@RequestBody Map<String, String> userIdMap) throws CustomException{
+        ConfirmGetCheckFilesDto checkFileUrls = confirmService.getCheckfileUrls(userIdMap.get("userId"));
+
+        return ResponseEntity.status(HttpStatus.OK).body(checkFileUrls);
+    }
+
+    @PostMapping("/image/delete")
+    public ResponseEntity<SuccessDto> deleteImg(@RequestBody Map<String, String> userIdMap) throws CustomException{
+        if(!confirmService.deleteFiles(userIdMap.get("userId"))){
+            throw new RuntimeException("파일 삭제중 에러 발생");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("삭제 성공").build());
     }
 
     @GetMapping("/image/{fileName}")

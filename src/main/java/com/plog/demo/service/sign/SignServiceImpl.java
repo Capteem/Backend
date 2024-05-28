@@ -2,11 +2,8 @@ package com.plog.demo.service.sign;
 
 import com.plog.demo.common.UserStatus;
 import com.plog.demo.config.JwtTokenProvider;
-import com.plog.demo.dto.sign.KakaoTokenDto;
 import com.plog.demo.dto.sign.LoginResponseDto;
-import com.plog.demo.dto.sign.RenewAccessTokenResponseDto;
 import com.plog.demo.dto.user.UserDto;
-import com.plog.demo.dto.user.UserInfoDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.IdTable;
 import com.plog.demo.repository.IdTableRepository;
