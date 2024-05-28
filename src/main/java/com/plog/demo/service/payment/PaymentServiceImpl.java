@@ -147,9 +147,7 @@ public class PaymentServiceImpl implements PaymentService{
         log.info("[getApprove] idTable : " + idTable.toString());
         try{
             paymentTables = paymentTableRepository.findAllByUserId(idTable);
-            log.info("[getApprove] paymentTables : " + paymentTables.toString());
             paymentTable = paymentTables.get(paymentTables.size() - 1);
-            log.info("[getApprove] paymentTable : " + paymentTable.toString());
         } catch (Exception e){
             log.info("[getApprove] paymentTable is null");
             reservationTableRepository.deleteById(reservationTableRepository.findAllByUserId(idTable).get(reservationTableRepository.findAllByUserId(idTable).size() - 1).getReservationId());
