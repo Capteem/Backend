@@ -3,6 +3,7 @@ package com.plog.demo.controller.confirm;
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.confirm.*;
+import com.plog.demo.dto.portfolio.PortfolioImageDto;
 import com.plog.demo.dto.user.CheckAuthDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.confirm.ConfirmService;
@@ -18,13 +19,18 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Objects;
 
@@ -77,6 +83,26 @@ public class ConfirmController {
         confirmService.checkProvider(confirmCheckProviderRequestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
+    }
+
+    @GetMapping("/image/{fileName}")
+    public ResponseEntity<Resource> getImage(@PathVariable String fileName) throws CustomException, MalformedURLException {
+
+        ConfirmImageDto confirmImageDto = confirmService.getImage(fileName);
+        HttpHeaders httpHeaders = new HttpHeaders();
+
+
+        if(confirmImageDto.getFileExtension().equalsIgnoreCase("jpg")){
+            httpHeaders.setContentType(MediaType.IMAGE_JPEG);
+        }
+
+        if(confirmImageDto.getFileExtension().equalsIgnoreCase("png")){
+            httpHeaders.setContentType(MediaType.IMAGE_PNG);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .headers(httpHeaders)
+                .body(new UrlResource("file:" + confirmImageDto.getImgFullPath()));
     }
 
     @PostMapping("/sendEmail")

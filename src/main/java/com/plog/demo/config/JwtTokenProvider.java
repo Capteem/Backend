@@ -24,10 +24,10 @@ public class JwtTokenProvider {
     /**
      * TODO 나중에 시크릿키, 만료시간 환경변수 처리해야함
      */
-    @Value("${}")
-    private String tokenSecretKey = "plog_secretKey";
+    @Value("${jwt.key}")
+    private String tokenSecretKey;
 
-    //private String refreshTokenSecretKey = "SecretKey222";
+
 
     //한시간
     private final long jwtAccessExpiration = 1000L * 60 * 60;
@@ -96,11 +96,6 @@ public class JwtTokenProvider {
         return info.getSubject();
     }
 
-    public boolean isAccessToken(String token){
-        String tokenType = Jwts.parser().setSigningKey(tokenSecretKey).parseClaimsJws(token)
-                .getBody().get(TOKEN_TYPE, String.class);
-        return tokenType.equals(ACCESS);
-    }
 
     /**
      * request 헤더에서 token 추출

@@ -9,25 +9,17 @@ import com.plog.demo.dto.user.UserDto;
 import com.plog.demo.dto.user.UserInfoDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.IdTable;
-import com.plog.demo.model.RefreshTokenTable;
 import com.plog.demo.repository.IdTableRepository;
-import com.plog.demo.repository.RefreshTokenRepository;
-import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.http.HttpServletRequest;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.spi.ObjectThreadContextMap;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -39,7 +31,6 @@ public class SignServiceImpl implements SignService{
     private final IdTableRepository idTableRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public UserDto register(UserDto userDto) throws CustomException {
@@ -112,19 +103,8 @@ public class SignServiceImpl implements SignService{
         String accessToken = jwtTokenProvider.createAccessToken(userId);
         String refreshToken = jwtTokenProvider.createRefreshToken();
 
-        RefreshTokenTable refreshTokenTable = RefreshTokenTable.builder()
-                                                .refreshToken(refreshToken)
-                                                .accessToken(accessToken)
-                                                .userId(userId)
-                                                .build();
 
 
-
-        try {
-            refreshTokenRepository.save(refreshTokenTable);
-        }catch (Exception e){
-            throw new RuntimeException("refresh token 저장 중 에러", e);
-        }
         return LoginResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -132,38 +112,6 @@ public class SignServiceImpl implements SignService{
                 .build();
     }
 
-    @Override
-    public RenewAccessTokenResponseDto renewAccessToken(HttpServletRequest request) throws CustomException {
-        String refreshToken = jwtTokenProvider.resolveToken(request);
 
-        if (!jwtTokenProvider.validationToken(refreshToken) || jwtTokenProvider.isAccessToken(refreshToken)) {
-            throw new CustomException("유효하지 않는 refreshToken", HttpStatus.UNAUTHORIZED.value());
-        }
-
-
-        RefreshTokenTable refreshTokenTable = refreshTokenRepository.findById(refreshToken)
-                .orElseThrow(() -> new CustomException("refresh token 존재하지 않습니다."));
-
-        if (!jwtTokenProvider.validationToken(refreshTokenTable.getRefreshToken())) {
-            throw new CustomException("유효하지 않는 refreshToken", HttpStatus.UNAUTHORIZED.value());
-        }
-
-        if(jwtTokenProvider.validationToken(refreshTokenTable.getAccessToken())){
-            throw new CustomException("Access Token이 이미 유효합니다.", HttpStatus.UNAUTHORIZED.value());
-        }
-
-
-        String newAccessToken = jwtTokenProvider.createAccessToken(refreshTokenTable.getUserId());
-
-        try {
-            refreshTokenTable.setAccessToken(newAccessToken);
-        }catch (Exception e){
-            throw new RuntimeException("access token update 오류", e);
-        }
-
-        return RenewAccessTokenResponseDto.builder()
-                .accessToken(newAccessToken)
-                .build();
-    }
 
 }

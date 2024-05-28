@@ -2,8 +2,11 @@ package com.plog.demo.service.confirm;
 
 import com.plog.demo.common.file.ProviderCheckFileStore;
 import com.plog.demo.dto.confirm.ConfirmCheckProviderRequestDto;
+import com.plog.demo.dto.confirm.ConfirmGetCheckFilesDto;
+import com.plog.demo.dto.confirm.ConfirmImageDto;
 import com.plog.demo.dto.confirm.ConfirmResponseDto;
 import com.plog.demo.dto.file.ProviderCheckFileDto;
+import com.plog.demo.dto.portfolio.PortfolioImageDto;
 import com.plog.demo.dto.user.CheckAuthDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.AuthTable;
@@ -33,6 +36,7 @@ import org.springframework.web.servlet.tags.form.CheckboxesTag;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -106,6 +110,41 @@ public class ConfirmServiceImpl implements ConfirmService{
             throw new RuntimeException("서비스 등록용 파일을 db에 저장하는데 오류", e);
         }
 
+    }
+
+    @Override
+    public ConfirmGetCheckFilesDto getCheckfileUrls(String userId) throws CustomException {
+
+        IdTable user = idTableRepository.findById(userId)
+                .orElseThrow(() -> new CustomException("존재하지 않는 유저입니다.", HttpStatus.NOT_FOUND.value()));
+
+        List<ProviderCheckTable> providerCheckTables = providerCheckTableRepository.findAllById(user);
+
+        if(providerCheckTables.isEmpty()) throw new CustomException("해당 유저가 등록한 파일이 없습니다.", HttpStatus.NOT_FOUND.value());
+
+        List<String> fileNames = new ArrayList<>();
+
+//
+//        providerCheckTables.stream().map(
+//                providerCheckTable -> {
+//
+//                }
+//        )
+        return null;
+    }
+
+    @Override
+    public ConfirmImageDto getImage(String fileName) throws CustomException {
+        String fileExtension = providerCheckFileStore.extractExt(fileName);
+
+        if(providerCheckFileStore.isNotSupportedExtension(fileExtension)){
+            throw new CustomException("지원되지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
+        }
+
+        return ConfirmImageDto.builder()
+                .imgFullPath(providerCheckFileStore.getFullPath(fileName))
+                .fileExtension(fileExtension)
+                .build();
     }
 
     @Override

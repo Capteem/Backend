@@ -31,6 +31,6 @@ public class LogInInterceptor implements HandlerInterceptor {
     }
 
     private boolean isNotValidatedToken(String token) {
-        return token == null || !jwtTokenProvider.validationToken(token) || !jwtTokenProvider.isAccessToken(token);
+        return token == null || !jwtTokenProvider.validationToken(token);
     }
 }

@@ -15,7 +15,6 @@ public class ProviderCheckTable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int providerCheckId;
 
-
     @Column
     private String storedFileName;
 

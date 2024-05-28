@@ -1,14 +1,11 @@
 package com.plog.demo.controller.sign;
 
 import com.plog.demo.dto.ErrorDto;
-import com.plog.demo.dto.SuccessDto;
 import com.plog.demo.dto.sign.LoginRequestDto;
 import com.plog.demo.dto.sign.LoginResponseDto;
-import com.plog.demo.dto.sign.RenewAccessTokenResponseDto;
 import com.plog.demo.dto.user.UserDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.sign.SignService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -73,11 +70,6 @@ public class SignController {
 
     }
 
-    @GetMapping("/refresh")
-    public ResponseEntity<RenewAccessTokenResponseDto> refresh(HttpServletRequest request) throws CustomException {
-
-        return ResponseEntity.status(HttpStatus.OK).body(signService.renewAccessToken(request));
-    }
 
     /**
      * logout TODO
