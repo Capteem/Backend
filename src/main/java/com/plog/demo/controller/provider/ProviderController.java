@@ -32,7 +32,6 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/service")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @Tag(name = "Provider", description = "서비스 제공자 API")
 public class ProviderController {
 
