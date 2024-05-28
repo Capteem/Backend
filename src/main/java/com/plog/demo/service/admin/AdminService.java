@@ -17,7 +17,7 @@ public interface AdminService {
     void changeProviderStatus(AdminProviderDto adminProviderDto) throws CustomException;
 
     void addComplainReply(ComplaintReplyDto complaintReplyDto) throws CustomException;
-
+//
     List<ProviderTable> getProviderList(String adminId) throws CustomException;
 
     List<IdTable> getUserList(String adminId) throws CustomException;

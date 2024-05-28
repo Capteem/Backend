@@ -200,6 +200,19 @@ public class ProviderController {
         }
     }
 
+    @PostMapping("/info")
+    @Operation(summary = "제공자 정보 수정", description = "제공자 정보를 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "제공자 정보 수정 성공")
+    public ResponseEntity<SuccessDto> updateProviderInfo(@RequestBody ProviderInfoResponseDto providerInfoDto) throws CustomException {
+        try{
+            providerService.updateProviderInfo(providerInfoDto);
+            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("제공자 정보 수정 성공").build());
+        } catch (CustomException e){
+            log.info("updateProviderInfo error");
+            throw new CustomException(e.getMessage(), e.getResultCode());
+        }
+    }
+
     @PostMapping("/delete/workdate")
     @Operation(summary = "제공자 근무일 삭제", description = "제공자 근무일을 삭제합니다.")
     @ApiResponse(responseCode = "200", description = "제공자 근무일 삭제 성공")

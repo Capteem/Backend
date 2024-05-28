@@ -1,6 +1,10 @@
 package com.plog.demo.dto.Provider;
 
+import com.plog.demo.dto.workdate.DateListDto;
+import com.plog.demo.dto.workdate.WorkDateRequestDto;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,4 +19,5 @@ public class ProviderInfoDto {
     private String providerRepPhotoPath;
     private String providerRepPhoto;
     private int providerPrice;
+    private List<WorkDateRequestDto> dateList;
 }

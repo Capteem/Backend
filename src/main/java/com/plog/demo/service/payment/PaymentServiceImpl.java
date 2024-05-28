@@ -12,7 +12,6 @@ import com.plog.demo.service.Provider.ProviderService;
 import com.plog.demo.service.reservation.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.jdbc.Work;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -42,7 +41,6 @@ public class PaymentServiceImpl implements PaymentService{
     private final PaymentDataTableRepository paymentDataTableRepository;
     private final WorkdateTableRepository workdateTableRepository;
     private final ProviderTableRepository providerTableRepository;
-
 
     @Value("${pay.admin_key}")
     private String adminKey;
@@ -173,6 +171,7 @@ public class PaymentServiceImpl implements PaymentService{
 
         try{
             payApproveResDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayApproveResDto.class);
+            assert payApproveResDto != null;
             PaymentDataTable paymentDataTable = PaymentDataTable.builder()
                     .total(payApproveResDto.getAmount().getTotal())
                     .approved_at(payApproveResDto.getApproved_at())
@@ -186,18 +185,23 @@ public class PaymentServiceImpl implements PaymentService{
 
             paymentDataTableRepository.save(paymentDataTable);
             List<ReservationTable> reservationTables = reservationTableRepository.findAllByUserId(idTable);
-            ReservationTable reservationTable = reservationTables.get(reservationTables.size() - 1);
-            List<Integer> providerIdList = new ArrayList<>();
-            providerIdList.add(reservationTable.getReservation_camera());
-            providerIdList.add(reservationTable.getReservation_studio());
-            providerIdList.add(reservationTable.getReservation_hair());
-            for(int providerId : providerIdList){
-                ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new IllegalArgumentException("[getApprove] no such provider exists."));
-                workdateTableRepository.deleteByProviderIdAndWorkTime(providerTable, reservationTable.getReservation_start_date(), reservationTable.getReservation_end_date());
+            if(reservationTables.isEmpty()){
+                throw new CustomException("예약 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
             }
+            ReservationTable reservationTable = reservationTables.get(reservationTables.size() - 1);
             reservationTable.setTid(paymentTable);
+            reservationTableRepository.save(reservationTable);
+            List<ProviderTable> providerTables = getProviderList(reservationTable);
+            for(ProviderTable providerTable : providerTables){
+                try{
+                    workdateTableRepository.deleteByProviderIdAndWorkTime(providerTable, reservationTable.getReservation_start_date(), reservationTable.getReservation_end_date());
+                } catch (Exception e){
+                    log.error(e.getMessage());
+                    throw new CustomException("예약 정보 삭제 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+                }
+            }
         }catch (Exception e){
-            log.error("[getApprove] failure to get approve");
+            log.error(e.getMessage());
             throw new CustomException("failure to get approve", HttpStatus.UNAUTHORIZED.value());
         }
 
@@ -261,6 +265,11 @@ public class PaymentServiceImpl implements PaymentService{
             reservationTable.setStatus(ReservationStatus.CANCELLED.getCode());
             reservationTableRepository.save(reservationTable);
             paymentTableRepository.save(paymentTable);
+            List<WorkdateTable> workdateTables = saveWorkDateList(reservationTable);
+            for(WorkdateTable workdateTable : workdateTables){
+                log.info("[getCancelApprove] workdateTable : " + workdateTable.getWorkDate());
+            }
+            workdateTableRepository.saveAll(workdateTables);
         }catch (Exception e){
             log.error("[getCancelApprove] failure to get cancel approve");
             throw new CustomException("failure to get cancel approve", HttpStatus.UNAUTHORIZED.value());
@@ -268,19 +277,35 @@ public class PaymentServiceImpl implements PaymentService{
         return payCancelDto;
     }
 
-    private List<WorkDateRequestDto> getWorkDateList(LocalDateTime startDate, LocalDateTime endDate){
-        LocalDateTime current = startDate;
-        List<WorkDateRequestDto> workDateRequestList = new ArrayList<>();
-        while(current.isBefore(endDate)){
-            WorkDateRequestDto workDateRequestDto = WorkDateRequestDto.builder()
-                    .date(current.toLocalDate().toString())
-                    .day(current.getDayOfWeek().toString())
-                    .time(current.toLocalTime().toString())
-                    .build();
-            workDateRequestList.add(workDateRequestDto);
-            current = current.plusHours(1);
+    private List<ProviderTable> getProviderList(ReservationTable reservationTable){
+        log.info("[getProviderList] start");
+        List<ProviderTable> providerTables = new ArrayList<>();
+        int[] providerIds = new int[]{reservationTable.getReservation_camera(), reservationTable.getReservation_hair(), reservationTable.getReservation_studio()};
+        for(int providerId : providerIds){
+            if(providerId != 0){
+                providerTables.add(providerTableRepository.findByProviderId(providerId));
+            }
         }
-        return workDateRequestList;
+        return providerTables;
     }
 
+    private List<WorkdateTable> saveWorkDateList(ReservationTable reservationTable){
+        List<WorkdateTable> workdateTables = new ArrayList<>();
+        List<ProviderTable> providerTables = getProviderList(reservationTable);
+        LocalDateTime startDate = reservationTable.getReservation_start_date();
+        LocalDateTime endDate = reservationTable.getReservation_end_date();
+        for(ProviderTable providerTable : providerTables){
+            LocalDateTime currentDate = startDate;
+            while (currentDate.isBefore(endDate)){
+                WorkdateTable workdateTable = WorkdateTable.builder()
+                        .providerId(providerTable)
+                        .workDate(currentDate)
+                        .workDay(currentDate.getDayOfWeek().toString())
+                        .build();
+                workdateTables.add(workdateTable);
+                currentDate = currentDate.plusHours(1);
+            }
+        }
+        return workdateTables;
+    }
 }

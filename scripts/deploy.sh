@@ -9,14 +9,29 @@ JAR_PATH=$REPOSITORY/build/libs/$JAR_NAME
 
 CURRENT_PID=$(pgrep -f $APP_NAME)
 
-if [ -z $CURRENT_PID ]
-then
-  echo "> 종료할 애플리케이션이 없습니다."
+if [ -z $CURRENT_PID ]; then
+  echo "> No application to terminate."
 else
-  echo "> kill -9 $CURRENT_PID"
+  echo "> Terminating process $CURRENT_PID"
   kill -15 $CURRENT_PID
   sleep 5
+
+  # Ensure the process is terminated
+  if ps -p $CURRENT_PID > /dev/null; then
+    echo "> Process did not terminate, killing with -9"
+    kill -9 $CURRENT_PID
+    sleep 5
+  fi
 fi
 
-echo "> Deploy - $JAR_PATH "
-nohup java -jar $JAR_PATH > /dev/null 2> /dev/null < /dev/null &
+echo "> Deploying $JAR_PATH"
+# Use full path for nohup.out
+LOG_FILE=$REPOSITORY/nohup.out
+nohup java -jar $JAR_PATH > $LOG_FILE 2>&1 &
+
+# Confirm the log file is created and provide feedback
+if [ -f $LOG_FILE ]; then
+  echo "> Logs are being written to $LOG_FILE"
+else
+  echo "> Failed to create log file at $LOG_FILE"
+fi

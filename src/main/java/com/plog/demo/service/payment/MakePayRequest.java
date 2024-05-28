@@ -37,9 +37,9 @@ public class MakePayRequest {
         jsonMap.put("total_amount", payInfoDto.getPurchaseAmount());
         jsonMap.put("tax_free_amount", 0);
 
-        jsonMap.put("approval_url", "http://13.124.122.238:8080/payment/success?userId" + "=" + payInfoDto.getReservationRequestDto().getUserId());
-        jsonMap.put("cancel_url", "http://13.124.122.238:8080/payment/cancel");
-        jsonMap.put("fail_url", "http://13.124.122.238:8080/payment/fail");
+        jsonMap.put("approval_url", "http://13.124.122.238:8084/payment/success?userId" + "=" + payInfoDto.getReservationRequestDto().getUserId());
+        jsonMap.put("cancel_url", "http://13.124.122.238:8084/payment/cancel");
+        jsonMap.put("fail_url", "http://13.124.122.238:8084/payment/fail");
         try{
             payRequestDto = new PayRequestDto("https://open-api.kakaopay.com/online/v1/payment/ready", jsonMap);
             return payRequestDto;
