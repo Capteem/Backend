@@ -5,8 +5,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
+
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @RequiredArgsConstructor
@@ -21,6 +25,11 @@ public class LogInInterceptor implements HandlerInterceptor {
 
         log.info("[LogInInterceptor] 인터셉터 실행");
         String token = jwtTokenProvider.resolveToken(request);
+
+        if(StringUtils.equals(request.getMethod(), "OPTIONS")){
+            log.info("[LogInInterceptor] OPTIONS 요청");
+            return true;
+        }
 
         if(isNotValidatedToken(token)) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
