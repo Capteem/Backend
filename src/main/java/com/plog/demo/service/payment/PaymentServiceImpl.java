@@ -208,6 +208,7 @@ public class PaymentServiceImpl implements PaymentService{
 
     @Override
     public PaymentInfoDto getPaymentInfo(String id) throws CustomException{
+        log.info("[getPaymentInfo] start");
         IdTable idTable = idTableRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 id가 없습니다."));
         PaymentTable paymentTable = paymentTableRepository.findAllByUserId(idTable).get(paymentTableRepository.findAllByUserId(idTable).size() - 1);
         log.info("[getPaymentInfo] paymentTable : " + paymentTable.toString());
