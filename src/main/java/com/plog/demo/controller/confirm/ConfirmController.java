@@ -87,6 +87,8 @@ public class ConfirmController {
     }
 
     @PostMapping("/image/fileNames")
+    @Operation(summary = "제공자 등록용 사진 이름 리스트 불러오기", description = "제공자(사진작가, 헤어메이크업)가 등록 요청한 사진 이름 리스트 불러오기")
+    @ApiResponse(responseCode = "200", description = "파일 이름 리스트 불러오기 성공", content = @Content(schema = @Schema(implementation = ConfirmGetCheckFilesDto.class)))
     public ResponseEntity<ConfirmGetCheckFilesDto> getImageNames(@RequestBody Map<String, String> userIdMap) throws CustomException{
         ConfirmGetCheckFilesDto checkFileUrls = confirmService.getCheckfileUrls(userIdMap.get("userId"));
 
@@ -94,6 +96,8 @@ public class ConfirmController {
     }
 
     @PostMapping("/image/delete")
+    @Operation(summary = "제공자 등록용 사진 삭제", description = "제공자(사진작가, 헤어메이크업)가 등록 요청한 사진들 삭제하기")
+    @ApiResponse(responseCode = "200", description = "사진들 삭제 완료", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
     public ResponseEntity<SuccessDto> deleteImg(@RequestBody Map<String, String> userIdMap) throws CustomException{
         if(!confirmService.deleteFiles(userIdMap.get("userId"))){
             throw new RuntimeException("파일 삭제중 에러 발생");
@@ -102,6 +106,8 @@ public class ConfirmController {
     }
 
     @GetMapping("/image/{fileName}")
+    @Operation(summary = "사진 불러오기", description = "/image + fileName 붙여서 api 콜하면 됨")
+    @ApiResponse(responseCode = "200", description = "사진 불러오기 성공", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
     public ResponseEntity<Resource> getImage(@PathVariable String fileName) throws CustomException, MalformedURLException {
 
         ConfirmImageDto confirmImageDto = confirmService.getImage(fileName);
