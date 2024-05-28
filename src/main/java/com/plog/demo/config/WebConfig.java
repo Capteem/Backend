@@ -29,6 +29,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .order(1)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/sign-api/signin", "/sign-api/signup", "/sign-api/refresh")
-                .excludePathPatterns("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**");
+                .excludePathPatterns("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/payment/success", "/payment/fail", "/payment/cancel");
     }
 }
