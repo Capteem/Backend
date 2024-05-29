@@ -31,6 +31,11 @@ public class LogInInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        if(StringUtils.equals(request.getRequestURI(), "/aws")) {
+            log.info("[LogInInterceptor] aws 요청");
+            return true;
+        }
+
         if(isNotValidatedToken(token)) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
