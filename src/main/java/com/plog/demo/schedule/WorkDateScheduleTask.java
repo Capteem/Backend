@@ -32,7 +32,7 @@ public class WorkDateScheduleTask {
             LocalDateTime workDateTime = workdate.getWorkDate();
 
             // 두 달 후의 같은 주의 같은 요일 계산
-            LocalDateTime targetDateTime = getTargetDateTimeTwoMonthsLater(workDateTime);
+            LocalDateTime targetDateTime = getTargetDateTimeOneMonthsLater(workDateTime);
 
             workdate.setWorkDate(targetDateTime); // 시간 유지
         }
@@ -41,8 +41,8 @@ public class WorkDateScheduleTask {
         System.out.println("Updated workdates to two months later: " + now.plusMonths(2).getMonthValue());
     }
 
-    private LocalDateTime getTargetDateTimeTwoMonthsLater(LocalDateTime dateTime) {
-        LocalDateTime twoMonthsLater = dateTime.plusMonths(2);
+    private LocalDateTime getTargetDateTimeOneMonthsLater(LocalDateTime dateTime) {
+        LocalDateTime twoMonthsLater = dateTime.plusMonths(1);
 
         // 두 달 후의 같은 주의 동일한 요일 계산
         LocalDateTime firstDayOfTargetMonth = LocalDateTime.of(twoMonthsLater.getYear(), twoMonthsLater.getMonth(), 1, 0, 0);
