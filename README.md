@@ -1,13 +1,24 @@
 # Plog - 나만의 사진촬영 패키지를 만들어 보자
 
-## 역할 분담
+
+## 0. 목차
+1. [역할 분담](#1-역할-분담)
+2. [기술 스택](#2-기술-스택)
+3. [build.gradle](#3-build.gradle)
+4. [ERD](#4-ERD)
+5. [서버 아키텍처](#5-서버-아키텍처)
+6. [프로젝트 폴더 구조](#6-프로젝트-폴더-구조)
+
+## 1. 역할 분담
 |주명하|김태헌|
 |:---:|:---:|
 |DB설계|DB설계|
 |API 명세서 작성 및 구현|API 명세서 작성 및 구현|
 |리드미 작성|인프라 구축|
 
-## 기술 스택
+
+
+## 2. 기술 스택
 <div>
   <img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white">
   <img src="https://img.shields.io/badge/spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white"/> 
@@ -18,7 +29,9 @@
 <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white"/>
 
 
-## build.gradle
+
+
+## 3. build.gradle
 ```gradle
 plugins {
 	id 'java'
@@ -80,14 +93,15 @@ tasks.named('test') {
 }
 ```
 
-## ERD
+
+## 4. ERD
 ![db_erd_최종](https://github.com/Capteem/Backend/assets/80399640/1bbe47a4-d0bd-4b88-9b63-d9aadad65b07)
 
-## 서버 아키텍처
+## 5. 서버 아키텍처
 ![image](https://github.com/Capteem/Backend/assets/80399640/a06b1162-f6cf-4e7f-b4d1-8585a692acb5)
 
 
-## 프로젝트 폴더 구조
+## 6. 프로젝트 폴더 구조
 ```
 ├─common
 │  └─file
