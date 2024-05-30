@@ -81,7 +81,7 @@ public class PortfolioServiceImpl implements PortfolioService{
         log.info("[getPortfolioRandom] 포트폴리오 조회 시작");
         long total = portfolioTableRepository.countAllPortfolio();
         int size = 30;
-        int offset = page * 30;
+        int offset = (page-1) * 30;
 
         List<PortfolioTable> portfolios = portfolioTableRepository.findRandomPortfolio(size, offset);
 
