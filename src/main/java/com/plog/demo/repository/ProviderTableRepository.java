@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface ProviderTableRepository extends JpaRepository<ProviderTable, Integer> {
     Optional<ProviderTable> findByProviderName(String providerName);
-    List<ProviderTable> findAllByUserId(IdTable userId);
+    List<ProviderTable> findAllByUserIdOrderByProviderIdDesc(IdTable userId);
 
     Optional<ProviderTable> findByUserId(IdTable idTable);
 
@@ -26,6 +26,7 @@ public interface ProviderTableRepository extends JpaRepository<ProviderTable, In
     List<ProviderTable> findByUserIdAndProviderStatus(IdTable idTable, int providerStatus);
     ProviderTable findByProviderId(int providerId);
 
+    List<ProviderTable> findAllOrderByProviderIdDesc();
 
 
 }

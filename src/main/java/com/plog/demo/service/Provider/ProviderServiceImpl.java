@@ -73,7 +73,7 @@ public class ProviderServiceImpl implements ProviderService{
         IdTable idTable = idTableRepository.findById(userId).orElseThrow(() -> new CustomException("존재하지 않는 사용자입니다."));
         try{
             log.info("[getProvider] 제공자 조회 로직 시작");
-            List<ProviderTable> providerTables = providerTableRepository.findAllByUserId(idTable);
+            List<ProviderTable> providerTables = providerTableRepository.findAllByUserIdOrderByProviderIdDesc(idTable);
             List<ProviderResponseDto> providerDtos = providerTables.stream().map(providerTable -> ProviderResponseDto.builder()
                     .providerName(providerTable.getProviderName())
                     .providerType(providerTable.getProviderType())
