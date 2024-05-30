@@ -79,16 +79,18 @@ public class PortfolioServiceImpl implements PortfolioService{
     public List<PortfolioRandomResponseDto> getPortfolioRandom(int page) throws CustomException {
 
         log.info("[getPortfolioRandom] 포트폴리오 조회 시작");
+        long total = portfolioTableRepository.countAllPortfolio();
+        int size = 30;
+        int offset = page * 30;
 
-        Pageable pageable = PageRequest.of(page, 30, Sort.by(Sort.Order.by("RAND()")));
-        Page<PortfolioTable> portfolios = portfolioTableRepository.findAll(pageable);
+        List<PortfolioTable> portfolios = portfolioTableRepository.findRandomPortfolio(size, offset);
 
         if(portfolios.isEmpty()){
             throw new CustomException("포트폴리오가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
         }
         //정상로직
-        List<PortfolioRandomResponseDto> portfolioRandomResponseDtos = portfolios.map(
-                portfolio -> PortfolioRandomResponseDto.builder()
+        List<PortfolioRandomResponseDto> portfolioRandomResponseDtos = portfolios.stream()
+                .map(portfolio -> PortfolioRandomResponseDto.builder()
                         .providerId(portfolio.getProviderId().getProviderId())
                         .imgUrl(getImgUrl(portfolio))
                         .build()
