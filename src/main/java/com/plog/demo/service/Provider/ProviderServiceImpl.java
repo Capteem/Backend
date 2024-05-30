@@ -188,9 +188,8 @@ public class ProviderServiceImpl implements ProviderService{
     @Override
     public void deleteWorkDate(WorkdateDto workdateDto) throws CustomException {
         ProviderTable providerTable = providerTableRepository.findById(workdateDto.getProviderId()).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
-        LocalDateTime date = LocalDateTime.parse(workdateDto.getDateList().get(0).getDate() + "T" + workdateDto.getDateList().get(0).getTime());
         for(WorkDateRequestDto workDateRequestDto : workdateDto.getDateList()){
-            WorkdateTable workdateTable = workdateTableRepository.findByProviderIdAndWorkDate(providerTable, date);
+            WorkdateTable workdateTable = workdateTableRepository.findByProviderIdAndWorkDate(providerTable, LocalDateTime.parse(workDateRequestDto.getDate() + "T" + workDateRequestDto.getTime()));
             if(workdateTable == null){
                 log.error("[deleteWorkDate] 존재하지 않는 일정입니다.");
                 throw new CustomException("존재하지 않는 일정입니다.", HttpStatus.NOT_FOUND.value());
