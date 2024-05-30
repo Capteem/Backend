@@ -17,5 +17,6 @@ public class ProviderDto {
     private int providerStatus;
     private String userId;
     private String providerPhoneNum;
+    private String uuid;
 
 }

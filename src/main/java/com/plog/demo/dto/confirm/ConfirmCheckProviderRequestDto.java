@@ -15,4 +15,6 @@ public class ConfirmCheckProviderRequestDto {
     private String userId;
 
     List<MultipartFile> providerCheckFiles;
+
+    private String uuid;
 }

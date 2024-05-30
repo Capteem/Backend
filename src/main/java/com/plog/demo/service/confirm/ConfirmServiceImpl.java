@@ -99,7 +99,7 @@ public class ConfirmServiceImpl implements ConfirmService{
 
         //체크파일테이블 등록
         List<ProviderCheckTable> providerCheckTables = providerCheckFileDtos.stream().map(providerCheckFileDto ->
-                getProviderCheckTable(providerCheckFileDto, idTable)
+                getProviderCheckTable(providerCheckFileDto, idTable, confirmCheckProviderRequestDto.getUuid())
         ).toList();
 
         try {
@@ -253,10 +253,11 @@ public class ConfirmServiceImpl implements ConfirmService{
         }
     }
 
-    private ProviderCheckTable getProviderCheckTable(ProviderCheckFileDto providerCheckFileDto, IdTable idTable) {
+    private ProviderCheckTable getProviderCheckTable(ProviderCheckFileDto providerCheckFileDto, IdTable idTable, String uuid) {
         return ProviderCheckTable.builder()
                 .id(idTable)
                 .storedFileName(providerCheckFileDto.getStoreFileName())
+                .providerUuid(uuid)
                 .build();
     }
 }

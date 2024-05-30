@@ -18,6 +18,9 @@ public class ProviderCheckTable {
     @Column
     private String storedFileName;
 
+    @Column
+    private String providerUuid;
+
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "userId")
     IdTable id;

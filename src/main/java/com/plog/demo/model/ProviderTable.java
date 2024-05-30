@@ -42,6 +42,8 @@ public class ProviderTable {
     private String providerRepPhoto;
     @Column
     private String providerRepPhotoPath;
+    @Column
+    private String providerUuid;
 
     @OneToMany(mappedBy = "providerId", fetch = FetchType.EAGER)
     private List<WorkdateTable> workdateTableList;

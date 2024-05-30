@@ -52,9 +52,9 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerDetailArea(providerDto.getProviderDetail())
                 .providerPhoneNum(providerDto.getProviderPhoneNum())
                 .providerPrice(-1)
-                .providerStatus(UserStatus.STOP.getCode())
+                .providerStatus(UserStatus.INFO_LACK.getCode())
+                .providerUuid(providerDto.getUuid())
                 .build();
-        log.info("[addProvider] " + providerTable.getProviderId());
 
         try{
             log.info("[addProvider] save제공자 저장 로직 시작");
