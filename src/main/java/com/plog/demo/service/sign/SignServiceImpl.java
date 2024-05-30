@@ -67,6 +67,42 @@ public class SignServiceImpl implements SignService{
     }
 
     @Override
+    public void checkId(String userId) throws CustomException {
+        log.info("[checkId] 시작");
+
+        Optional<IdTable> findUser = idTableRepository.findById(userId);
+
+        if(findUser.isPresent()){
+            log.info("[checkId] 아이디 중복");
+            throw new CustomException("이미 존재하는 아이디입니다.", HttpStatus.BAD_REQUEST.value());
+        }
+    }
+
+    @Override
+    public void checkEmail(String email) throws CustomException {
+        log.info("[checkEmail] 시작");
+
+        IdTable idTable = idTableRepository.findByEmail(email);
+
+        if(idTable != null){
+            log.info("[checkEmail] 이메일 중복");
+            throw new CustomException("이미 존재하는 이메일입니다.", HttpStatus.BAD_REQUEST.value());
+        }
+    }
+
+    @Override
+    public void checkNickname(String nickname) throws CustomException {
+        log.info("[checkNickname] 시작");
+
+        IdTable idTable = idTableRepository.findByNickname(nickname);
+
+        if(idTable != null){
+            log.info("[checkNickname] 닉네임 중복");
+            throw new CustomException("이미 존재하는 닉네임입니다.", HttpStatus.BAD_REQUEST.value());
+        }
+    }
+
+    @Override
     public LoginResponseDto login(String userId, String password) throws CustomException {
         log.info("[login] 시작");
 
@@ -82,17 +118,17 @@ public class SignServiceImpl implements SignService{
 
         if(user.getStatus() == UserStatus.STOP.getCode()){
             log.info("[login] 유저 비활성화");
-            throw new CustomException("정지된 유저입니다.", HttpStatus.NOT_ACCEPTABLE.value());
+            throw new CustomException("정지된 유저입니다.", 406);
         }
 
         if(user.getStatus() == UserStatus.BANNED.getCode()){
             log.info("[login] 유저 탈퇴");
-            throw new CustomException("탈퇴된 유저입니다.", HttpStatus.NOT_ACCEPTABLE.value());
+            throw new CustomException("탈퇴된 유저입니다.", 406);
         }
 
         if(user.getStatus() == UserStatus.DELETED.getCode()){
             log.info("[login] 유저 삭제");
-            throw new CustomException("탈퇴된 유저입니다.", HttpStatus.NOT_ACCEPTABLE.value());
+            throw new CustomException("탈퇴된 유저입니다.", 406);
         }
 
         log.info("[login] 패스워드 일치");

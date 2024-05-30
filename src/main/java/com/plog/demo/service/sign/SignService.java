@@ -10,7 +10,11 @@ public interface SignService {//
 
     LoginResponseDto login(String userId, String password) throws CustomException;
 
+    void checkId(String userId) throws CustomException;
 
+    void checkEmail(String email) throws CustomException;
+
+    void checkNickname(String nickname) throws CustomException;
     /**
      * 로그아웃아면 리프레쉬 토큰 삭제 + 스케쥴러나 이런거 이용해서 7일 지나면 삭제
      */
