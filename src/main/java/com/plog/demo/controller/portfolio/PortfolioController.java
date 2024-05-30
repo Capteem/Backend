@@ -52,6 +52,21 @@ public class PortfolioController {
         return ResponseEntity.status(HttpStatus.OK).body(portfolioService.getPortfolio(providerId));
     }
 
+    @Operation(summary = "포트 폴리오 랜덤 조회", description = "포트 폴리오 랜덤 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "포트폴리오 랜덤 조회 성공",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = PortfolioRandomResponseDto.class)))),
+            @ApiResponse(responseCode = "400",
+                    description = "포트 폴리오 랜덤 조회 실패",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+    })
+    @GetMapping("/random")
+    public ResponseEntity<List<PortfolioRandomResponseDto>> getPortfolioRandom(@RequestParam int page) throws CustomException {
+
+        return ResponseEntity.status(HttpStatus.OK).body(portfolioService.getPortfolioRandom(page));
+    }
+
     @Operation(summary = "포트 폴리오 등록", description = "포트 폴리오 등록합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",

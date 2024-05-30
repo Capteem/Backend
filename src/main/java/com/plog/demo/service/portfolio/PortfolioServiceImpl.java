@@ -12,6 +12,10 @@ import com.plog.demo.repository.*;
 import com.plog.demo.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,6 +75,27 @@ public class PortfolioServiceImpl implements PortfolioService{
         return portfolioResponseDto;
     }
 
+    @Override
+    public List<PortfolioRandomResponseDto> getPortfolioRandom(int page) throws CustomException {
+
+        log.info("[getPortfolioRandom] 포트폴리오 조회 시작");
+
+        Pageable pageable = PageRequest.of(page, 30, Sort.by(Sort.Order.by("RAND()")));
+        Page<PortfolioTable> portfolios = portfolioTableRepository.findAll(pageable);
+
+        if(portfolios.isEmpty()){
+            throw new CustomException("포트폴리오가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+        }
+        //정상로직
+        List<PortfolioRandomResponseDto> portfolioRandomResponseDtos = portfolios.map(
+                portfolio -> PortfolioRandomResponseDto.builder()
+                        .providerId(portfolio.getProviderId().getProviderId())
+                        .imgUrl(getImgUrl(portfolio))
+                        .build()
+        ).toList();
+
+        return portfolioRandomResponseDtos;
+    }
 
     @Override
     public List<UploadFileDto> addPortfolios(PortfolioUploadDto portfolioUploadDto) throws CustomException {
