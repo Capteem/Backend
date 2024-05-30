@@ -142,6 +142,7 @@ public class SignServiceImpl implements SignService{
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .role(user.getRole())
+                .userNickname(user.getNickname())
                 .build();
     }
 
