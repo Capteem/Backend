@@ -62,6 +62,10 @@ public class AdminServiceImpl implements AdminService{
             log.error("[changeProviderStatus] not match provider status.");
             throw new CustomException("제공자 상태가 같습니다.", HttpStatus.BAD_REQUEST.value());
         }
+        if(adminProviderDto.getProviderStatus() == UserStatus.ACTIVE.getCode()){
+            log.error("[changeProviderStatus] already active provider.");
+            throw new CustomException("이미 활성화된 제공자입니다.", HttpStatus.BAD_REQUEST.value());
+        }
 
         try{
             providerTable.setProviderStatus(adminProviderDto.getProviderStatus());
