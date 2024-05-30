@@ -1,5 +1,6 @@
 # Plog - 나만의 사진촬영 패키지를 만들어 보자
 
+
 ## 0. 목차
 1. [역할 분담](#1-역할-분담)
 2. [기술 스택](#2-기술-스택)
@@ -15,6 +16,8 @@
 |API 명세서 작성 및 구현|API 명세서 작성 및 구현|
 |리드미 작성|인프라 구축|
 
+
+
 ## 2. 기술 스택
 <div>
   <img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white">
@@ -24,6 +27,8 @@
 </br>
 <img src="https://img.shields.io/badge/aws-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white"/>
 <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white"/>
+
+
 
 
 ## 3. build.gradle
@@ -87,6 +92,7 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 ```
+
 
 ## 4. ERD
 ![db_erd_최종](https://github.com/Capteem/Backend/assets/80399640/1bbe47a4-d0bd-4b88-9b63-d9aadad65b07)
