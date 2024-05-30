@@ -54,6 +54,7 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerPrice(-1)
                 .providerStatus(UserStatus.STOP.getCode())
                 .build();
+        log.info("[addProvider] " + providerTable.getProviderId());
 
         try{
             log.info("[addProvider] save제공자 저장 로직 시작");
