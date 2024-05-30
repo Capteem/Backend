@@ -105,7 +105,7 @@ public class AdminServiceImpl implements AdminService{
             if(!adminId.equals("admin")){
                 throw new CustomException("관리자만 접근 가능합니다.", HttpStatus.BAD_REQUEST.value());
             }
-            return providerTableRepository.findAll();
+            return providerTableRepository.findAllByOrderByProviderIdDesc();
         }catch (Exception e){
             log.info("[getProviderList] db데이터 베이스 접근 오류");
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
