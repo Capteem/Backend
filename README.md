@@ -81,8 +81,11 @@ tasks.named('test') {
 ```
 
 ## ERD
+![db_erd_최종](https://github.com/Capteem/Backend/assets/80399640/1bbe47a4-d0bd-4b88-9b63-d9aadad65b07)
 
 ## 서버 아키텍처
+![image](https://github.com/Capteem/Backend/assets/80399640/a06b1162-f6cf-4e7f-b4d1-8585a692acb5)
+
 
 ## 프로젝트 폴더 구조
 ```
