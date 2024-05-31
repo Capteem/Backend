@@ -25,5 +25,7 @@ public class ReviewAddRequestDto {
 
     private LocalDateTime reviewDate;
 
+    private int reservationId;
+
     private int providerId;
 }

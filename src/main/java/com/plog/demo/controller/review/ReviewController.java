@@ -30,6 +30,26 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
+    @PostMapping("/check")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "리뷰 작성 가능",
+                    content = @Content(schema = @Schema(implementation = SuccessDto.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "리뷰 작성 불가능 (예약이 완료되지 않음)",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class))),
+            @ApiResponse(responseCode = "409",
+                    description = "리뷰 작성 불가능 (리뷰 중복)",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+    })
+    public ResponseEntity<SuccessDto> checkReviewWrite(
+            @RequestBody ReviewCheckWriteRequestDto reviewCheckWriteRequestDto) throws CustomException{
+
+        reviewService.canWriteReview(reviewCheckWriteRequestDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("리뷰 작성 가능").build());
+    }
+
     /**
      * 등록
      */
