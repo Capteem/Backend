@@ -14,9 +14,6 @@ public interface PortfolioTableRepository extends JpaRepository<PortfolioTable, 
 
     List<PortfolioTable> findByProviderId(ProviderTable providerId);
 
-    @Query(value = "SELECT COUNT(*) FROM portfolio_table", nativeQuery = true)
-    long countAllPortfolio();
-
     @Query(value = "SELECT * FROM portfolio_table ORDER BY RAND() LIMIT :limit OFFSET :offset", nativeQuery = true)
     List<PortfolioTable> findRandomPortfolio(@Param("limit") int limit, @Param("offset") int offset);
 }

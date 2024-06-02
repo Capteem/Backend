@@ -42,6 +42,9 @@ public class SignServiceImpl implements SignService{
             throw new CustomException("이미 존재하는 유저입니다.");
         }
 
+        checkEmail(userDto.getEmail());
+        checkNickname(userDto.getNickname());
+
         //정상 로직
         IdTable user = IdTable.builder()
                 .id(userDto.getId())
