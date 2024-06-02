@@ -11,4 +11,6 @@ import java.util.List;
 public interface ProviderCheckTableRepository extends JpaRepository<ProviderCheckTable, Integer> {
 
     List<ProviderCheckTable> findAllById(IdTable id);
+
+    List<ProviderCheckTable> findAllByProviderUuid(String providerUuid);
 }

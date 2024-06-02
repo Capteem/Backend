@@ -7,16 +7,18 @@ import com.plog.demo.dto.confirm.ConfirmResponseDto;
 import com.plog.demo.dto.user.CheckAuthDto;
 import com.plog.demo.exception.CustomException;
 
+import java.util.List;
+
 public interface ConfirmService {
     ConfirmResponseDto getBusinessStatus(String businessNumber) throws CustomException;
 
     void checkProvider(ConfirmCheckProviderRequestDto confirmCheckProviderRequestDto) throws CustomException;
 
-    ConfirmGetCheckFilesDto getCheckfileUrls(String userId) throws CustomException;
+    ConfirmGetCheckFilesDto getCheckfileUrls(String uuid) throws CustomException;
 
     ConfirmImageDto getImage(String fileName) throws CustomException;
 
-    boolean deleteFiles(String userId) throws CustomException;
+    boolean deleteFiles(String uuid) throws CustomException;
 
     void joinEmail(String email) throws CustomException;
 

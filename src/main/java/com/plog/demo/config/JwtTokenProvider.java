@@ -21,9 +21,6 @@ public class JwtTokenProvider {
     public static final String TOKEN_HEADER = "Auth-Token";
 
 
-    /**
-     * TODO 나중에 시크릿키, 만료시간 환경변수 처리해야함
-     */
     @Value("${jwt.key}")
     private String tokenSecretKey;
 

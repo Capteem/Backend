@@ -111,25 +111,27 @@ public class ConfirmServiceImpl implements ConfirmService{
     }
 
     @Override
-    public ConfirmGetCheckFilesDto getCheckfileUrls(String userId) throws CustomException {
+    public ConfirmGetCheckFilesDto getCheckfileUrls(String uuid) throws CustomException {
 
-        IdTable user = idTableRepository.findById(userId)
-                .orElseThrow(() -> new CustomException("존재하지 않는 유저입니다.", HttpStatus.NOT_FOUND.value()));
 
-        List<ProviderCheckTable> providerCheckTables = providerCheckTableRepository.findAllById(user);
+
+        List<ProviderCheckTable> providerCheckTables = providerCheckTableRepository.findAllByProviderUuid(uuid);
 
         if(providerCheckTables.isEmpty()){
             throw new CustomException("파일이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
         }
 
-        List<String> fileNames = providerCheckTables.stream().map(providerCheckTable ->
-                providerCheckTable.getStoredFileName()
-        ).toList();
+
+        List<String> fileNames = providerCheckTables.stream()
+                .map(providerCheckTable -> providerCheckTable.getStoredFileName())
+                .toList();
+
 
         return ConfirmGetCheckFilesDto.builder()
-                .userId(userId)
+                .uuid(uuid)
                 .fileNameList(fileNames)
                 .build();
+
     }
 
     @Override
@@ -147,13 +149,10 @@ public class ConfirmServiceImpl implements ConfirmService{
     }
 
     @Override
-    public boolean deleteFiles(String userId) throws CustomException {
+    public boolean deleteFiles(String uuid) throws CustomException {
 
-        IdTable idTable = idTableRepository.findById(userId)
-                .orElseThrow(() -> new CustomException("존재하지 않은 유저입니다.", HttpStatus.NOT_FOUND.value()));
+        List<ProviderCheckTable> providerCheckTables = providerCheckTableRepository.findAllByProviderUuid(uuid);
 
-        //디비에서 파일 경로, 이름 가져오기
-        List<ProviderCheckTable> providerCheckTables = providerCheckTableRepository.findAllById(idTable);
 
         //파일 삭제 & 디비 삭제
         for(ProviderCheckTable providerCheckTable : providerCheckTables){

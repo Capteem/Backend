@@ -89,17 +89,17 @@ public class ConfirmController {
     @PostMapping("/image/fileNames")
     @Operation(summary = "제공자 등록용 사진 이름 리스트 불러오기", description = "제공자(사진작가, 헤어메이크업)가 등록 요청한 사진 이름 리스트 불러오기")
     @ApiResponse(responseCode = "200", description = "파일 이름 리스트 불러오기 성공", content = @Content(schema = @Schema(implementation = ConfirmGetCheckFilesDto.class)))
-    public ResponseEntity<ConfirmGetCheckFilesDto> getImageNames(@RequestBody Map<String, String> userIdMap) throws CustomException{
-        ConfirmGetCheckFilesDto checkFileUrls = confirmService.getCheckfileUrls(userIdMap.get("userId"));
+    public ResponseEntity<ConfirmGetCheckFilesDto> getImageNames(@RequestBody Map<String, String> uuidMap) throws CustomException{
+        ConfirmGetCheckFilesDto checkfileUrls = confirmService.getCheckfileUrls(uuidMap.get("uuid"));
 
-        return ResponseEntity.status(HttpStatus.OK).body(checkFileUrls);
+        return ResponseEntity.status(HttpStatus.OK).body(checkfileUrls);
     }
 
     @PostMapping("/image/delete")
     @Operation(summary = "제공자 등록용 사진 삭제", description = "제공자(사진작가, 헤어메이크업)가 등록 요청한 사진들 삭제하기")
     @ApiResponse(responseCode = "200", description = "사진들 삭제 완료", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
-    public ResponseEntity<SuccessDto> deleteImg(@RequestBody Map<String, String> userIdMap) throws CustomException{
-        if(!confirmService.deleteFiles(userIdMap.get("userId"))){
+    public ResponseEntity<SuccessDto> deleteImg(@RequestBody Map<String, String> uuidMap) throws CustomException{
+        if(!confirmService.deleteFiles(uuidMap.get("uuid"))){
             throw new RuntimeException("파일 삭제중 에러 발생");
         }
         return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("삭제 성공").build());

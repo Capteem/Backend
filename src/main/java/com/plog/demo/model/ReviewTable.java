@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "reviewTable",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"userId", "providerId", "reviewDate"})},
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"userId", "providerId", "reservationId"})},
         indexes = {@Index(columnList = "user_id")}
 )
 public class ReviewTable {
@@ -38,12 +38,16 @@ public class ReviewTable {
     @Column
     private LocalDateTime reviewDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "providerId")
     private ProviderTable providerId;
 
     @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "commentId")
     private CommentTable commentId;
+
+    @ManyToOne
+    @JoinColumn(name = "reservationId")
+    private ReservationTable reservationId;
 
 }
