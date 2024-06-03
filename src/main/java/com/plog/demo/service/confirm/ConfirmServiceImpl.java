@@ -28,12 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -82,11 +80,6 @@ public class ConfirmServiceImpl implements ConfirmService{
 
     @Override
     public void checkProvider(ConfirmCheckProviderRequestDto confirmCheckProviderRequestDto) throws CustomException {
-
-        List<MultipartFile> providerCheckFiles = confirmCheckProviderRequestDto.getProviderCheckFiles();
-
-        //파일 검증
-        providerCheckFileStore.validateFiles(providerCheckFiles);
 
 
         IdTable idTable = idTableRepository.findById(confirmCheckProviderRequestDto.getUserId())
@@ -138,9 +131,6 @@ public class ConfirmServiceImpl implements ConfirmService{
     public ConfirmImageDto getImage(String fileName) throws CustomException {
         String fileExtension = providerCheckFileStore.extractExt(fileName);
 
-        if(providerCheckFileStore.isNotSupportedExtension(fileExtension)){
-            throw new CustomException("지원되지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
-        }
 
         return ConfirmImageDto.builder()
                 .imgFullPath(providerCheckFileStore.getFullPath(fileName))

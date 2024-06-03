@@ -31,7 +31,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -112,19 +116,23 @@ public class ConfirmController {
     public ResponseEntity<Resource> getImage(@PathVariable String fileName) throws CustomException, MalformedURLException {
 
         ConfirmImageDto confirmImageDto = confirmService.getImage(fileName);
-        HttpHeaders httpHeaders = new HttpHeaders();
+
+        Path filePath = Paths.get(confirmImageDto.getImgFullPath());
 
 
-        if(confirmImageDto.getFileExtension().equalsIgnoreCase("jpg")){
-            httpHeaders.setContentType(MediaType.IMAGE_JPEG);
+        // 파일 MIME 타입 결정
+        String contentType;
+
+        try {
+            contentType = Files.probeContentType(filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            contentType = "application/octet-stream";
         }
 
-        if(confirmImageDto.getFileExtension().equalsIgnoreCase("png")){
-            httpHeaders.setContentType(MediaType.IMAGE_PNG);
-        }
 
         return ResponseEntity.status(HttpStatus.OK)
-                .headers(httpHeaders)
+                .contentType(MediaType.parseMediaType(contentType))
                 .body(new UrlResource("file:" + confirmImageDto.getImgFullPath()));
     }
 

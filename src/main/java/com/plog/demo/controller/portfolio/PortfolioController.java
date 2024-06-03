@@ -25,8 +25,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.MalformedURLException;
 
-import java.util.List;
 
+import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -113,19 +118,22 @@ public class PortfolioController {
     public ResponseEntity<Resource> getImage(@PathVariable String middleDir, @PathVariable String fileName) throws CustomException, MalformedURLException {
 
         PortfolioImageDto portfolioImageDto = portfolioService.getImage(middleDir, fileName);
-        HttpHeaders httpHeaders = new HttpHeaders();
+
+        Path filePath = Paths.get(portfolioImageDto.getImgFullPath());
 
 
-        if(portfolioImageDto.getFileExtension().equalsIgnoreCase("jpg")){
-            httpHeaders.setContentType(MediaType.IMAGE_JPEG);
-        }
+        // 파일 MIME 타입 결정
+        String contentType;
 
-        if(portfolioImageDto.getFileExtension().equalsIgnoreCase("png")){
-            httpHeaders.setContentType(MediaType.IMAGE_PNG);
+        try {
+            contentType = Files.probeContentType(filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            contentType = "application/octet-stream";
         }
 
         return ResponseEntity.status(HttpStatus.OK)
-                .headers(httpHeaders)
+                .contentType(MediaType.parseMediaType(contentType))
                 .body(new UrlResource("file:" + portfolioImageDto.getImgFullPath()));
     }
 

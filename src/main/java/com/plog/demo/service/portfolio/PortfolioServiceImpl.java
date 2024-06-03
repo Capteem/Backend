@@ -106,9 +106,6 @@ public class PortfolioServiceImpl implements PortfolioService{
         ProviderTable providerTable = providerTableRepository.findById(portfolioUploadDto.getProviderId())
                 .orElseThrow(() -> new CustomException("존재 하지 않은 서비스 제공자입니다", HttpStatus.NOT_FOUND.value()));
 
-        //파일 검증
-        List<MultipartFile> portfolioUploadFiles = portfolioUploadDto.getPortfolioUploadFiles();
-        portfolioFileStore.validateFiles(portfolioUploadFiles);
 
         //서버에 파일 저장
         List<UploadFileDto> storedFiles = portfolioFileStore.storeFiles(portfolioUploadDto.getPortfolioUploadFiles());
@@ -142,9 +139,6 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         String fileExtension = portfolioFileStore.extractExt(fileName);
 
-        if(portfolioFileStore.isNotSupportedExtension(fileExtension)){
-            throw new CustomException("지원되지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
-        }
 
         return PortfolioImageDto.builder()
                 .imgFullPath(portfolioFileStore.getFullPath(middleDir, fileName))
