@@ -68,9 +68,6 @@ public class ReservationServiceImpl implements ReservationService{
                 .reservationCameraName(reservationRequestDto.getReservationCameraName())
                 .reservationStudioName(reservationRequestDto.getReservationStudioName())
                 .reservationHairName(reservationRequestDto.getReservationHairName())
-                .reservation_camera_confirm(false)
-                .reservation_studio_confirm(false)
-                .reservation_hair_confirm(false)
                 .status(ReservationStatus.WAITING.getCode())
                 .build();
 

@@ -28,24 +28,18 @@ public class ReservationTable {
 
     @Column
     private int reservation_camera;
-    @Column
-    private boolean reservation_camera_confirm;
 
     @Column
     private String reservationCameraName;
 
     @Column
     private int reservation_studio;
-    @Column
-    private boolean reservation_studio_confirm;
 
     @Column
     private String reservationStudioName;
 
     @Column
     private int reservation_hair;
-    @Column
-    private boolean reservation_hair_confirm;
 
     @Column
     private String reservationHairName;
