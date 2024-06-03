@@ -19,7 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController("/chat/room")
+@RestController
+@RequestMapping("/ch")
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -28,7 +29,7 @@ public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
 
-    @GetMapping
+    @PostMapping
     public ResponseEntity<ChatCreateRoomResDto> createChatRoom(@RequestBody ChatCreateRoomReqDto chatCreateRoomReqDto) throws CustomException {
         ChatCreateRoomResDto chatRoom = chatRoomService.createRoom(chatCreateRoomReqDto);
         return ResponseEntity.status(HttpStatus.OK).body(chatRoom);
