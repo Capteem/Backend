@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Tag(name = "Review", description = "리뷰 관련 API")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-
 public class ReviewController {
 
     private final ReviewService reviewService;
