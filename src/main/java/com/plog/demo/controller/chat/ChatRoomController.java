@@ -2,12 +2,15 @@ package com.plog.demo.controller.chat;
 
 import com.plog.demo.dto.ErrorDto;
 import com.plog.demo.dto.SuccessDto;
-import com.plog.demo.dto.chat.ChatCreateRoomReqDto;
-import com.plog.demo.dto.chat.ChatCreateRoomResDto;
-import com.plog.demo.dto.chat.ChatMessageDto;
-import com.plog.demo.dto.chat.ChatRoomDto;
+import com.plog.demo.dto.chat.*;
+import com.plog.demo.dto.portfolio.PortfolioResponseDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.chat.ChatRoomService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,50 +32,89 @@ public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
 
+    @Operation(summary = "채팅 방 생성", description = "채팅방을 생성합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "채팅방 생성 성공",
+                    content = @Content(schema = @Schema(implementation = ChatCreateRoomResDto.class))),
+            @ApiResponse(responseCode = "409",
+                    description = "채팅방 이미 존재합니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+    })
     @PostMapping
     public ResponseEntity<ChatCreateRoomResDto> createChatRoom(@RequestBody ChatCreateRoomReqDto chatCreateRoomReqDto) throws CustomException {
         ChatCreateRoomResDto chatRoom = chatRoomService.createRoom(chatCreateRoomReqDto);
         return ResponseEntity.status(HttpStatus.OK).body(chatRoom);
     }
 
+    @Operation(summary = "채팅 방 유저 아이디로 조회", description = "채팅방을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "채팅방 조회 성공",
+                    content = @Content(schema = @Schema(implementation = ChatRoomResponseDto.class))),
+            @ApiResponse(responseCode = "409",
+                    description = "채팅방이 존재하지 않습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+    })
     @PostMapping("/user")
-    public ResponseEntity<Map<String, List<ChatRoomDto>>> getChatRoomsByUserId(@RequestBody Map<String, String> userMap) throws CustomException {
+    public ResponseEntity<ChatRoomResponseDto> getChatRoomsByUserId(@RequestBody Map<String, String> userMap) throws CustomException {
 
         String userId = userMap.get("userId");
         List<ChatRoomDto> chatRoomDtos = chatRoomService.getByUserId(userId);
 
-        Map<String, List<ChatRoomDto>> chatRoomMap = new HashMap<>();
+        ChatRoomResponseDto chatRoomResponseDto = ChatRoomResponseDto.builder().chatRoomDtoList(chatRoomDtos).build();
 
-        chatRoomMap.put("chatRoomList", chatRoomDtos);
-
-        return ResponseEntity.status(HttpStatus.OK).body(chatRoomMap);
+        return ResponseEntity.status(HttpStatus.OK).body(chatRoomResponseDto);
     }
 
+    @Operation(summary = "채팅 방 제공자 id로 조회", description = "채팅방을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "채팅방 조회 성공",
+                    content = @Content(schema = @Schema(implementation = ChatRoomResponseDto.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "채팅방이 존재하지 않습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+    })
     @PostMapping("/provider")
-    public ResponseEntity<Map<String, List<ChatRoomDto>>> getChatRoomsByProviderId(@RequestBody Map<String, Integer> providerMap) throws CustomException {
+    public ResponseEntity<ChatRoomResponseDto> getChatRoomsByProviderId(@RequestBody Map<String, Integer> providerMap) throws CustomException {
 
         int providerId = providerMap.get("providerId");
 
         List<ChatRoomDto> chatRoomDtos = chatRoomService.getByProviderId(providerId);
 
-        Map<String, List<ChatRoomDto>> chatRoomMap = new HashMap<>();
+        ChatRoomResponseDto chatRoomResponseDto = ChatRoomResponseDto.builder().chatRoomDtoList(chatRoomDtos).build();
 
-        chatRoomMap.put("chatRoomList", chatRoomDtos);
-
-        return ResponseEntity.status(HttpStatus.OK).body(chatRoomMap);
+        return ResponseEntity.status(HttpStatus.OK).body(chatRoomResponseDto);
     }
 
+    @Operation(summary = "채팅 메시지 조회", description = "채팅 메시지를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "채팅 메시지 조회 성공",
+                    content = @Content(schema = @Schema(implementation = ChatMessageResponseDto.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "채팅방이 존재하지 않습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+    })
     @GetMapping("/{roomId}")
-    public ResponseEntity<Map<String, List<ChatMessageDto>>> getMessages(@PathVariable int roomId) throws CustomException {
+    public ResponseEntity<ChatMessageResponseDto> getMessages(@PathVariable int roomId) throws CustomException {
         List<ChatMessageDto> chatMessages = chatRoomService.getChatMessages(roomId);
 
-        Map<String, List<ChatMessageDto>> chatMessageMap = new HashMap<>();
+        ChatMessageResponseDto chatMessageResponseDto = ChatMessageResponseDto.builder().chatMessageDtoList(chatMessages).build();
 
-        chatMessageMap.put("chatMessageList", chatMessages);
-
-        return ResponseEntity.status(HttpStatus.OK).body(chatMessageMap);
+        return ResponseEntity.status(HttpStatus.OK).body(chatMessageResponseDto);
     }
 
+    @Operation(summary = "채팅 방 삭제", description = "채팅방을 삭제합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "채팅 방 삭제 성공",
+                    content = @Content(schema = @Schema(implementation = SuccessDto.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "채팅방이 존재하지 않습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+    })
     @DeleteMapping("/{roomId}")
     public ResponseEntity<SuccessDto> deleteChatRoom(@PathVariable int roomId) throws CustomException {
         chatRoomService.deleteRoom(roomId);
