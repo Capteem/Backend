@@ -64,7 +64,7 @@ public class PaymentServiceImpl implements PaymentService{
         try{
             payReadyResDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayReadyResDto.class);
         } catch (Exception e){
-            log.info("[payReady] failure to get redirect url");
+            log.info("[payReady] "+ e.getMessage());
             throw new RuntimeException("failure to get redirect url", e);
         }
 

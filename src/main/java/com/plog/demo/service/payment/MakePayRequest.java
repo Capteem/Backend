@@ -44,7 +44,7 @@ public class MakePayRequest {
             payRequestDto = new PayRequestDto("https://open-api.kakaopay.com/online/v1/payment/ready", jsonMap);
             return payRequestDto;
         } catch (Exception e) {
-            log.info("[getReadyRequest] failure to get ready request");
+            log.info("[getReadyRequest]" + e.getMessage());
         }
 
         return null;
