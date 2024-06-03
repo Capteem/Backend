@@ -52,7 +52,7 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerDetailArea(providerDto.getProviderDetail())
                 .providerPhoneNum(providerDto.getProviderPhoneNum())
                 .providerPrice(-1)
-                .providerStatus(UserStatus.INFO_LACK.getCode())
+                .providerStatus(UserStatus.STOP.getCode())
                 .providerUuid(providerDto.getUuid())
                 .build();
 
