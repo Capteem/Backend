@@ -51,6 +51,13 @@ public class ReservationTable {
     private LocalDateTime reservation_end_date;
 
     @Column
+    private boolean reservation_camera_confirm;
+    @Column
+    private boolean reservation_studio_confirm;
+    @Column
+    private boolean reservation_hair_confirm;
+
+    @Column
     private int status;
 
     @Column

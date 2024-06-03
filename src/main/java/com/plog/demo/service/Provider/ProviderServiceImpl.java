@@ -249,7 +249,18 @@ public class ProviderServiceImpl implements ProviderService{
             log.error("[acceptReservation] 존재하지 않는 예약입니다.");
             throw new CustomException("존재하지 않는 예약입니다.", HttpStatus.NOT_FOUND.value());
         }
-        reservationTable.setStatus(ReservationStatus.CONFIRMED.getCode());
+        if(providerTable.getProviderType() == 1){
+            reservationTable.setReservation_camera_confirm(true);
+        }
+        if(providerTable.getProviderType() == 2){
+            reservationTable.setReservation_hair_confirm(true);
+        }
+        if(providerTable.getProviderType() == 3){
+            reservationTable.setReservation_studio_confirm(true);
+        }
+        if(reservationTable.isReservation_camera_confirm() && reservationTable.isReservation_hair_confirm() && reservationTable.isReservation_studio_confirm()){
+            reservationTable.setStatus(ReservationStatus.CONFIRMED.getCode());
+        }
         try{
             reservationTableRepository.save(reservationTable);
         }catch (Exception e){

@@ -58,27 +58,44 @@ public class ReservationServiceImpl implements ReservationService{
         IdTable idTable = idTableRepository.findById(reservationRequestDto.getUserId())
                 .orElseThrow(() -> new CustomException("존재하지 않는 회원입니다.", HttpStatus.NOT_FOUND.value()));
 
-
-        ReservationTable reservation = ReservationTable.builder()
-                .reservation_camera(reservationRequestDto.getReservationCameraId())
-                .reservation_studio(reservationRequestDto.getReservationStudioId())
-                .reservation_hair(reservationRequestDto.getReservationHairId())
-                .reservation_start_date(reservationRequestDto.getReservationStartDate())
-                .reservation_end_date(reservationRequestDto.getReservationEndDate())
-                .reservationCameraName(reservationRequestDto.getReservationCameraName())
-                .reservationStudioName(reservationRequestDto.getReservationStudioName())
-                .reservationHairName(reservationRequestDto.getReservationHairName())
-                .status(ReservationStatus.WAITING.getCode())
-                .build();
-
-        reservation.setUserId(idTable);
-
         try {
+            ReservationTable reservation = ReservationTable.builder()
+                    .reservation_camera(reservationRequestDto.getReservationCameraId())
+                    .reservation_studio(reservationRequestDto.getReservationStudioId())
+                    .reservation_hair(reservationRequestDto.getReservationHairId())
+                    .reservation_start_date(reservationRequestDto.getReservationStartDate())
+                    .reservation_end_date(reservationRequestDto.getReservationEndDate())
+                    .reservationCameraName(reservationRequestDto.getReservationCameraName())
+                    .reservationStudioName(reservationRequestDto.getReservationStudioName())
+                    .reservationHairName(reservationRequestDto.getReservationHairName())
+                    .reservation_studio_confirm(true)
+                    .reservation_camera_confirm(true)
+                    .reservation_hair_confirm(true)
+                    .status(ReservationStatus.WAITING.getCode())
+                    .build();
+
+            if (reservation.getReservation_camera() != 0) {
+                reservation.setReservation_camera_confirm(false);
+            }
+            if (reservation.getReservation_studio() != 0) {
+                reservation.setReservation_studio_confirm(false);
+            }
+            if (reservation.getReservation_hair() != 0) {
+                reservation.setReservation_hair_confirm(false);
+            }
             reservationTableRepository.save(reservation);
             log.info("[addReservation] 예약 완료");
-        }catch (Exception e){
-            throw new RuntimeException("데이터 베이스 오류", e);
+            reservation.setUserId(idTable);
+        } catch (Exception e) {
+            throw new CustomException("예약 서비스 로직 오류", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
+
+//        try {
+//            reservationTableRepository.save(reservation);
+//            log.info("[addReservation] 예약 완료");
+//        }catch (Exception e){
+//            throw new RuntimeException("데이터 베이스 오류", e);
+//        }
     }
 
     @Override
