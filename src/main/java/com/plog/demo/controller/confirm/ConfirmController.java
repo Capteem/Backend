@@ -85,7 +85,6 @@ public class ConfirmController {
     @ApiResponse(responseCode = "200", description = "제공자 등록 성공", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
     public ResponseEntity<SuccessDto> checkProvider(@ModelAttribute ConfirmCheckProviderRequestDto confirmCheckProviderRequestDto) throws CustomException {
 
-
         confirmService.checkProvider(confirmCheckProviderRequestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());

@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 public class KakaoPayController {
 
     private final PaymentService paymentService;
-    private final ReservationService reservationService;
 
     @PostMapping("/ready")
     @Operation(summary = "결제 준비", description = "결제 준비를 진행합니다.")
