@@ -244,6 +244,7 @@ public class ProviderServiceImpl implements ProviderService{
     @Override
     public void acceptReservation(int reservationId, int providerId) throws CustomException {
         ReservationTable reservationTable = reservationTableRepository.findReservationTableByProviderIdAndReservationId(providerId, reservationId);
+        ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
         if(reservationTable == null){
             log.error("[acceptReservation] 존재하지 않는 예약입니다.");
             throw new CustomException("존재하지 않는 예약입니다.", HttpStatus.NOT_FOUND.value());
