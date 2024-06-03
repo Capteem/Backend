@@ -249,9 +249,7 @@ public class ProviderServiceImpl implements ProviderService{
             log.error("[acceptReservation] 존재하지 않는 예약입니다.");
             throw new CustomException("존재하지 않는 예약입니다.", HttpStatus.NOT_FOUND.value());
         }
-        if(reservationTable.isReservation_camera_confirm() && reservationTable.isReservation_studio_confirm() && reservationTable.isReservation_hair_confirm()){
-            reservationTable.setStatus(ReservationStatus.CONFIRMED.getCode());
-        }
+        reservationTable.setStatus(ReservationStatus.CONFIRMED.getCode());
         try{
             reservationTableRepository.save(reservationTable);
         }catch (Exception e){
