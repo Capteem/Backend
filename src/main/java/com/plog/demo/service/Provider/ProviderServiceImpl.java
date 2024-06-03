@@ -244,11 +244,25 @@ public class ProviderServiceImpl implements ProviderService{
     @Override
     public void acceptReservation(int reservationId, int providerId) throws CustomException {
         ReservationTable reservationTable = reservationTableRepository.findReservationTableByProviderIdAndReservationId(providerId, reservationId);
+        ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
         if(reservationTable == null){
             log.error("[acceptReservation] 존재하지 않는 예약입니다.");
             throw new CustomException("존재하지 않는 예약입니다.", HttpStatus.NOT_FOUND.value());
         }
-        reservationTable.setStatus(ReservationStatus.CONFIRMED.getCode());
+        switch (providerTable.getProviderType()){
+            case 1:
+                reservationTable.setReservation_camera_confirm(true);
+                break;
+            case 3:
+                reservationTable.setReservation_studio_confirm(true);
+                break;
+            case 2:
+                reservationTable.setReservation_hair_confirm(true);
+                break;
+        }
+        if(reservationTable.isReservation_camera_confirm() && reservationTable.isReservation_studio_confirm() && reservationTable.isReservation_hair_confirm()){
+            reservationTable.setStatus(ReservationStatus.CONFIRMED.getCode());
+        }
         try{
             reservationTableRepository.save(reservationTable);
         }catch (Exception e){
