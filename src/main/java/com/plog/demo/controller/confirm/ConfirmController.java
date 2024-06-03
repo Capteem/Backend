@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.MalformedURLException;
@@ -174,5 +175,17 @@ public class ConfirmController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDto);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorDto> UploadExceptionHandler(Exception e){
+        log.error("UploadExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
+
+        ErrorDto errorDto = ErrorDto.builder()
+                .resultCode(HttpStatus.BAD_REQUEST.value())
+                .msg("파일 크기가 너무 큽니다.")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
     }
 }
