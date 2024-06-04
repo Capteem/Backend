@@ -157,6 +157,7 @@ public class ProviderServiceImpl implements ProviderService{
                             .date(String.valueOf(workdateTable.getWorkDate().toLocalDate()))
                             .time(String.valueOf(workdateTable.getWorkDate().toLocalTime().format(dateTimeFormatter)))
                             .build()).toList())
+                    .userId(providerTable.getUserId().getId())
                     .build()).toList();
             if (providerTables.isEmpty()) {
                 return providerList;

@@ -25,4 +25,6 @@ public class ProviderListDto {
     private String providerRepPhotoPath;
 
     private List<DateListDto> dateList;
+
+    private String userId;
 }
