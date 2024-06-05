@@ -81,6 +81,7 @@ public class ProviderServiceImpl implements ProviderService{
                     .providerAddress(providerTable.getProviderArea() + " " + providerTable.getProviderSubArea() + " " + providerTable.getProviderDetailArea())
                     .providerPhoneNum(providerTable.getProviderPhoneNum())
                     .providerStatus(providerTable.getProviderStatus())
+                    .providerUuid(providerTable.getProviderUuid())
                     .build()).toList();
             if(providerTables.isEmpty()){
                 return providerDtos;
