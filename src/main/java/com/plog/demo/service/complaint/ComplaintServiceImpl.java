@@ -57,20 +57,20 @@ public class ComplaintServiceImpl implements ComplaintService{
 
     }
 
-    @Override
-    public void addPhotoToComplaint(ComplaintPhotoDto complaintPhotoDto) throws CustomException{
-
-        try {
-            List<ProviderCheckFileDto> complaintPhotoDtos =
-                    complaintFileStore.storeFiles(complaintPhotoDto.getComplaintCheckFiles());
-
-            List<ComplaintPhotoTable> complaintPhotoTables = complaintPhotoDtos.stream().map(providerCheckFileDto
-                    -> getComplaintPhotoTable(providerCheckFileDto, complaintPhotoDto.getUuid())).toList();
-            complaintPhotoTablesRepository.saveAll(complaintPhotoTables);
-        }catch (Exception e){
-            throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
-    }
+//    @Override
+//    public void addPhotoToComplaint(ComplaintPhotoDto complaintPhotoDto) throws CustomException{
+//
+//        try {
+//            List<ProviderCheckFileDto> complaintPhotoDtos =
+//                    complaintFileStore.storeFiles(complaintPhotoDto.getComplaintCheckFiles());
+//
+//            List<ComplaintPhotoTable> complaintPhotoTables = complaintPhotoDtos.stream().map(providerCheckFileDto
+//                    -> getComplaintPhotoTable(providerCheckFileDto, complaintPhotoDto.getUuid())).toList();
+//            complaintPhotoTablesRepository.saveAll(complaintPhotoTables);
+//        }catch (Exception e){
+//            throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+//        }
+//    }
 
 
 

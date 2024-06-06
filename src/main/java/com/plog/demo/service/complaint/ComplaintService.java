@@ -15,5 +15,5 @@ public interface ComplaintService {
 
     List<ComplaintResponseDto> getComplain(String userId) throws CustomException;
 
-    void addPhotoToComplaint(ComplaintPhotoDto complaintPhotoDto) throws CustomException;
+//    void addPhotoToComplaint(ComplaintPhotoDto complaintPhotoDto) throws CustomException;
 }

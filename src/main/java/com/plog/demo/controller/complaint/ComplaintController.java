@@ -53,14 +53,14 @@ public class ComplaintController {
         }
     }
 
-    @PostMapping("/addPhoto")
-    @Operation(summary = "불만 신고 사진 추가", description = "불만 신고에 사진을 추가합니다.")
-    public ResponseEntity<Object> addPhoto(@ModelAttribute ComplaintPhotoDto complaintPhotoDto) throws CustomException{
-        try{
-            complaintService.addPhotoToComplaint(complaintPhotoDto);
-            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("불만 신고 사진 추가 성공").build());
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorDto.builder().msg(e.getMessage()).build());
-        }
-    }
+//    @PostMapping("/addPhoto")
+//    @Operation(summary = "불만 신고 사진 추가", description = "불만 신고에 사진을 추가합니다.")
+//    public ResponseEntity<Object> addPhoto(@ModelAttribute ComplaintPhotoDto complaintPhotoDto) throws CustomException{
+//        try{
+//            complaintService.addPhotoToComplaint(complaintPhotoDto);
+//            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("불만 신고 사진 추가 성공").build());
+//        } catch (Exception e){
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorDto.builder().msg(e.getMessage()).build());
+//        }
+//    }
 }
