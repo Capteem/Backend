@@ -20,5 +20,6 @@ public class ProviderInfoDto {
     private String providerRepPhoto;
     private int providerPrice;
     private int providerType;
+    private String userId;
     private List<WorkDateRequestDto> dateList;
 }
