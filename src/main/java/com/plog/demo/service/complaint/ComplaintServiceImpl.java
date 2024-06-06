@@ -2,22 +2,14 @@ package com.plog.demo.service.complaint;
 
 
 import com.plog.demo.common.ComplaintStatus;
-import com.plog.demo.common.file.ComplaintFileStore;
 import com.plog.demo.dto.complaint.*;
-import com.plog.demo.dto.confirm.ConfirmCheckProviderRequestDto;
-import com.plog.demo.dto.file.ProviderCheckFileDto;
 import com.plog.demo.exception.CustomException;
-import com.plog.demo.model.ComplaintAnswerTable;
-import com.plog.demo.model.ComplaintPhotoTable;
 import com.plog.demo.model.ComplaintTable;
 import com.plog.demo.model.IdTable;
-import com.plog.demo.repository.ComplaintAnswerTableRepository;
-import com.plog.demo.repository.ComplaintPhotoTableRepository;
 import com.plog.demo.repository.ComplaintTableRepository;
 import com.plog.demo.repository.IdTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +23,8 @@ public class ComplaintServiceImpl implements ComplaintService{
 
     private final ComplaintTableRepository complaintTableRepository;
     private final IdTableRepository idTableRepository;
-    private final ComplaintFileStore complaintFileStore;
-    private final ComplaintPhotoTableRepository complaintPhotoTablesRepository;
+//    private final ComplaintFileStore complaintFileStore;
+//    private final ComplaintPhotoTableRepository complaintPhotoTablesRepository;
 
     @Override
     public void addComplain(ComplaintRequestDto complaintRequestDto) throws CustomException{
@@ -122,10 +114,10 @@ public class ComplaintServiceImpl implements ComplaintService{
         return complaintTableList;
     }
 
-    private ComplaintPhotoTable getComplaintPhotoTable(ProviderCheckFileDto providerCheckFileDto, String uuid){
-        return ComplaintPhotoTable.builder()
-                .StoreFileName(providerCheckFileDto.getStoreFileName())
-                .complaintUuid(uuid)
-                .build();
-    }
+//    private ComplaintPhotoTable getComplaintPhotoTable(ProviderCheckFileDto providerCheckFileDto, String uuid){
+//        return ComplaintPhotoTable.builder()
+//                .StoreFileName(providerCheckFileDto.getStoreFileName())
+//                .complaintUuid(uuid)
+//                .build();
+//    }
 }
