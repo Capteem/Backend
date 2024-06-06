@@ -19,5 +19,6 @@ public class ProviderInfoDto {
     private String providerRepPhotoPath;
     private String providerRepPhoto;
     private int providerPrice;
+    private int providerType;
     private List<WorkDateRequestDto> dateList;
 }

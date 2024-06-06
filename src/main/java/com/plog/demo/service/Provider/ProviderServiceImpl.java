@@ -298,6 +298,7 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerRepPhotoPath(providerTable.getProviderRepPhotoPath())
                 .providerRepPhoto(providerTable.getProviderRepPhoto())
                 .providerPrice(providerTable.getProviderPrice())
+                .providerType(providerTable.getProviderType())
                 .dateList(providerTable.getWorkdateTableList().stream().map(workdateTable -> WorkDateRequestDto.builder()
                         .date(String.valueOf(workdateTable.getWorkDate().toLocalDate()))
                         .time(String.valueOf(workdateTable.getWorkDate().toLocalTime().format(dateTimeFormatter)))

@@ -25,4 +25,5 @@ public interface ConfirmService {
     void sendEmail(String setFrom, String toMail, String title, String content) throws CustomException;
 
     String checkAuthNumber(CheckAuthDto checkAuthDto) throws CustomException;
+
 }

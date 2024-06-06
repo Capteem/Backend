@@ -2,19 +2,22 @@ package com.plog.demo.service.complaint;
 
 
 import com.plog.demo.common.ComplaintStatus;
-import com.plog.demo.dto.complaint.ComplaintReplyDto;
-import com.plog.demo.dto.complaint.ComplaintReplyResponseDto;
-import com.plog.demo.dto.complaint.ComplaintResponseDto;
-import com.plog.demo.dto.complaint.ComplaintRequestDto;
+import com.plog.demo.common.file.ComplaintFileStore;
+import com.plog.demo.dto.complaint.*;
+import com.plog.demo.dto.confirm.ConfirmCheckProviderRequestDto;
+import com.plog.demo.dto.file.ProviderCheckFileDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.ComplaintAnswerTable;
+import com.plog.demo.model.ComplaintPhotoTable;
 import com.plog.demo.model.ComplaintTable;
 import com.plog.demo.model.IdTable;
 import com.plog.demo.repository.ComplaintAnswerTableRepository;
+import com.plog.demo.repository.ComplaintPhotoTableRepository;
 import com.plog.demo.repository.ComplaintTableRepository;
 import com.plog.demo.repository.IdTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,8 @@ public class ComplaintServiceImpl implements ComplaintService{
 
     private final ComplaintTableRepository complaintTableRepository;
     private final IdTableRepository idTableRepository;
+    private final ComplaintFileStore complaintFileStore;
+    private final ComplaintPhotoTableRepository complaintPhotoTablesRepository;
 
     @Override
     public void addComplain(ComplaintRequestDto complaintRequestDto) throws CustomException{
@@ -41,6 +46,7 @@ public class ComplaintServiceImpl implements ComplaintService{
                 .complaintType(complaintRequestDto.getComplaintType())
                 .userId(IdTable)
                 .complaintAnswerId(null)
+                .complaintUuid(complaintRequestDto.getComplaintUuid())
                 .build();
 
         try{
@@ -50,6 +56,22 @@ public class ComplaintServiceImpl implements ComplaintService{
         }
 
     }
+
+    @Override
+    public void addPhotoToComplaint(ComplaintPhotoDto complaintPhotoDto) throws CustomException{
+
+        try {
+            List<ProviderCheckFileDto> complaintPhotoDtos =
+                    complaintFileStore.storeFiles(complaintPhotoDto.getComplaintCheckFiles());
+
+            List<ComplaintPhotoTable> complaintPhotoTables = complaintPhotoDtos.stream().map(providerCheckFileDto
+                    -> getComplaintPhotoTable(providerCheckFileDto, complaintPhotoDto.getUuid())).toList();
+            complaintPhotoTablesRepository.saveAll(complaintPhotoTables);
+        }catch (Exception e){
+            throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
 
 
     @Override
@@ -98,5 +120,12 @@ public class ComplaintServiceImpl implements ComplaintService{
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);
         }
         return complaintTableList;
+    }
+
+    private ComplaintPhotoTable getComplaintPhotoTable(ProviderCheckFileDto providerCheckFileDto, String uuid){
+        return ComplaintPhotoTable.builder()
+                .StoreFileName(providerCheckFileDto.getStoreFileName())
+                .complaintUuid(uuid)
+                .build();
     }
 }
