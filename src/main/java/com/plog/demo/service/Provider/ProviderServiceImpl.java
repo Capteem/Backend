@@ -300,6 +300,7 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerPrice(providerTable.getProviderPrice())
                 .providerType(providerTable.getProviderType())
                 .userId(providerTable.getUserId().getId())
+                .providerId(providerTable.getProviderId())
                 .dateList(providerTable.getWorkdateTableList().stream().map(workdateTable -> WorkDateRequestDto.builder()
                         .date(String.valueOf(workdateTable.getWorkDate().toLocalDate()))
                         .time(String.valueOf(workdateTable.getWorkDate().toLocalTime().format(dateTimeFormatter)))
