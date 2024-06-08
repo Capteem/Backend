@@ -33,8 +33,6 @@ public class ProviderTable {
     @Column
     private String providerPhoneNum;
     @Column
-    private int providerTypeInfo;
-    @Column
     private int providerType;
     @Column
     private int providerStatus;
