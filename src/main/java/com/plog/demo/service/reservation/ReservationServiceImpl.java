@@ -127,7 +127,9 @@ public class ReservationServiceImpl implements ReservationService{
         List<ReservationResponseDto> reservationResponseDtoList = new ArrayList<>();
 
         for (ReservationTable reservation : reservations) {
-
+            if (reservation.getTid() == null) {
+                continue;
+            }
             ReservationResponseDto reservationResponseDto = ReservationResponseDto.builder()
                     .reservationTableId(reservation.getReservationId())
                     .reservationCameraId(reservation.getReservation_camera())
