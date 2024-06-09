@@ -16,9 +16,9 @@ import java.util.Optional;
 public interface ReviewTableRepository extends JpaRepository<ReviewTable, Integer> {
 
 
-    List<ReviewTable> findByUserIdOrderByReviewIdDesc(String userId);
+    List<ReviewTable> findByUserId(String userId);
 
-    List<ReviewTable> findByProviderIdOrderByReviewIdDesc(ProviderTable providerTable);
+    List<ReviewTable> findByProviderId(ProviderTable providerTable);
 
     Optional<ReviewTable> findByUserIdAndAndProviderIdAndReservationId(String userId,
                                                                        ProviderTable providerId,

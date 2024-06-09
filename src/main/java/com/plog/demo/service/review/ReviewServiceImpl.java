@@ -128,7 +128,7 @@ public class ReviewServiceImpl implements ReviewService{
     @Override
     public ReviewGetResponseDto getReviewsByUserId(String userId) throws CustomException {
 
-        List<ReviewTable> reviews = reviewTableRepository.findByUserIdOrderByReviewIdDesc(userId);
+        List<ReviewTable> reviews = reviewTableRepository.findByUserId(userId);
 
 
         if(reviews.isEmpty()){
@@ -159,7 +159,7 @@ public class ReviewServiceImpl implements ReviewService{
                 .orElseThrow(() -> new CustomException("존재하지 않는서비스 제공자 입니다.", HttpStatus.NOT_FOUND.value()));
 
 
-        List<ReviewTable> reviews = reviewTableRepository.findByProviderIdOrderByReviewIdDesc(provider);
+        List<ReviewTable> reviews = reviewTableRepository.findByProviderId(provider);
 
         List<ReviewGetDto> reviewGetDtos = new ArrayList<>();
 
