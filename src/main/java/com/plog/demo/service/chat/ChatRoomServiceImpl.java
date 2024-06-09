@@ -14,6 +14,7 @@ import com.plog.demo.repository.ChatRoomTableRepository;
 import com.plog.demo.repository.IdTableRepository;
 import com.plog.demo.repository.ProviderTableRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -81,7 +82,7 @@ public class ChatRoomServiceImpl implements ChatRoomService{
         IdTable idTable = idTableRepository.findById(userId)
                 .orElseThrow(() -> new CustomException("유저가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value()));
 
-        List<ChatRoomTable> chatRooms = chatRoomTableRepository.findAllByUserId(idTable.getId());
+        List<ChatRoomTable> chatRooms = chatRoomTableRepository.findAllByUserIdOrderByChatRoomIdDesc(idTable.getId());
 
         if(chatRooms.isEmpty()) throw new CustomException("채팅방이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
 
@@ -101,7 +102,7 @@ public class ChatRoomServiceImpl implements ChatRoomService{
         ProviderTable provider = providerTableRepository.findById(providerId)
                 .orElseThrow(() -> new CustomException("서비스가 존재하지 않습니다.", HttpStatus.NOT_FOUND.value()));
 
-        List<ChatRoomTable> chatRooms = chatRoomTableRepository.findAllByProviderId(provider.getProviderId());
+        List<ChatRoomTable> chatRooms = chatRoomTableRepository.findAllByProviderIdOrderByChatRoomIdDesc(provider.getProviderId());
 
         if(chatRooms.isEmpty()) throw new CustomException("채팅방이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
 
@@ -121,7 +122,7 @@ public class ChatRoomServiceImpl implements ChatRoomService{
         ChatRoomTable chatRoom = chatRoomTableRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException("채팅방이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value()));
 
-        List<ChatMessageTable> chatMessages = chatMessageTableRepository.findAllByChatRoomTable(chatRoom);
+        List<ChatMessageTable> chatMessages = chatMessageTableRepository.findAllByChatRoomTableOrderByChatIdAsc(chatRoom);
 
         if(chatMessages.isEmpty()) return null;
 

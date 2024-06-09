@@ -10,7 +10,7 @@ public interface ChatRoomTableRepository extends JpaRepository<ChatRoomTable, In
 
     Optional<ChatRoomTable> findByUserIdAndProviderId(String userId, int providerId);
 
-    List<ChatRoomTable> findAllByUserId(String userId);
+    List<ChatRoomTable> findAllByUserIdOrderByChatRoomIdDesc(String userId);
 
-    List<ChatRoomTable> findAllByProviderId(int providerId);
+    List<ChatRoomTable> findAllByProviderIdOrderByChatRoomIdDesc(int providerId);
 }

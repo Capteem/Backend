@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface ChatMessageTableRepository extends JpaRepository<ChatMessageTable, Integer> {
 
-    List<ChatMessageTable> findAllByChatRoomTable(ChatRoomTable chatRoomTable);
+    List<ChatMessageTable> findAllByChatRoomTableOrderByChatIdAsc(ChatRoomTable chatRoomTable);
 }
