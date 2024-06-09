@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -122,20 +123,29 @@ public class ProviderServiceImpl implements ProviderService{
     public List<ProviderReservationDto> getProviderReservationList(int providerId) throws CustomException{
         ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
         List<ReservationTable> reservationTables = reservationTableRepository.findReservationTableByProviderId(providerTable.getProviderId());
-        List<ProviderReservationDto> providerReservationDtos = reservationTables.stream().map(reservationTable -> ProviderReservationDto.builder()
-                .reservationId(reservationTable.getReservationId())
-                .reservationStartTime(reservationTable.getReservation_start_date().toString())
-                .reservationEndTime(reservationTable.getReservation_end_date().toString())
-                .reservationStatus(reservationTable.getStatus())
-                .providerType(providerTable.getProviderType())
-                .providerName(providerTable.getProviderName())
-                .reservationPrice(getProviderPrice(providerTable, reservationTable))
-                .build()).toList();
+        List<ProviderReservationDto> providerReservationDtos = new ArrayList<>();
+        for(ReservationTable reservationTable : reservationTables){
+            if(reservationTable.getTid() == null){
+                continue;
+            }
+            ProviderReservationDto providerReservationDto = ProviderReservationDto.builder()
+                    .reservationId(reservationTable.getReservationId())
+                    .reservationStartTime(reservationTable.getReservation_start_date().toString())
+                    .reservationEndTime(reservationTable.getReservation_end_date().toString())
+                    .reservationStatus(reservationTable.getStatus())
+                    .providerType(providerTable.getProviderType())
+                    .providerName(providerTable.getProviderName())
+                    .reservationPrice(getProviderPrice(providerTable, reservationTable))
+                    .build();
+            providerReservationDtos.add(providerReservationDto);
+        }
         if(reservationTables.isEmpty()){
             return providerReservationDtos;
         }
         return providerReservationDtos;
     }
+
+
 //
     @Override
     @Operation(summary = "허가된 제공자 목록 조회", description = "허가된 제공자 목록을 조회합니다.")
