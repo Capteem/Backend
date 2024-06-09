@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class aws {
-
         @RequestMapping("/aws")
         public ResponseEntity<Object> aws() {
             return ResponseEntity.ok().body("aws");
