@@ -42,6 +42,7 @@ public class SignServiceImpl implements SignService{
             throw new CustomException("이미 존재하는 유저입니다.");
         }
 
+
         //정상 로직
         IdTable user = IdTable.builder()
                 .id(userDto.getId())
@@ -142,6 +143,7 @@ public class SignServiceImpl implements SignService{
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .role(user.getRole())
+                .userNickname(user.getNickname())
                 .build();
     }
 

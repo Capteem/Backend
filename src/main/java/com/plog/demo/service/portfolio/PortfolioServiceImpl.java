@@ -12,6 +12,10 @@ import com.plog.demo.repository.*;
 import com.plog.demo.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,6 +75,28 @@ public class PortfolioServiceImpl implements PortfolioService{
         return portfolioResponseDto;
     }
 
+    @Override
+    public List<PortfolioRandomResponseDto> getPortfolioRandom(int page) throws CustomException {
+
+        log.info("[getPortfolioRandom] 포트폴리오 조회 시작");
+        int size = 30;
+        int offset = (page-1) * 30;
+
+        List<PortfolioTable> portfolios = portfolioTableRepository.findRandomPortfolio(size, offset);
+
+        if(portfolios.isEmpty()){
+            throw new CustomException("포트폴리오가 없습니다.", HttpStatus.NOT_FOUND.value());
+        }
+        //정상로직
+        List<PortfolioRandomResponseDto> portfolioRandomResponseDtos = portfolios.stream()
+                .map(portfolio -> PortfolioRandomResponseDto.builder()
+                        .providerId(portfolio.getProviderId().getProviderId())
+                        .imgUrl(getImgUrl(portfolio))
+                        .build()
+        ).toList();
+
+        return portfolioRandomResponseDtos;
+    }
 
     @Override
     public List<UploadFileDto> addPortfolios(PortfolioUploadDto portfolioUploadDto) throws CustomException {
@@ -80,9 +106,6 @@ public class PortfolioServiceImpl implements PortfolioService{
         ProviderTable providerTable = providerTableRepository.findById(portfolioUploadDto.getProviderId())
                 .orElseThrow(() -> new CustomException("존재 하지 않은 서비스 제공자입니다", HttpStatus.NOT_FOUND.value()));
 
-        //파일 검증
-        List<MultipartFile> portfolioUploadFiles = portfolioUploadDto.getPortfolioUploadFiles();
-        portfolioFileStore.validateFiles(portfolioUploadFiles);
 
         //서버에 파일 저장
         List<UploadFileDto> storedFiles = portfolioFileStore.storeFiles(portfolioUploadDto.getPortfolioUploadFiles());
@@ -116,9 +139,6 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         String fileExtension = portfolioFileStore.extractExt(fileName);
 
-        if(portfolioFileStore.isNotSupportedExtension(fileExtension)){
-            throw new CustomException("지원되지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
-        }
 
         return PortfolioImageDto.builder()
                 .imgFullPath(portfolioFileStore.getFullPath(middleDir, fileName))

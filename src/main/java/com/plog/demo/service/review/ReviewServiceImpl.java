@@ -1,5 +1,6 @@
 package com.plog.demo.service.review;
 
+import com.plog.demo.common.ReservationStatus;
 import com.plog.demo.dto.review.*;
 import com.plog.demo.dto.review.comment.CommentAddRequestDto;
 import com.plog.demo.dto.review.comment.CommentGetDto;
@@ -7,9 +8,11 @@ import com.plog.demo.dto.review.comment.CommentUpdateRequestDto;
 import com.plog.demo.exception.CustomException;
 import com.plog.demo.model.CommentTable;
 import com.plog.demo.model.ProviderTable;
+import com.plog.demo.model.ReservationTable;
 import com.plog.demo.model.ReviewTable;
 import com.plog.demo.repository.CommentTableRepository;
 import com.plog.demo.repository.ProviderTableRepository;
+import com.plog.demo.repository.ReservationTableRepository;
 import com.plog.demo.repository.ReviewTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,14 +33,41 @@ public class ReviewServiceImpl implements ReviewService{
     private final ProviderTableRepository providerTableRepository;
     private final ReviewTableRepository reviewTableRepository;
     private final CommentTableRepository commentTableRepository;
+    private final ReservationTableRepository reservationTableRepository;
+
+
+    @Override
+    public void canWriteReview(ReviewCheckWriteRequestDto reviewCheckWriteRequestDto) throws CustomException {
+
+        ReservationTable reservation = reservationTableRepository.findById(reviewCheckWriteRequestDto.getReservationId())
+                .orElseThrow(() -> new CustomException("존재하지 않은 예약입니다.", HttpStatus.NOT_FOUND.value()));
+
+        if(isReservationNotCompleted(reservation)){
+            throw new CustomException("예약이 완료 되지않았습니다.", HttpStatus.FORBIDDEN.value());
+        }
+
+        ProviderTable provider = providerTableRepository.findById(reviewCheckWriteRequestDto.getProviderId())
+                .orElseThrow(() -> new CustomException("존재하지 않은 서비스입니다.", HttpStatus.NOT_FOUND.value()));
+
+        Optional<ReviewTable> review = reviewTableRepository.findByUserIdAndAndProviderIdAndReservationId(
+                reviewCheckWriteRequestDto.getUserId(),
+                provider,
+                reservation);
+        if(review.isPresent()){
+            throw new CustomException("이미 리뷰를 작성했습니다.", HttpStatus.CONFLICT.value());
+        }
+    }
 
     @Override
     public void addReview(ReviewAddRequestDto reviewAddRequestDto) throws CustomException {
 
-        ProviderTable provider = providerTableRepository.findById(reviewAddRequestDto.getProviderId())
-                .orElseThrow(() -> new CustomException("존재하지 않는 서비스 제공자입니다.", HttpStatus.NOT_FOUND.value()));
+        ReservationTable reservation = reservationTableRepository.findById(reviewAddRequestDto.getReservationId())
+                .orElseThrow(() -> new CustomException("존재하지 않은 예약입니다.", HttpStatus.NOT_FOUND.value()));
 
-        // TODO 예약이 완료된 유저만 리뷰 작성 가능하도록
+        ProviderTable provider = providerTableRepository.findById(reviewAddRequestDto.getProviderId())
+                .orElseThrow(() -> new CustomException("존재하지 않은 서비스입니다.", HttpStatus.NOT_FOUND.value()));
+
+
 
         //리뷰에 저장
         ReviewTable review = ReviewTable.builder()
@@ -46,6 +77,7 @@ public class ReviewServiceImpl implements ReviewService{
                 .reviewDate(reviewAddRequestDto.getReviewDate())
                 .userId(reviewAddRequestDto.getUserId())
                 .userNickName(reviewAddRequestDto.getUserNickName())
+                .reservationId(reservation)
                 .build();
         try {
             reviewTableRepository.save(review);
@@ -107,7 +139,11 @@ public class ReviewServiceImpl implements ReviewService{
                 .map(review -> {
                     CommentGetDto commentGetDto = createCommentGetDto(review);
 
-                    return createReviewGetDto(review, commentGetDto);
+                    ReviewGetDto reviewGetDto = createReviewGetDto(review, commentGetDto);
+
+                    reviewGetDto.setProviderName(review.getProviderId().getProviderName());
+
+                    return reviewGetDto;
 
                 }).toList();
 
@@ -218,5 +254,9 @@ public class ReviewServiceImpl implements ReviewService{
                 .commentContent(review.getCommentId().getCommentContent())
                 .commentDate(review.getCommentId().getCommentDate())
                 .build();
+    }
+
+    private boolean isReservationNotCompleted(ReservationTable reservation) {
+        return reservation.getStatus() != ReservationStatus.COMPLETED.getCode();
     }
 }

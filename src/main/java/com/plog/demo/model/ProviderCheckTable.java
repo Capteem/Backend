@@ -21,7 +21,7 @@ public class ProviderCheckTable {
     @Column
     private String providerUuid;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "userId")
     IdTable id;
 }

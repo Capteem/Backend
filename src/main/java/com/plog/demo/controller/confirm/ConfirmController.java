@@ -28,9 +28,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -80,7 +85,6 @@ public class ConfirmController {
     @ApiResponse(responseCode = "200", description = "제공자 등록 성공", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
     public ResponseEntity<SuccessDto> checkProvider(@ModelAttribute ConfirmCheckProviderRequestDto confirmCheckProviderRequestDto) throws CustomException {
 
-
         confirmService.checkProvider(confirmCheckProviderRequestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("성공").build());
@@ -89,17 +93,17 @@ public class ConfirmController {
     @PostMapping("/image/fileNames")
     @Operation(summary = "제공자 등록용 사진 이름 리스트 불러오기", description = "제공자(사진작가, 헤어메이크업)가 등록 요청한 사진 이름 리스트 불러오기")
     @ApiResponse(responseCode = "200", description = "파일 이름 리스트 불러오기 성공", content = @Content(schema = @Schema(implementation = ConfirmGetCheckFilesDto.class)))
-    public ResponseEntity<ConfirmGetCheckFilesDto> getImageNames(@RequestBody Map<String, String> userIdMap) throws CustomException{
-        ConfirmGetCheckFilesDto checkFileUrls = confirmService.getCheckfileUrls(userIdMap.get("userId"));
+    public ResponseEntity<ConfirmGetCheckFilesDto> getImageNames(@RequestBody Map<String, String> uuidMap) throws CustomException{
+        ConfirmGetCheckFilesDto checkfileUrls = confirmService.getCheckfileUrls(uuidMap.get("uuid"));
 
-        return ResponseEntity.status(HttpStatus.OK).body(checkFileUrls);
+        return ResponseEntity.status(HttpStatus.OK).body(checkfileUrls);
     }
 
     @PostMapping("/image/delete")
     @Operation(summary = "제공자 등록용 사진 삭제", description = "제공자(사진작가, 헤어메이크업)가 등록 요청한 사진들 삭제하기")
     @ApiResponse(responseCode = "200", description = "사진들 삭제 완료", content = @Content(schema = @Schema(implementation = SuccessDto.class)))
-    public ResponseEntity<SuccessDto> deleteImg(@RequestBody Map<String, String> userIdMap) throws CustomException{
-        if(!confirmService.deleteFiles(userIdMap.get("userId"))){
+    public ResponseEntity<SuccessDto> deleteImg(@RequestBody Map<String, String> uuidMap) throws CustomException{
+        if(!confirmService.deleteFiles(uuidMap.get("uuid"))){
             throw new RuntimeException("파일 삭제중 에러 발생");
         }
         return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("삭제 성공").build());
@@ -111,19 +115,23 @@ public class ConfirmController {
     public ResponseEntity<Resource> getImage(@PathVariable String fileName) throws CustomException, MalformedURLException {
 
         ConfirmImageDto confirmImageDto = confirmService.getImage(fileName);
-        HttpHeaders httpHeaders = new HttpHeaders();
+
+        Path filePath = Paths.get(confirmImageDto.getImgFullPath());
 
 
-        if(confirmImageDto.getFileExtension().equalsIgnoreCase("jpg")){
-            httpHeaders.setContentType(MediaType.IMAGE_JPEG);
+        // 파일 MIME 타입 결정
+        String contentType;
+
+        try {
+            contentType = Files.probeContentType(filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            contentType = "application/octet-stream";
         }
 
-        if(confirmImageDto.getFileExtension().equalsIgnoreCase("png")){
-            httpHeaders.setContentType(MediaType.IMAGE_PNG);
-        }
 
         return ResponseEntity.status(HttpStatus.OK)
-                .headers(httpHeaders)
+                .contentType(MediaType.parseMediaType(contentType))
                 .body(new UrlResource("file:" + confirmImageDto.getImgFullPath()));
     }
 
@@ -174,5 +182,17 @@ public class ConfirmController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDto);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorDto> UploadExceptionHandler(Exception e){
+        log.error("UploadExceptionHandler 호출, {}, {}", e.getCause(), e.getMessage());
+
+        ErrorDto errorDto = ErrorDto.builder()
+                .resultCode(HttpStatus.BAD_REQUEST.value())
+                .msg("파일 크기가 너무 큽니다.")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
     }
 }

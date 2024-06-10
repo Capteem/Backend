@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 public class ConfirmGetCheckFilesDto {
 
-    private String userId;
+    private String uuid;
 
     private List<String> fileNameList;
 }

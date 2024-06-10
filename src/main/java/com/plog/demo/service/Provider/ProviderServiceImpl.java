@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -52,7 +53,7 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerDetailArea(providerDto.getProviderDetail())
                 .providerPhoneNum(providerDto.getProviderPhoneNum())
                 .providerPrice(-1)
-                .providerStatus(UserStatus.INFO_LACK.getCode())
+                .providerStatus(UserStatus.STOP.getCode())
                 .providerUuid(providerDto.getUuid())
                 .build();
 
@@ -73,7 +74,7 @@ public class ProviderServiceImpl implements ProviderService{
         IdTable idTable = idTableRepository.findById(userId).orElseThrow(() -> new CustomException("존재하지 않는 사용자입니다."));
         try{
             log.info("[getProvider] 제공자 조회 로직 시작");
-            List<ProviderTable> providerTables = providerTableRepository.findAllByUserId(idTable);
+            List<ProviderTable> providerTables = providerTableRepository.findAllByUserIdOrderByProviderIdDesc(idTable);
             List<ProviderResponseDto> providerDtos = providerTables.stream().map(providerTable -> ProviderResponseDto.builder()
                     .providerName(providerTable.getProviderName())
                     .providerType(providerTable.getProviderType())
@@ -81,6 +82,7 @@ public class ProviderServiceImpl implements ProviderService{
                     .providerAddress(providerTable.getProviderArea() + " " + providerTable.getProviderSubArea() + " " + providerTable.getProviderDetailArea())
                     .providerPhoneNum(providerTable.getProviderPhoneNum())
                     .providerStatus(providerTable.getProviderStatus())
+                    .providerUuid(providerTable.getProviderUuid())
                     .build()).toList();
             if(providerTables.isEmpty()){
                 return providerDtos;
@@ -121,20 +123,29 @@ public class ProviderServiceImpl implements ProviderService{
     public List<ProviderReservationDto> getProviderReservationList(int providerId) throws CustomException{
         ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
         List<ReservationTable> reservationTables = reservationTableRepository.findReservationTableByProviderId(providerTable.getProviderId());
-        List<ProviderReservationDto> providerReservationDtos = reservationTables.stream().map(reservationTable -> ProviderReservationDto.builder()
-                .reservationId(reservationTable.getReservationId())
-                .reservationStartTime(reservationTable.getReservation_start_date().toString())
-                .reservationEndTime(reservationTable.getReservation_end_date().toString())
-                .reservationStatus(reservationTable.getStatus())
-                .providerType(providerTable.getProviderType())
-                .providerName(providerTable.getProviderName())
-                .reservationPrice(getProviderPrice(providerTable, reservationTable))
-                .build()).toList();
+        List<ProviderReservationDto> providerReservationDtos = new ArrayList<>();
+        for(ReservationTable reservationTable : reservationTables){
+            if(reservationTable.getTid() == null){
+                continue;
+            }
+            ProviderReservationDto providerReservationDto = ProviderReservationDto.builder()
+                    .reservationId(reservationTable.getReservationId())
+                    .reservationStartTime(reservationTable.getReservation_start_date().toString())
+                    .reservationEndTime(reservationTable.getReservation_end_date().toString())
+                    .reservationStatus(reservationTable.getStatus())
+                    .providerType(providerTable.getProviderType())
+                    .providerName(providerTable.getProviderName())
+                    .reservationPrice(getProviderPrice(providerTable, reservationTable))
+                    .build();
+            providerReservationDtos.add(providerReservationDto);
+        }
         if(reservationTables.isEmpty()){
             return providerReservationDtos;
         }
         return providerReservationDtos;
     }
+
+
 //
     @Override
     @Operation(summary = "허가된 제공자 목록 조회", description = "허가된 제공자 목록을 조회합니다.")
@@ -157,6 +168,7 @@ public class ProviderServiceImpl implements ProviderService{
                             .date(String.valueOf(workdateTable.getWorkDate().toLocalDate()))
                             .time(String.valueOf(workdateTable.getWorkDate().toLocalTime().format(dateTimeFormatter)))
                             .build()).toList())
+                    .userId(providerTable.getUserId().getId())
                     .build()).toList();
             if (providerTables.isEmpty()) {
                 return providerList;
@@ -244,11 +256,23 @@ public class ProviderServiceImpl implements ProviderService{
     @Override
     public void acceptReservation(int reservationId, int providerId) throws CustomException {
         ReservationTable reservationTable = reservationTableRepository.findReservationTableByProviderIdAndReservationId(providerId, reservationId);
+        ProviderTable providerTable = providerTableRepository.findById(providerId).orElseThrow(() -> new CustomException("존재하지 않는 제공자입니다."));
         if(reservationTable == null){
             log.error("[acceptReservation] 존재하지 않는 예약입니다.");
             throw new CustomException("존재하지 않는 예약입니다.", HttpStatus.NOT_FOUND.value());
         }
-        reservationTable.setStatus(ReservationStatus.CONFIRMED.getCode());
+        if(providerTable.getProviderType() == 1){
+            reservationTable.setReservation_camera_confirm(true);
+        }
+        if(providerTable.getProviderType() == 2){
+            reservationTable.setReservation_hair_confirm(true);
+        }
+        if(providerTable.getProviderType() == 3){
+            reservationTable.setReservation_studio_confirm(true);
+        }
+        if(reservationTable.isReservation_camera_confirm() && reservationTable.isReservation_hair_confirm() && reservationTable.isReservation_studio_confirm()){
+            reservationTable.setStatus(ReservationStatus.CONFIRMED.getCode());
+        }
         try{
             reservationTableRepository.save(reservationTable);
         }catch (Exception e){
@@ -284,6 +308,9 @@ public class ProviderServiceImpl implements ProviderService{
                 .providerRepPhotoPath(providerTable.getProviderRepPhotoPath())
                 .providerRepPhoto(providerTable.getProviderRepPhoto())
                 .providerPrice(providerTable.getProviderPrice())
+                .providerType(providerTable.getProviderType())
+                .userId(providerTable.getUserId().getId())
+                .providerId(providerTable.getProviderId())
                 .dateList(providerTable.getWorkdateTableList().stream().map(workdateTable -> WorkDateRequestDto.builder()
                         .date(String.valueOf(workdateTable.getWorkDate().toLocalDate()))
                         .time(String.valueOf(workdateTable.getWorkDate().toLocalTime().format(dateTimeFormatter)))

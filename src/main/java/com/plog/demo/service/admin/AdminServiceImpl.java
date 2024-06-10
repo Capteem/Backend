@@ -58,6 +58,7 @@ public class AdminServiceImpl implements AdminService{
     public void changeProviderStatus(AdminProviderDto adminProviderDto) throws CustomException {
         IdTable idTable = idTableRepository.findById(adminProviderDto.getUserId()).orElseThrow(() -> new CustomException("not exist user.", HttpStatus.BAD_REQUEST.value()));
         ProviderTable providerTable = providerTableRepository.findByUserIdAndProviderId(idTable, adminProviderDto.getProviderId()).orElseThrow(() -> new CustomException("not exist provider.", HttpStatus.BAD_REQUEST.value()));
+        log.info("[changeProviderStatus] provider status : {}", providerTable);
         if(providerTable.getProviderStatus() == adminProviderDto.getProviderStatus()){
             log.error("[changeProviderStatus] not match provider status.");
             throw new CustomException("제공자 상태가 같습니다.", HttpStatus.BAD_REQUEST.value());
@@ -73,6 +74,7 @@ public class AdminServiceImpl implements AdminService{
                 idTable.setRole("PROVIDER");
             }
             providerTableRepository.save(providerTable);
+            idTableRepository.save(idTable);
         }catch (Exception e){
             log.info("[changeProviderStatus] db connection error.");
             throw new CustomException("데이터베이스 접근 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -105,7 +107,7 @@ public class AdminServiceImpl implements AdminService{
             if(!adminId.equals("admin")){
                 throw new CustomException("관리자만 접근 가능합니다.", HttpStatus.BAD_REQUEST.value());
             }
-            return providerTableRepository.findAll();
+            return providerTableRepository.findAllByOrderByProviderIdDesc();
         }catch (Exception e){
             log.info("[getProviderList] db데이터 베이스 접근 오류");
             throw new RuntimeException("데이터베이스 접근 중 오류가 발생했습니다.", e);

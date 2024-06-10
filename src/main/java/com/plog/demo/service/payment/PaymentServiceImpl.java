@@ -64,7 +64,7 @@ public class PaymentServiceImpl implements PaymentService{
         try{
             payReadyResDto = restTemplate.postForObject(payRequestDto.getUrl(), urlRequest, PayReadyResDto.class);
         } catch (Exception e){
-            log.info("[payReady] failure to get redirect url");
+            log.info("[payReady] "+ e.getMessage());
             throw new RuntimeException("failure to get redirect url", e);
         }
 
@@ -88,6 +88,7 @@ public class PaymentServiceImpl implements PaymentService{
         try{
             reservationTables = reservationTableRepository.findAllByUserId(idTable);
             currentReservation = reservationTables.get(reservationTables.size() - 1);
+            log.info("[payReady] currentReservation : " + currentReservation.toString());
         } catch (Exception e){
             log.info("[payReady] errow while getting reservation info");
             throw new RuntimeException("예약 정보 조회 중 오류가 발생했습니다.", e);

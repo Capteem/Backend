@@ -27,6 +27,9 @@ public class ComplaintTable {
     @Column
     private int complaintType;
 
+    @Column
+    private String complaintUuid;
+
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "id")
     private IdTable userId;

@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/payment")
@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 public class KakaoPayController {
 
     private final PaymentService paymentService;
-    private final ReservationService reservationService;
 
     @PostMapping("/ready")
     @Operation(summary = "결제 준비", description = "결제 준비를 진행합니다.")
@@ -42,14 +41,13 @@ public class KakaoPayController {
 
     @GetMapping("/success")
     @Operation(summary = "결제 성공", description = "결제가 성공적으로 완료되었습니다.(API 콜 X)")
-    public ResponseEntity<Object> getApprove(@RequestParam("userId") String id, @RequestParam("pg_token") String pgToken){
+    public String getApprove(@RequestParam("userId") String id, @RequestParam("pg_token") String pgToken) throws CustomException{
         try{
             PayApproveResDto payApproveResDto = paymentService.getApprove(id, pgToken);
-            log.info(id + " 결제 승인 완료");
-            return ResponseEntity.status(HttpStatus.OK).body(payApproveResDto);
+            return "PaymentComplete";
         } catch (Exception e){
             log.info("[getApprove] error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 승인 중 오류가 발생했습니다.");
+            throw new CustomException("결제 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 

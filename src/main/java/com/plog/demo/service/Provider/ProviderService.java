@@ -9,7 +9,7 @@ import com.plog.demo.model.ProviderTable;
 import java.util.List;
 
 public interface ProviderService {
-
+//
     ProviderDto addProvider(ProviderDto providerDto) throws CustomException;
 
     List<ProviderResponseDto> getSelectedProvider(String userId) throws CustomException;

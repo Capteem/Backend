@@ -28,12 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -83,11 +81,6 @@ public class ConfirmServiceImpl implements ConfirmService{
     @Override
     public void checkProvider(ConfirmCheckProviderRequestDto confirmCheckProviderRequestDto) throws CustomException {
 
-        List<MultipartFile> providerCheckFiles = confirmCheckProviderRequestDto.getProviderCheckFiles();
-
-        //파일 검증
-        providerCheckFileStore.validateFiles(providerCheckFiles);
-
 
         IdTable idTable = idTableRepository.findById(confirmCheckProviderRequestDto.getUserId())
                 .orElseThrow(() -> new CustomException("존재하지 않는 유저입니다.", HttpStatus.NOT_FOUND.value()));
@@ -111,34 +104,33 @@ public class ConfirmServiceImpl implements ConfirmService{
     }
 
     @Override
-    public ConfirmGetCheckFilesDto getCheckfileUrls(String userId) throws CustomException {
+    public ConfirmGetCheckFilesDto getCheckfileUrls(String uuid) throws CustomException {
 
-        IdTable user = idTableRepository.findById(userId)
-                .orElseThrow(() -> new CustomException("존재하지 않는 유저입니다.", HttpStatus.NOT_FOUND.value()));
 
-        List<ProviderCheckTable> providerCheckTables = providerCheckTableRepository.findAllById(user);
+
+        List<ProviderCheckTable> providerCheckTables = providerCheckTableRepository.findAllByProviderUuid(uuid);
 
         if(providerCheckTables.isEmpty()){
             throw new CustomException("파일이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
         }
 
-        List<String> fileNames = providerCheckTables.stream().map(providerCheckTable ->
-                providerCheckTable.getStoredFileName()
-        ).toList();
+
+        List<String> fileNames = providerCheckTables.stream()
+                .map(providerCheckTable -> providerCheckTable.getStoredFileName())
+                .toList();
+
 
         return ConfirmGetCheckFilesDto.builder()
-                .userId(userId)
+                .uuid(uuid)
                 .fileNameList(fileNames)
                 .build();
+
     }
 
     @Override
     public ConfirmImageDto getImage(String fileName) throws CustomException {
         String fileExtension = providerCheckFileStore.extractExt(fileName);
 
-        if(providerCheckFileStore.isNotSupportedExtension(fileExtension)){
-            throw new CustomException("지원되지 않는 파일 형식입니다.", HttpStatus.BAD_REQUEST.value());
-        }
 
         return ConfirmImageDto.builder()
                 .imgFullPath(providerCheckFileStore.getFullPath(fileName))
@@ -147,13 +139,10 @@ public class ConfirmServiceImpl implements ConfirmService{
     }
 
     @Override
-    public boolean deleteFiles(String userId) throws CustomException {
+    public boolean deleteFiles(String uuid) throws CustomException {
 
-        IdTable idTable = idTableRepository.findById(userId)
-                .orElseThrow(() -> new CustomException("존재하지 않은 유저입니다.", HttpStatus.NOT_FOUND.value()));
+        List<ProviderCheckTable> providerCheckTables = providerCheckTableRepository.findAllByProviderUuid(uuid);
 
-        //디비에서 파일 경로, 이름 가져오기
-        List<ProviderCheckTable> providerCheckTables = providerCheckTableRepository.findAllById(idTable);
 
         //파일 삭제 & 디비 삭제
         for(ProviderCheckTable providerCheckTable : providerCheckTables){

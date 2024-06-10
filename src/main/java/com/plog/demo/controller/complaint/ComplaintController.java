@@ -1,8 +1,12 @@
 package com.plog.demo.controller.complaint;
 
 
+import com.plog.demo.dto.ErrorDto;
+import com.plog.demo.dto.SuccessDto;
+import com.plog.demo.dto.complaint.ComplaintPhotoDto;
 import com.plog.demo.dto.complaint.ComplaintRequestDto;
 import com.plog.demo.dto.complaint.ComplaintResponseDto;
+import com.plog.demo.exception.CustomException;
 import com.plog.demo.service.complaint.ComplaintService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,4 +52,15 @@ public class ComplaintController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("불만 신고 조회 중 오류가 발생했습니다.");
         }
     }
+
+//    @PostMapping("/addPhoto")
+//    @Operation(summary = "불만 신고 사진 추가", description = "불만 신고에 사진을 추가합니다.")
+//    public ResponseEntity<Object> addPhoto(@ModelAttribute ComplaintPhotoDto complaintPhotoDto) throws CustomException{
+//        try{
+//            complaintService.addPhotoToComplaint(complaintPhotoDto);
+//            return ResponseEntity.status(HttpStatus.OK).body(SuccessDto.builder().message("불만 신고 사진 추가 성공").build());
+//        } catch (Exception e){
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorDto.builder().msg(e.getMessage()).build());
+//        }
+//    }
 }

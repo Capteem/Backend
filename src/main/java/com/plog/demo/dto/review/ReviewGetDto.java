@@ -22,6 +22,7 @@ public class ReviewGetDto {
 
     private String userNickName;
 
+    private String providerName;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reviewDate;

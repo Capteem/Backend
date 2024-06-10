@@ -16,4 +16,5 @@ public class ComplaintRequestDto {
     private String complaintDate;
     private String userId;
     private int complaintType;
+    private String complaintUuid;
 }
